@@ -1,0 +1,78 @@
+# ========== Binaries ==========
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# ========== Build Files ==========
+*.VC.db
+*.VC.opendb
+*.opensdf
+*.sdf
+*.suo
+*.ncb
+*.sln
+*.csproj
+*.pyc
+*.pdb
+*.ipch
+*.vscode/
+*.cache
+*.log
+*.obj
+*.o
+*.a
+*.lib
+*.exp
+
+# ========== Visual Studio 2022 Specific ==========
+# Visual Studio 임시 파일/설정 저장 폴더
+.vs/
+# Visual Studio 데이터베이스 파일
+*.VC.db
+# VS 데이터베이스 열림 정보
+*.VC.opendb
+# 사용자별 Visual Studio 설정 파일
+*.user
+*.userosscache
+# Solution User Options 파일
+*.suo
+# 사용자 환경설정 파일
+*.ide
+# 프로젝트 필터 파일
+*.filters
+# Visual Studio 자동 생성 검색 DB
+*.opensdf
+# 컴파일러 명령줄 응답파일
+*.rsp
+# Incremental Linker 파일
+*.ilk
+# 메타 정보 파일 (유니티 등)
+*.meta
+# 테스트 결과 폴더
+TestResults/
+
+# ========== Config ==========
+Binaries/*
+Intermediate/*
+Saved/Config/*
+
+# ========== IDE 폴더 ==========
+.vscode/
+.idea/
+*.code-workspace
+
+# ========== Mac OS 특수 파일 ==========
+.DS_Store
+
+# ========== 기타 ==========
+*.snap
+*.temp
+*.tmp
+*.cache
+
+# ========== Unreal Engine 자동 무시 ==========
+/*.opensdf
+/Engine/DerivedDataCache/*
+/Engine/Binaries/*
+/Engine/Intermediate/*
