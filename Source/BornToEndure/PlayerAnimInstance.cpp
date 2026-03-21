@@ -3,6 +3,7 @@
 
 #include "PlayerAnimInstance.h"
 #include "PlayerCharacter.h"
+#include "WeaponBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void UPlayerAnimInstance::NativeInitializeAnimation()
@@ -26,11 +27,34 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (PlayerCharacter == nullptr || MovementComponent == nullptr) return;
 
-	// Z축(상하)을 제외한 평면(XY) 이동 속도(GroundSpeed) 계산
+	// 상하를 제외한 XY 이동 속도 계산
 	FVector Velocity = PlayerCharacter->GetVelocity();
 	Velocity.Z = 0.f;
 	GroundSpeed = Velocity.Size();
 
 	// 공중에 떠 있는지 확인
 	bIsFalling = MovementComponent->IsFalling();
+
+
+	// PlayerCharacter에서 AWaeponBase를 가지고 있는 지 확인
+	AWeaponBase* CurrentWeapon;
+	PlayerCharacter->GetWeaponBase(CurrentWeapon);
+
+	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+	{
+		// 무기를 들고 있다면, "LHIK" 소켓 좌표를 계속 저장
+		WeaponBaseComp = CurrentWeapon;
+		LHIKTargetTransform = CurrentWeapon->GetWeaponMesh()->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
+		Alpha = 1.0f; // IK 적용
+		CurrentWeaponType = WeaponBaseComp->WeaponType;
+	}
+	else
+	{
+		WeaponBaseComp = nullptr;
+		Alpha = 0.0f; // IK 적용 안함
+		CurrentWeaponType = EWeaponType::EWT_Unarmed;
+	}
+
+
+
 }

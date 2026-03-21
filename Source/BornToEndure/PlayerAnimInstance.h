@@ -8,6 +8,9 @@
 
 class APlayerCharacter;
 class UCharacterMovementComponent;
+class USkeletalMeshComponent;
+class AWeaponBase;
+enum class EWeaponType : uint8;
 
 UCLASS()
 class BORNTOENDURE_API UPlayerAnimInstance : public UAnimInstance
@@ -34,5 +37,19 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool bIsFalling;
+
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<AWeaponBase> WeaponBaseComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	FTransform LHIKTargetTransform;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float Alpha = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	EWeaponType CurrentWeaponType;
 
 };
