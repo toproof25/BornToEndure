@@ -32,6 +32,8 @@ void AWeaponBase::Interact_Implementation(APlayerCharacter* InstigatorCharacter)
 		AttachToComponent(PlayerMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
 	}
 
+	InstigatorCharacter->SetWeaponBase(this);
+
 	UE_LOG(LogTemp, Warning, TEXT("Weapon Interacted: %s"), *InstigatorCharacter->GetName());
 }
 
