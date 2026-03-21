@@ -23,6 +23,7 @@ class UInputComponent;
 // 각종 캐릭터 관련 액터 컴포넌트 전방 선언
 class UStatComponent;
 class UInteractionComponent;
+class AWeaponBase;
 
 UCLASS()
 class BORNTOENDURE_API APlayerCharacter : public ACharacter
@@ -97,6 +98,17 @@ private:
 	UPROPERTY()
 	TObjectPtr<UInteractionComponent> InteractionComp;
 
+	UPROPERTY()
+	TObjectPtr<AWeaponBase> WeaponBaseComp;
+
+
+public:
+
+	UFUNCTION()
+	void SetWeaponBase(AWeaponBase* NewWeaponBase) { WeaponBaseComp = NewWeaponBase; }
+	
+	UFUNCTION(BlueprintPure)
+	void GetWeaponBase(AWeaponBase*& OutWeaponBase) const { OutWeaponBase = WeaponBaseComp; }
 };
 
 

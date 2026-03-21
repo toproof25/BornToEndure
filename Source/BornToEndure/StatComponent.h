@@ -29,7 +29,7 @@ public:
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Stat")
-	float BaseWalkSpeed = 600.f;
+	float BaseWalkSpeed = 300.f;
 
 	UPROPERTY(EditAnywhere, Category = "Stat")
 	float SprintMultiplier = 1.5f; // ´Þ¸± ¶§´Â 1.5¹è »¡¶óÁü
