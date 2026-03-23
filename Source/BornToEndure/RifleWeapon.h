@@ -8,6 +8,9 @@
 #include "RifleWeapon.generated.h"
 
 
+class UArrowComponent;
+class ABaseProjectile;
+
 UCLASS()
 class BORNTOENDURE_API ARifleWeapon : public AWeaponBase
 {
@@ -18,7 +21,16 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Attack() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
+
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UArrowComponent> ProjectilePoint;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<ABaseProjectile> ProjectileClass;
 };

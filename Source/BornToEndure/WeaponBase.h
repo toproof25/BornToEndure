@@ -19,7 +19,7 @@ enum class EWeaponType : uint8
 	EWT_Rifle		UMETA(DisplayName = "Rifle")
 };
 
-UCLASS()
+UCLASS(Abstract)
 class BORNTOENDURE_API AWeaponBase : public AActor, public IInteractable
 {
 	GENERATED_BODY()
@@ -34,9 +34,7 @@ public:
 	 */
 	virtual void Interact_Implementation(APlayerCharacter* InstigatorCharacter) override;
 
-	/**
-	 * @brief 현재 무기의 타입을 저장하는 ENUM 변수
-	 */
+	/** * @brief 현재 무기의 타입을 저장하는 ENUM 변수 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	EWeaponType WeaponType;
 
@@ -66,4 +64,13 @@ public:
 	 */
 	UFUNCTION(BlueprintPure)
 	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+
+
+	/**
+	 * @brief 공격 함수로 플레이어 캐릭터가 공격 입력을 받았을 때 호출되는 함수
+	 * @note 자식 클래스에서 이 함수를 오버라이드하여 실제 공격 로직을 구현할 수 있음
+	 */
+	UFUNCTION()
+	virtual void Attack() PURE_VIRTUAL(AWeaponBase::Attack, );
 };
+
