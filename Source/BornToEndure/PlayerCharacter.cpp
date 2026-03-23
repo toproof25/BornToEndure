@@ -17,6 +17,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -69,33 +70,24 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// PlayerInputComponent를 Enhanced Input을 사용하기 위해 UEnhancedInputComponent로 캐스팅
 	if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		if (MoveAction)
-		{
 			Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Moving);
-		}
 
-		if (SprintAction)
-		{
 			Input->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerCharacter::Sprint);
 			Input->BindAction(SprintAction, ETriggerEvent::Canceled, this, &APlayerCharacter::Sprint);
 			Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::Sprint);
-		}
 
-		if (JumpAction)
-		{
 			Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jumping);
 			Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::JumpingStop);
-		}
 
-		if (LookUpAction)
-		{
 			Input->BindAction(LookUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::TurnAndLookUp);
-		}
-
-		if (InteractionAction)
-		{
+		
 			Input->BindAction(InteractionAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
-		}
+
+			Input->BindAction(ClickLeftAction, ETriggerEvent::Started, this, &APlayerCharacter::ClickLeft);
+
+
+
+
 		UE_LOG(LogTemp, Log, TEXT("Binding MoveAction to Moving function"));
 	}
 	
@@ -179,6 +171,20 @@ void APlayerCharacter::Interact(const FInputActionValue& Value)
 	if (InteractionComp)
 	{
 		InteractionComp->TestInteraction();
+	}
+}
+
+void APlayerCharacter::ClickLeft(const FInputActionValue& Value)
+{
+	if (Controller == nullptr) return;
+
+	bool bClickLeftCheck = Value.Get<bool>();
+
+	//UE_LOG(LogTemp, Log, TEXT("ClickLeft Action with Value: %s"), bClickLeftCheck ? TEXT("True") : TEXT("False"));
+
+	if (bClickLeftCheck && WeaponBaseComp)
+	{
+		WeaponBaseComp->Attack();
 	}
 }
 
