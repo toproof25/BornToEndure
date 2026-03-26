@@ -83,7 +83,7 @@ void UInteractionComponent::TestInteraction()
 		if (IInteractable* Interactable = Cast<IInteractable>(HitResult.GetActor()))
 		{
 			Interactable->Execute_Interact(HitResult.GetActor(), Cast<APlayerCharacter>(Owner));
-			DrawDebugLine(GetWorld(), HitResult.TraceStart, HitResult.TraceEnd, FColor::Red, false, 2.f);
+			//DrawDebugLine(GetWorld(), HitResult.TraceStart, HitResult.TraceEnd, FColor::Red, false, 2.f);
 		}
 	}
 }

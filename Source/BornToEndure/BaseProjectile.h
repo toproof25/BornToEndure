@@ -4,16 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Poolable.h"
 #include "BaseProjectile.generated.h"
 
+// 로그 분류 커스텀
+DECLARE_LOG_CATEGORY_EXTERN(LogBaseProjectile, Log, All);
 
 class UProjectileMovementComponent;
 class USphereComponent;
 class UStaticMeshComponent;
 class UDamageType;
+struct FTimerHandle;
 
-UCLASS(BlueprintType, Blueprintable)
-class BORNTOENDURE_API ABaseProjectile : public AActor
+UCLASS(Abstract, BlueprintType, Blueprintable)
+class BORNTOENDURE_API ABaseProjectile : public AActor, public IPoolable
 {
 	GENERATED_BODY()
 
@@ -22,6 +26,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void ActivateActor_Implementation() override;
+	virtual void DeactivateActor_Implementation() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -44,11 +51,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TObjectPtr<AActor> TargetActor;
 
+	// 생명 관리
+	FTimerHandle LifeSpanTimerHandle;
+	FTimerDelegate TimerDelegate;
+
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile | Physics")
 	//float PhysicsForce;
 
 	UFUNCTION()
-	void OnProjectileHit(
+	virtual void OnProjectileHit(
 		UPrimitiveComponent* HitComp,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
@@ -56,18 +67,22 @@ public:
 		const FHitResult& Hit
 	);
 
+	//// 수명이 다했을 때 풀로 돌아가는 함수
+	//UFUNCTION()
+	//void ReturnToPool();
 
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComp;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
 	TObjectPtr<USphereComponent> SphereComp;
 
+
 public:
 
-	UFUNCTION()
 	void GetProjectileMovementComponent(UProjectileMovementComponent*& OutProjectileMovementComp) const { OutProjectileMovementComp = ProjectileMovementComp; }
-
+	void GetSphereComponent(USphereComponent*& OutSphereComp) const { OutSphereComp = SphereComp; }
 
 };
