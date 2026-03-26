@@ -38,8 +38,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool bIsFalling;
 
-
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<AWeaponBase> WeaponBaseComp;
 
@@ -51,5 +49,17 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	EWeaponType CurrentWeaponType;
+
+	// 위아래 고개 각도 (-90 ~ 90)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Aim")
+	float AimPitch;
+
+
+
+public:
+
+	float GetGroundSpeed() const { return GroundSpeed; }
+	bool GetIsFalling() const { return bIsFalling; }
+	float GetAimPitch() const { return AimPitch; }
 
 };

@@ -11,21 +11,21 @@
 
 class UCharacterMovementComponent;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BORNTOENDURE_API UStatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UStatComponent();
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Stat")
@@ -44,4 +44,9 @@ public:
 
 	UFUNCTION()
 	void RecalculateSpeed(UCharacterMovementComponent* MoveComponent, bool isSprint);
+
+	float GetBaseWalkSpeed() const { return BaseWalkSpeed; }
+	float GetSprintMultiplier() const { return SprintMultiplier; }
+	bool GetIsSprinting() const { return bIsSprinting; }
+	float GetItemSpeedBonus() const { return ItemSpeedBonus; }
 };

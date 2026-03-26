@@ -72,6 +72,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> InteractionAction;
 
+	/** * @brief 마우스 좌클릭을 이용한 상호작용 처리 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<UInputAction> ClickLeftAction;
+
 private:
 
 	UFUNCTION()
@@ -89,6 +93,10 @@ private:
 
 	UFUNCTION()
 	void Interact(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void ClickLeft(const FInputActionValue& Value);
+
 
 private:
 
