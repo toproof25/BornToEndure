@@ -33,4 +33,13 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ABaseProjectile> ProjectileClass;
+<<<<<<< HEAD
+
+
+	virtual void InitializeProjectilePool() override;
+
+
+
+=======
+>>>>>>> main
 };

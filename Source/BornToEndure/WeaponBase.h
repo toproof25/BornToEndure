@@ -10,7 +10,7 @@
 
 #include "WeaponBase.generated.h"
 
-
+DECLARE_LOG_CATEGORY_EXTERN(LogWeaponBase, Log, All);
 
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
@@ -34,10 +34,13 @@ public:
 	 */
 	virtual void Interact_Implementation(APlayerCharacter* InstigatorCharacter) override;
 
+<<<<<<< HEAD
+=======
 	/** * @brief 현재 무기의 타입을 저장하는 ENUM 변수 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	EWeaponType WeaponType;
 
+>>>>>>> main
 protected:
 	virtual void BeginPlay() override;
 
@@ -50,6 +53,15 @@ protected:
 	
 
 public:
+	/**
+	 * @brief UProjectilePoolSubsystem에서 사용할 풀 크기를 설정하는 변수
+	 */
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	int32 PoolSize;
+
+	/** * @brief 현재 무기의 타입을 저장하는 ENUM 변수 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	EWeaponType WeaponType;
 
 	/**
 	 * @brief 현재 클래스인 AWeaponBase 객체를 반환하는 Getter 함수
@@ -72,5 +84,13 @@ public:
 	 */
 	UFUNCTION()
 	virtual void Attack() PURE_VIRTUAL(AWeaponBase::Attack, );
+<<<<<<< HEAD
+
+	/**
+	 * @brief UProjectilePoolSubsystem으로 발사체 풀을 초기화하는 함수
+	 */
+	virtual void InitializeProjectilePool() {};
+=======
+>>>>>>> main
 };
 

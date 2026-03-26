@@ -4,6 +4,8 @@
 #include "WeaponBase.h"
 #include "PlayerCharacter.h"
 
+DEFINE_LOG_CATEGORY(LogWeaponBase)
+
 AWeaponBase::AWeaponBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -32,9 +34,11 @@ void AWeaponBase::Interact_Implementation(APlayerCharacter* InstigatorCharacter)
 		AttachToComponent(PlayerMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
 	}
 
+	SetInstigator(InstigatorCharacter);
 	InstigatorCharacter->SetWeaponBase(this);
+	InitializeProjectilePool();
 
-	UE_LOG(LogTemp, Warning, TEXT("Weapon Interacted: %s"), *InstigatorCharacter->GetName());
+	UE_LOG(LogWeaponBase, Warning, TEXT("Weapon Interacted: %s, Instigator set"), *InstigatorCharacter->GetName());
 }
 
 void AWeaponBase::BeginPlay()
