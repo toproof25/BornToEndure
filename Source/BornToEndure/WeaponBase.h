@@ -34,13 +34,6 @@ public:
 	 */
 	virtual void Interact_Implementation(APlayerCharacter* InstigatorCharacter) override;
 
-<<<<<<< HEAD
-=======
-	/** * @brief 현재 무기의 타입을 저장하는 ENUM 변수 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	EWeaponType WeaponType;
-
->>>>>>> main
 protected:
 	virtual void BeginPlay() override;
 
@@ -84,13 +77,10 @@ public:
 	 */
 	UFUNCTION()
 	virtual void Attack() PURE_VIRTUAL(AWeaponBase::Attack, );
-<<<<<<< HEAD
 
 	/**
 	 * @brief UProjectilePoolSubsystem으로 발사체 풀을 초기화하는 함수
 	 */
 	virtual void InitializeProjectilePool() {};
-=======
->>>>>>> main
 };
 

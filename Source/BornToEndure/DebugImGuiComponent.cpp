@@ -12,14 +12,11 @@
 #include "PlayerAnimInstance.h"
 #include "StatComponent.h"
 #include "WeaponBase.h"
-<<<<<<< HEAD
+
 #include "RifleWeapon.h"
 #include "BaseProjectile.h"
 
-#include "ProjectilePoolSubsystem.h"
 #include "ObjectPoolSubsystem.h"
-=======
->>>>>>> main
 
 #include "GameFramework/Character.h"
 
@@ -103,8 +100,8 @@ void UDebugImGuiComponent::InitializeComponent()
 
 void UDebugImGuiComponent::BeginPlay()
 {
-	Super::BeginPlay();    
-	
+	Super::BeginPlay();
+
 	if (FImGuiModule::IsAvailable())
 	{
 		FImGuiDelegate Delegate = FImGuiDelegate::CreateUObject(this, &UDebugImGuiComponent::DebugDrawPlayerInfo);
@@ -114,7 +111,7 @@ void UDebugImGuiComponent::BeginPlay()
 }
 
 void UDebugImGuiComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{  
+{
 	if (FImGuiModule::IsAvailable() && ImGuiDelegateHandle.IsValid())
 	{
 		FImGuiModule::Get().RemoveImGuiDelegate(ImGuiDelegateHandle);
@@ -248,17 +245,12 @@ void UDebugImGuiComponent::DrawAnimationBasic()
 
 void UDebugImGuiComponent::DrawWeaponInfo()
 {
-<<<<<<< HEAD
-=======
-	// PlayerCharacter 탭의 접힘 여부와 상관없이 무기 정보를 렌더링하기 위해 지역에서 할당
->>>>>>> main
 	AWeaponBase* EquippedWeapon = nullptr;
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->GetWeaponBase(EquippedWeapon);
 	}
 
-<<<<<<< HEAD
 	if (EquippedWeapon && ImGui::CollapsingHeader("무기 정보", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		if (ImGui::BeginTable("WeaponTable", 2, ImGuiTableFlags_BordersInnerH))
@@ -271,16 +263,14 @@ void UDebugImGuiComponent::DrawWeaponInfo()
 				FTransform LHIKTransform = WeaponMesh->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
 				ImGuiUtils::DrawRowVector("왼손 IK 소켓", LHIKTransform.GetLocation());
 
-				// 추가: 실제 총알이 나가는 Muzzle 소켓 위치 (발사체 스폰 디버깅용)
 				FTransform MuzzleTransform = WeaponMesh->GetSocketTransform(FName("Muzzle"), ERelativeTransformSpace::RTS_World);
 				ImGuiUtils::DrawRowVector("총구(Muzzle) 위치", MuzzleTransform.GetLocation());
 			}
 
-			// 2. 오브젝트 풀링 정보 (RifleWeapon과 같이 발사체를 쏘는 무기일 경우)
-			// (참고: ProjectileClass 변수가 선언된 클래스로 캐스팅해야 합니다. 여기선 ARifleWeapon이라 가정)
+			// 2. 오브젝트 풀링 정보
 			if (ARifleWeapon* Rifle = Cast<ARifleWeapon>(EquippedWeapon))
 			{
-				TSubclassOf<ABaseProjectile> ProjClass = Rifle->ProjectileClass; // 접근지정자에 따라 GetProjectileClass() 사용
+				TSubclassOf<ABaseProjectile> ProjClass = Rifle->ProjectileClass;
 
 				if (ProjClass)
 				{
@@ -288,7 +278,6 @@ void UDebugImGuiComponent::DrawWeaponInfo()
 
 					if (UWorld* World = GetWorld())
 					{
-						// 월드 서브시스템 가져오기
 						if (UObjectPoolSubsystem* PoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>())
 						{
 							int32 TotalPool = 0, ActiveCount = 0, InactiveCount = 0;
@@ -306,15 +295,7 @@ void UDebugImGuiComponent::DrawWeaponInfo()
 				}
 			}
 
-=======
-	if (EquippedWeapon && ImGui::CollapsingHeader("무기"))
-	{
-		if (ImGui::BeginTable("WeaponTable", 2, ImGuiTableFlags_BordersInnerH))
-		{
-			ImGuiUtils::DrawRowText("무기 종류", "%s", *UEnum::GetValueAsString(EquippedWeapon->WeaponType));
-			FTransform LHIKTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
-			ImGuiUtils::DrawRowVector("왼손 IK 소켓 위치", LHIKTransform.GetLocation());
->>>>>>> main
+			// (핵심) 열었던 테이블을 반드시 닫아줍니다!
 			ImGui::EndTable();
 		}
 	}
