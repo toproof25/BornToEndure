@@ -1,11 +1,14 @@
 #include "BaseProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+<<<<<<< HEAD
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
 #include "ObjectPoolSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogBaseProjectile);
+=======
+>>>>>>> main
 
 ABaseProjectile::ABaseProjectile()
 {
@@ -20,7 +23,11 @@ ABaseProjectile::ABaseProjectile()
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	check(SphereComp != nullptr);
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> main
 	// 발사체 메쉬를 콜리젼 자식으로 설정
 	ProjectileMesh->SetupAttachment(SphereComp);
 
@@ -33,7 +40,11 @@ ABaseProjectile::ABaseProjectile()
 
 	// 루트 컴포넌트를 콜리젼 컴포넌트로 설정
 	RootComponent = SphereComp;
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> main
 	// 이동, 충돌 연산을 ShpereComp에 적용하도록 설정
 	ProjectileMovementComp->UpdatedComponent = SphereComp;
 
@@ -47,16 +58,26 @@ ABaseProjectile::ABaseProjectile()
 	ProjectileMovementComp->Bounciness = 0.0f;
 	ProjectileMovementComp->Friction = 0.0f;
 
+<<<<<<< HEAD
 	SphereComp->SetSimulatePhysics(false);
 	SphereComp->SetCollisionProfileName(TEXT("Projectile"));
 	SphereComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	DamageType = UDamageType::StaticClass();
+=======
+	// InitialLifeSpan는 AActor에서 상속받은 속성 (n초 후 자동으로 액터가 사라지도록 설정하는 변수)
+	//InitialLifeSpan = ProjectileLifespan;
+
+	SphereComp->SetSimulatePhysics(false);
+	SphereComp->SetCollisionProfileName(TEXT("Projectile"));
+	SphereComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+>>>>>>> main
 }
 
 void ABaseProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+<<<<<<< HEAD
 
 	UWorld* world = GetWorld();
 	if (world == nullptr) return;
@@ -117,6 +138,8 @@ void ABaseProjectile::DeactivateActor_Implementation()
 	}
 
 	UE_LOG(LogBaseProjectile, Display, TEXT("ReturnProjectile: %s"), *GetName());
+=======
+>>>>>>> main
 }
 
 void ABaseProjectile::Tick(float DeltaTime)
@@ -126,6 +149,7 @@ void ABaseProjectile::Tick(float DeltaTime)
 }
 
 void ABaseProjectile::OnProjectileHit(
+<<<<<<< HEAD
 	UPrimitiveComponent* HitComp,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
@@ -146,6 +170,21 @@ void ABaseProjectile::OnProjectileHit(
 			ObjectPoolSubsystem->ReturnPoolActor(this);
 		}
 
+=======
+	UPrimitiveComponent* HitComp, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	FVector NormalImpulse, 
+	const FHitResult& Hit
+)
+{
+	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
+	{
+		// 문서에는 물리 연산을 적용하여 밀리게 하는 기능. 일단은 주석 처리
+		// OtherComp->AddImpulseAtLocation(GetVelocity() * PhysicsForce, GetActorLocation());
+		UE_LOG(LogTemp, Warning, TEXT("Projectile hit: %s"), *OtherActor->GetName());
+		Destroy();
+>>>>>>> main
 	}
 }
 

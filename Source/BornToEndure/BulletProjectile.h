@@ -14,6 +14,7 @@ class BORNTOENDURE_API ABulletProjectile : public ABaseProjectile
 {
 	GENERATED_BODY()
 	
+<<<<<<< HEAD
 public:
 	ABulletProjectile();
 
@@ -32,4 +33,6 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+=======
+>>>>>>> main
 };

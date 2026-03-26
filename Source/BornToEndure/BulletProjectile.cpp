@@ -3,6 +3,7 @@
 
 #include "BulletProjectile.h"
 
+<<<<<<< HEAD
 // Apply damage and other effects
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
@@ -67,3 +68,5 @@ void ABulletProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+=======
+>>>>>>> main

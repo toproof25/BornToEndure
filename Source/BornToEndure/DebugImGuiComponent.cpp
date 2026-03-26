@@ -12,11 +12,14 @@
 #include "PlayerAnimInstance.h"
 #include "StatComponent.h"
 #include "WeaponBase.h"
+<<<<<<< HEAD
 #include "RifleWeapon.h"
 #include "BaseProjectile.h"
 
 #include "ProjectilePoolSubsystem.h"
 #include "ObjectPoolSubsystem.h"
+=======
+>>>>>>> main
 
 #include "GameFramework/Character.h"
 
@@ -245,12 +248,17 @@ void UDebugImGuiComponent::DrawAnimationBasic()
 
 void UDebugImGuiComponent::DrawWeaponInfo()
 {
+<<<<<<< HEAD
+=======
+	// PlayerCharacter 탭의 접힘 여부와 상관없이 무기 정보를 렌더링하기 위해 지역에서 할당
+>>>>>>> main
 	AWeaponBase* EquippedWeapon = nullptr;
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->GetWeaponBase(EquippedWeapon);
 	}
 
+<<<<<<< HEAD
 	if (EquippedWeapon && ImGui::CollapsingHeader("무기 정보", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		if (ImGui::BeginTable("WeaponTable", 2, ImGuiTableFlags_BordersInnerH))
@@ -298,6 +306,15 @@ void UDebugImGuiComponent::DrawWeaponInfo()
 				}
 			}
 
+=======
+	if (EquippedWeapon && ImGui::CollapsingHeader("무기"))
+	{
+		if (ImGui::BeginTable("WeaponTable", 2, ImGuiTableFlags_BordersInnerH))
+		{
+			ImGuiUtils::DrawRowText("무기 종류", "%s", *UEnum::GetValueAsString(EquippedWeapon->WeaponType));
+			FTransform LHIKTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
+			ImGuiUtils::DrawRowVector("왼손 IK 소켓 위치", LHIKTransform.GetLocation());
+>>>>>>> main
 			ImGui::EndTable();
 		}
 	}
