@@ -2,8 +2,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/World.h"
-#include "Engine/GameInstance.h"
 #include "ObjectPoolSubsystem.h"
+#include "Engine/GameInstance.h"
 
 DEFINE_LOG_CATEGORY(LogBaseProjectile);
 
@@ -27,9 +27,6 @@ ABaseProjectile::ABaseProjectile()
 	// 콜리젼 초기 크기 설정 및 충돌 채널 설정
 	SphereComp->InitSphereRadius(5.0f);
 
-	// 콜리젼 Hit 이벤트 발생 시 호출할 함수 바인딩
-	SphereComp->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnProjectileHit);
-
 	// 루트 컴포넌트를 콜리젼 컴포넌트로 설정
 	RootComponent = SphereComp;
 
@@ -40,6 +37,7 @@ ABaseProjectile::ABaseProjectile()
 	ProjectileMovementComp->InitialSpeed = 3000.f;
 	ProjectileMovementComp->MaxSpeed = 3000.f;
 	ProjectileMovementComp->bRotationFollowsVelocity = true;
+	ProjectileMovementComp->bSweepCollision = true;
 	ProjectileMovementComp->ProjectileGravityScale = 0.f;
 
 	ProjectileMovementComp->bShouldBounce = false;
@@ -63,6 +61,13 @@ void ABaseProjectile::BeginPlay()
 	{
 		TimerDelegate.BindUObject(ObjectPoolSubsystem, &UObjectPoolSubsystem::ReturnPoolActor, Cast<AActor>(this));
 	}
+
+	if (SphereComp)
+	{
+		SphereComp->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnProjectileHit);
+	}
+
+
 
 }
 
@@ -88,8 +93,14 @@ void ABaseProjectile::ActivateActor_Implementation()
 	}
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-	ProjectileMovementComp->StopMovementImmediately();
-	ProjectileMovementComp->SetUpdatedComponent(SphereComp); // 이동 대상 재확인
+
+	if (ProjectileMovementComp)
+	{
+		ProjectileMovementComp->StopMovementImmediately();
+		ProjectileMovementComp->SetUpdatedComponent(SphereComp);
+	}
+
+	UE_LOG(LogBaseProjectile, Display, TEXT("ActivateProjectile: %s"), *GetName());
 }
 
 void ABaseProjectile::DeactivateActor_Implementation()
@@ -132,6 +143,9 @@ void ABaseProjectile::OnProjectileHit(
 	const FHitResult& Hit
 )
 {
+
+	UE_LOG(LogBaseProjectile, Display, TEXT("OnProjectileHit called. OtherActor: %s"), OtherActor ? *OtherActor->GetName() : TEXT("nullptr"));
+
 	// 부모 클래스에서 사용한 발사체를 풀로 반환
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{

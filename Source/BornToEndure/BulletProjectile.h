@@ -6,9 +6,9 @@
 #include "BaseProjectile.h"
 #include "BulletProjectile.generated.h"
 
-/**
- * 
- */
+DECLARE_LOG_CATEGORY_EXTERN(LogBulletProjectile, Log, All);
+
+
 UCLASS()
 class BORNTOENDURE_API ABulletProjectile : public ABaseProjectile
 {
@@ -19,7 +19,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
 
 	virtual void OnProjectileHit(
 		UPrimitiveComponent* HitComp,

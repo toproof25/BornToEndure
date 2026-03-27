@@ -54,6 +54,7 @@ public:
 	FTimerHandle LifeSpanTimerHandle;
 	FTimerDelegate TimerDelegate;
 
+	UFUNCTION()
 	virtual void OnProjectileHit(
 		UPrimitiveComponent* HitComp,
 		AActor* OtherActor,

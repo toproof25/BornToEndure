@@ -8,6 +8,8 @@
 
 #include "BaseEnemy.h"
 
+DEFINE_LOG_CATEGORY(LogBulletProjectile);
+
 ABulletProjectile::ABulletProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -19,13 +21,16 @@ void ABulletProjectile::BeginPlay()
 }
 
 void ABulletProjectile::OnProjectileHit(
-	UPrimitiveComponent* HitComp, 
-	AActor* OtherActor, 
-	UPrimitiveComponent* OtherComp, 
-	FVector NormalImpulse, 
+	UPrimitiveComponent* HitComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse,
 	const FHitResult& Hit
 )
 {
+
+	UE_LOG(LogBulletProjectile, Display, TEXT("OnProjectileHit called. OtherActor: %s"), OtherActor ? *OtherActor->GetName() : TEXT("nullptr"));
+
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
 
@@ -35,12 +40,12 @@ void ABulletProjectile::OnProjectileHit(
 		}
 		else
 		{
-			UE_LOG(LogBaseProjectile, Display, TEXT("Target is NOT ABaseEnemy: %s"), *OtherActor->GetName());
+			UE_LOG(LogBaseProjectile, Warning, TEXT("Target is NOT ABaseEnemy: %s"), *OtherActor->GetName());
 		}
 
 		const AController* InstigatorCtrl = GetInstigatorController();
 		UE_LOG(LogBaseProjectile, Display, TEXT("InstigatorController: %s"), InstigatorCtrl ? *InstigatorCtrl->GetName() : TEXT("nullptr"));
-		
+
 		if (DamageType == nullptr)
 		{
 			UE_LOG(LogBaseProjectile, Warning, TEXT("DamageType is nullptr!"));
@@ -52,7 +57,7 @@ void ABulletProjectile::OnProjectileHit(
 			OtherActor,
 			ProjectileDamage,
 			GetInstigatorController(),
-			this, 
+			this,
 			DamageType
 		);
 
