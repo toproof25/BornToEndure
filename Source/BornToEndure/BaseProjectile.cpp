@@ -15,6 +15,9 @@ ABaseProjectile::ABaseProjectile()
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
 	check(ProjectileMesh != nullptr);
 
+	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ProjectileMesh->SetCollisionProfileName(TEXT("NoCollision"));
+
 	ProjectileMovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComp"));
 	check(ProjectileMovementComp != nullptr);
 
