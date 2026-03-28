@@ -5,11 +5,18 @@
 
 #include "CoreMinimal.h"
 #include "WeaponBase.h"
+#include "EffectSubsystem.h"
+#include "Delegates/Delegate.h"
 #include "RifleWeapon.generated.h"
 
 
 class UArrowComponent;
 class ABaseProjectile;
+
+class USoundBase;
+class UParticleSystem;
+
+DECLARE_DELEGATE_TwoParams(FSpawnSoundAtLocation, FString, FVector);
 
 UCLASS()
 class BORNTOENDURE_API ARifleWeapon : public AWeaponBase
@@ -34,6 +41,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ABaseProjectile> ProjectileClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TObjectPtr<UParticleSystem> FireParticle;
+
+
 	virtual void InitializeProjectilePool() override;
 
+	FSpawnSoundAtLocation EffectSoundDelegate;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effect|Sound", meta = (AllowedTypes = "SoundDataAsset"))
+	FPrimaryAssetId AttackSoundId;
 };
