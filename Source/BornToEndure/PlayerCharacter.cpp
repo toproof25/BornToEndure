@@ -10,7 +10,7 @@
 // 각종 캐릭터 관련 액터 컴포넌트
 #include "StatComponent.h"
 #include "InteractionComponent.h"
-#include "WeaponBase.h"
+#include "BaseWeapon.h"
 
 // Camera 관련 헤더 포함
 #include "Camera/CameraComponent.h"

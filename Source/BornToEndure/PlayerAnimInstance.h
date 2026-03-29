@@ -9,7 +9,7 @@
 class APlayerCharacter;
 class UCharacterMovementComponent;
 class USkeletalMeshComponent;
-class AWeaponBase;
+class ABaseWeapon;
 enum class EWeaponType : uint8;
 
 UCLASS()
@@ -39,7 +39,7 @@ protected:
 	bool bIsFalling;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
-	TObjectPtr<AWeaponBase> WeaponBaseComp;
+	TObjectPtr<ABaseWeapon> WeaponBaseComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	FTransform LHIKTargetTransform;
@@ -50,16 +50,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	EWeaponType CurrentWeaponType;
 
-	// 위아래 고개 각도 (-90 ~ 90)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Aim")
-	float AimPitch;
-
-
 
 public:
 
 	float GetGroundSpeed() const { return GroundSpeed; }
 	bool GetIsFalling() const { return bIsFalling; }
-	float GetAimPitch() const { return AimPitch; }
 
 };

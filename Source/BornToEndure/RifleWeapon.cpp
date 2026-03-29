@@ -7,12 +7,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "ObjectPoolSubsystem.h"
 #include "Components/SphereComponent.h"
-#include "EffectSubsystem.h"
-#include "Delegates/Delegate.h"
-
-#include "Sound/SoundBase.h"
-#include "Particles/ParticleSystem.h"
-#include "Kismet/GameplayStatics.h"
 
 ARifleWeapon::ARifleWeapon()
 {
@@ -24,9 +18,6 @@ ARifleWeapon::ARifleWeapon()
 void ARifleWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UEffectSubsystem* EffectSubsystem = GetWorld()->GetSubsystem<UEffectSubsystem>();
-    EffectSoundDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 }
 
 void ARifleWeapon::Attack()
@@ -42,15 +33,8 @@ void ARifleWeapon::Attack()
     FVector SpawnLocation = ProjectilePoint->GetComponentLocation();
     FRotator SpawnRotation = ProjectilePoint->GetComponentRotation();
 
-    if (AttackSoundId.IsValid())
-    {
-		FString SoundName = AttackSoundId.PrimaryAssetName.ToString();
-        EffectSoundDelegate.ExecuteIfBound(SoundName, SpawnLocation);
-    }
-    if (FireParticle)
-    {
-        UGameplayStatics::SpawnEmitterAtLocation(this, FireParticle, SpawnLocation);
-    }
+    OnAttackSound(SpawnLocation);
+    OnAttackNiagara(SpawnLocation);
 
     // 사용할 발사체 가져오기
     UClass* ProjectileClassKey = ProjectileClass.Get();
