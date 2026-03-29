@@ -13,7 +13,7 @@
 
 
 class APlayerCharacter;
-class AWeaponBase;
+class ABaseWeapon;
 class UPlayerAnimInstance;
 class UStatComponent;
 class UCharacterMovementComponent;
