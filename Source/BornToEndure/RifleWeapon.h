@@ -4,27 +4,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WeaponBase.h"
+#include "BaseWeapon.h"
 #include "RifleWeapon.generated.h"
-
 
 class UArrowComponent;
 class ABaseProjectile;
 
 UCLASS()
-class BORNTOENDURE_API ARifleWeapon : public AWeaponBase
+class BORNTOENDURE_API ARifleWeapon : public ABaseWeapon
 {
 	GENERATED_BODY()
 
 public:
 	ARifleWeapon();
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
+	virtual void InitializeProjectilePool() override;
 
 
 public:
@@ -33,7 +32,5 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<ABaseProjectile> ProjectileClass;
-
-	virtual void InitializeProjectilePool() override;
 
 };

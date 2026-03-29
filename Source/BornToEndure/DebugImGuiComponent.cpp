@@ -11,10 +11,12 @@
 #include "PlayerCharacter.h"
 #include "PlayerAnimInstance.h"
 #include "StatComponent.h"
-#include "WeaponBase.h"
+#include "BaseWeapon.h"
 
 #include "RifleWeapon.h"
 #include "BaseProjectile.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/SphereComponent.h"
 
 #include "ObjectPoolSubsystem.h"
 
@@ -210,7 +212,6 @@ void UDebugImGuiComponent::DrawAnimationBasic()
 		{
 			ImGuiUtils::DrawRowText("속도", "%.2f", PlayerAnimInstance->GetGroundSpeed());
 			ImGuiUtils::DrawRowBool("낙하 여부", PlayerAnimInstance->GetIsFalling());
-			ImGuiUtils::DrawRowText("상하 회전", "%.2f", PlayerAnimInstance->GetAimPitch());
 			ImGui::EndTable();
 		}
 
@@ -245,58 +246,136 @@ void UDebugImGuiComponent::DrawAnimationBasic()
 
 void UDebugImGuiComponent::DrawWeaponInfo()
 {
-	AWeaponBase* EquippedWeapon = nullptr;
+	ABaseWeapon* EquippedWeapon = nullptr;
 	if (PlayerCharacter)
 	{
 		PlayerCharacter->GetWeaponBase(EquippedWeapon);
 	}
 
-	if (EquippedWeapon && ImGui::CollapsingHeader("무기 정보", ImGuiTreeNodeFlags_DefaultOpen))
+	if (!EquippedWeapon)
 	{
-		if (ImGui::BeginTable("WeaponTable", 2, ImGuiTableFlags_BordersInnerH))
+		if (ImGui::CollapsingHeader("무기 정보 (Weapon Info)", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			// 1. 기본 무기 정보
-			ImGuiUtils::DrawRowText("무기 종류", "%s", *UEnum::GetValueAsString(EquippedWeapon->WeaponType));
+			ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "현재 장착된 무기가 없습니다.");
+		}
+		return;
+	}
 
-			if (USkeletalMeshComponent* WeaponMesh = EquippedWeapon->GetWeaponMesh())
+	if (ImGui::CollapsingHeader("무기 정보 (Weapon Info)", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		// ==============================================
+		// 1. 기본 무기 상태 (Basic Info)
+		// ==============================================
+		if (ImGui::TreeNodeEx("1. 기본 상태 (Basic Info)", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			if (ImGui::BeginTable("BasicInfoTable", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingFixedFit))
 			{
-				FTransform LHIKTransform = WeaponMesh->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
-				ImGuiUtils::DrawRowVector("왼손 IK 소켓", LHIKTransform.GetLocation());
+				ImGuiUtils::DrawRowText("무기 종류", "%s", TCHAR_TO_UTF8(*UEnum::GetValueAsString(EquippedWeapon->WeaponType)));
 
-				FTransform MuzzleTransform = WeaponMesh->GetSocketTransform(FName("Muzzle"), ERelativeTransformSpace::RTS_World);
-				ImGuiUtils::DrawRowVector("총구(Muzzle) 위치", MuzzleTransform.GetLocation());
-			}
+				AActor* InstigatorActor = EquippedWeapon->GetInstigator();
+				ImGuiUtils::DrawRowText("소유자 (Instigator)", "%s", InstigatorActor ? TCHAR_TO_UTF8(*InstigatorActor->GetName()) : "없음 (None)");
 
-			// 2. 오브젝트 풀링 정보
-			if (ARifleWeapon* Rifle = Cast<ARifleWeapon>(EquippedWeapon))
-			{
-				TSubclassOf<ABaseProjectile> ProjClass = Rifle->ProjectileClass;
-
-				if (ProjClass)
+				if (USkeletalMeshComponent* WeaponMesh = EquippedWeapon->GetWeaponMesh())
 				{
-					ImGuiUtils::DrawRowText("발사체 클래스", "%s", *ProjClass->GetName());
+					ImGuiUtils::DrawRowBool("물리 시뮬레이션 활성화", WeaponMesh->IsSimulatingPhysics());
 
-					if (UWorld* World = GetWorld())
+					FTransform LHIKTransform = WeaponMesh->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
+					ImGuiUtils::DrawRowVector("왼손 IK 소켓", LHIKTransform.GetLocation());
+
+					FTransform MuzzleTransform = WeaponMesh->GetSocketTransform(FName("Muzzle"), ERelativeTransformSpace::RTS_World);
+					ImGuiUtils::DrawRowVector("총구(Muzzle) 위치", MuzzleTransform.GetLocation());
+				}
+				ImGui::EndTable();
+			}
+			ImGui::TreePop();
+		}
+
+		// ==============================================
+		// 2. 이펙트 데이터 (Effect Data)
+		// ==============================================
+		if (ImGui::TreeNodeEx("2. 이펙트 데이터 (Effect Data)", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			if (ImGui::BeginTable("EffectDataTable", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingFixedFit))
+			{
+				ImGuiUtils::DrawRowText("공격 사운드 에셋", "%s", EquippedWeapon->AttackSoundId.IsValid() ? TCHAR_TO_UTF8(*EquippedWeapon->AttackSoundId.ToString()) : "지정되지 않음 (None)");
+				ImGuiUtils::DrawRowText("공격 나이아가라 에셋", "%s", EquippedWeapon->AttackNiagaraId.IsValid() ? TCHAR_TO_UTF8(*EquippedWeapon->AttackNiagaraId.ToString()) : "지정되지 않음 (None)");
+				ImGui::EndTable();
+			}
+			ImGui::TreePop();
+		}
+
+		// ==============================================
+		// 3. 오브젝트 풀링 및 발사체 스펙 (Projectile Info)
+		// ==============================================
+		if (ImGui::TreeNodeEx("3. 발사체 및 풀링 정보 (Projectile Pool)", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			if (ImGui::BeginTable("ProjectileTable", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingFixedFit))
+			{
+				ImGuiUtils::DrawRowText("요구 풀 크기 (PoolSize)", "%d", EquippedWeapon->PoolSize);
+
+				if (ARifleWeapon* Rifle = Cast<ARifleWeapon>(EquippedWeapon))
+				{
+					TSubclassOf<ABaseProjectile> ProjClass = Rifle->ProjectileClass;
+					if (ProjClass)
 					{
-						if (UObjectPoolSubsystem* PoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>())
-						{
-							int32 TotalPool = 0, ActiveCount = 0, InactiveCount = 0;
-							PoolSubsystem->GetPoolStats(ProjClass, TotalPool, ActiveCount, InactiveCount);
+						ImGuiUtils::DrawRowText("발사체 클래스", "%s", TCHAR_TO_UTF8(*ProjClass->GetName()));
 
-							ImGuiUtils::DrawRowText("풀 전체 크기 (Total)", "%d", TotalPool);
-							ImGuiUtils::DrawRowText("사용 중 (Active)", "%d", ActiveCount);
-							ImGuiUtils::DrawRowText("대기 중 (Inactive)", "%d", InactiveCount);
+						// [추가] CDO를 통한 발사체 스펙 세부 분석
+						if (ABaseProjectile* ProjCDO = ProjClass->GetDefaultObject<ABaseProjectile>())
+						{
+							// 기본 스탯 (BaseProjectile 멤버)
+							ImGuiUtils::DrawRowText(" └ 데미지 (Damage)", "%.1f", ProjCDO->ProjectileDamage);
+							ImGuiUtils::DrawRowText(" └ 수명 (Lifespan)", "%.1f sec", ProjCDO->ProjectileLifespan);
+							ImGuiUtils::DrawRowText(" └ 데미지 타입 (DamageType)", "%s", ProjCDO->DamageType ? TCHAR_TO_UTF8(*ProjCDO->DamageType->GetName()) : "None");
+
+							// 콜리전 컴포넌트 정보
+							USphereComponent* SphereComp = nullptr;
+							ProjCDO->GetSphereComponent(SphereComp);
+							if (SphereComp)
+							{
+								ImGuiUtils::DrawRowText(" └ 충돌 반경 (Radius)", "%.1f", SphereComp->GetScaledSphereRadius());
+								ImGuiUtils::DrawRowText(" └ 충돌 프로필", "%s", TCHAR_TO_UTF8(*SphereComp->GetCollisionProfileName().ToString()));
+							}
+
+							// 무브먼트 컴포넌트 정보
+							UProjectileMovementComponent* MoveComp = nullptr;
+							ProjCDO->GetProjectileMovementComponent(MoveComp);
+							if (MoveComp)
+							{
+								ImGuiUtils::DrawRowText(" └ 초기 속도 (Initial Speed)", "%.1f", MoveComp->InitialSpeed);
+								ImGuiUtils::DrawRowText(" └ 최대 속도 (Max Speed)", "%.1f", MoveComp->MaxSpeed);
+								ImGuiUtils::DrawRowText(" └ 중력 스케일 (Gravity)", "%.2f", MoveComp->ProjectileGravityScale);
+								ImGuiUtils::DrawRowBool(" └ 도탄 여부 (Should Bounce)", MoveComp->bShouldBounce);
+							}
 						}
+
+						// 풀링 통계 정보
+						if (UWorld* World = GetWorld())
+						{
+							if (UObjectPoolSubsystem* PoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>())
+							{
+								int32 TotalPool = 0, ActiveCount = 0, InactiveCount = 0;
+								PoolSubsystem->GetPoolStats(ProjClass, TotalPool, ActiveCount, InactiveCount);
+
+								ImGuiUtils::DrawRowText("풀 통계 - 생성량 (Total)", "%d", TotalPool);
+								ImGuiUtils::DrawRowText("풀 통계 - 활성 (Active)", "%d", ActiveCount);
+								ImGuiUtils::DrawRowText("풀 통계 - 대기 (Inactive)", "%d", InactiveCount);
+							}
+						}
+					}
+					else
+					{
+						ImGuiUtils::DrawRowText("발사체 상태", "클래스가 BP에 지정되지 않음 (Null)");
 					}
 				}
 				else
 				{
-					ImGuiUtils::DrawRowText("발사체 상태", "클래스 지정 안 됨 (Null)");
+					ImGuiUtils::DrawRowText("발사체 상태", "원거리 타격 무기가 아님 (Not Rifle)");
 				}
-			}
 
-			// (핵심) 열었던 테이블을 반드시 닫아줍니다!
-			ImGui::EndTable();
+				ImGui::EndTable();
+			}
+			ImGui::TreePop();
 		}
 	}
 }

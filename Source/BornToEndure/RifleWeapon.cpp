@@ -8,7 +8,6 @@
 #include "ObjectPoolSubsystem.h"
 #include "Components/SphereComponent.h"
 
-
 ARifleWeapon::ARifleWeapon()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -29,9 +28,13 @@ void ARifleWeapon::Attack()
     if (World == nullptr) return;
     UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
 
+
     // 발사체 스폰 위치와 회전 설정
     FVector SpawnLocation = ProjectilePoint->GetComponentLocation();
     FRotator SpawnRotation = ProjectilePoint->GetComponentRotation();
+
+    OnAttackSound(SpawnLocation);
+    OnAttackNiagara(SpawnLocation);
 
     // 사용할 발사체 가져오기
     UClass* ProjectileClassKey = ProjectileClass.Get();

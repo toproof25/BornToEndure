@@ -3,7 +3,7 @@
 
 #include "PlayerAnimInstance.h"
 #include "PlayerCharacter.h"
-#include "WeaponBase.h"
+#include "BaseWeapon.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -38,7 +38,7 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 
 	// PlayerCharacter에서 AWaeponBase를 가지고 있는 지 확인
-	AWeaponBase* CurrentWeapon;
+	ABaseWeapon* CurrentWeapon;
 	PlayerCharacter->GetWeaponBase(CurrentWeapon);
 
 	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
@@ -55,18 +55,5 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Alpha = 0.0f; // IK 적용 안함
 		CurrentWeaponType = EWeaponType::EWT_Unarmed;
 	}
-
-
-	// 캐릭터가 바라보는 시선 회전값 (카메라 컨트롤러 기준)
-	FRotator AimRotation = PlayerCharacter->GetBaseAimRotation();
-
-	// 캐릭터 액터의 실제 회전값
-	FRotator ActorRotation = PlayerCharacter->GetActorRotation();
-
-	// 두 회전값의 차이를 구하여 로컬 회전 각도 도출 (-180 ~ 180 범위로 정규화)
-	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(AimRotation, ActorRotation);
-
-	// FInterpTo를 사용해 값이 튀지 않고 부드럽게 보간되도록 적용
-	AimPitch = FMath::FInterpTo(AimPitch, DeltaRot.Pitch, DeltaSeconds, 15.0f);
 
 }
