@@ -3,22 +3,22 @@
 
 #include "DebugImGuiComponent.h"
 
-#include "KoreanFont.h"
+#include "Data/DebugFont/KoreanFont.h"
 #include "imgui.h"
 #include "ImGuiModule.h"     
 #include "ImGuiDelegates.h" 
 
-#include "PlayerCharacter.h"
-#include "PlayerAnimInstance.h"
-#include "StatComponent.h"
-#include "BaseWeapon.h"
+#include "Character/Player/PlayerCharacter.h"
+#include "Character/Player/PlayerAnimInstance.h"
+#include "Component/StatComponent.h"
+#include "Item/Weapon/BaseWeapon.h"
 
-#include "RifleWeapon.h"
-#include "BaseProjectile.h"
+#include "Item/Weapon/RifleWeapon.h"
+#include "Item/Projectile/BaseProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 
-#include "ObjectPoolSubsystem.h"
+#include "Subsystem/ObjectPoolSubsystem.h"
 
 #include "GameFramework/Character.h"
 

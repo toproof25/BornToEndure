@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Poolable.h"
+#include "Interface/Poolable.h"
 #include "BaseProjectile.generated.h"
 
 // 로그 분류 커스텀

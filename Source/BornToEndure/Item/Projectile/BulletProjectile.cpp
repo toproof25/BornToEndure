@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 
-#include "BaseEnemy.h"
+#include "Character/Enemy/BaseEnemy.h"
 
 DEFINE_LOG_CATEGORY(LogBulletProjectile);
 

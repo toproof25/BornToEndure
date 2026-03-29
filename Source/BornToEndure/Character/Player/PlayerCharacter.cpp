@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlayerCharacter.h"
+#include "Character/Player/PlayerCharacter.h"
 #include "GameFramework/Character.h"
 
 // Enhanced Input 관련 헤더 포함
@@ -8,9 +8,9 @@
 #include "InputActionValue.h"
 
 // 각종 캐릭터 관련 액터 컴포넌트
-#include "StatComponent.h"
-#include "InteractionComponent.h"
-#include "BaseWeapon.h"
+#include "Component/StatComponent.h"
+#include "Component/InteractionComponent.h"
+#include "Item/Weapon/BaseWeapon.h"
 
 // Camera 관련 헤더 포함
 #include "Camera/CameraComponent.h"

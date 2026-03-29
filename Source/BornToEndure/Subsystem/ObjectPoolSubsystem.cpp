@@ -1,8 +1,8 @@
-#include "ObjectPoolSubsystem.h"
+#include "Subsystem/ObjectPoolSubsystem.h"
 
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
-#include "Poolable.h"
+#include "Interface/Poolable.h"
 
 DEFINE_LOG_CATEGORY(LogObjectPoolSubsystem);
 

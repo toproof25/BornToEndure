@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseProjectile.h"
+#include "Item/Projectile/BaseProjectile.h"
 #include "BulletProjectile.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBulletProjectile, Log, All);

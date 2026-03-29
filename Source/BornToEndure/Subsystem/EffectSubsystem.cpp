@@ -1,7 +1,7 @@
-#include "EffectSubsystem.h"
+#include "Subsystem/EffectSubsystem.h"
 
-#include "SoundDataAsset.h"
-#include "NiagaraDataAsset.h"
+#include "Data/SoundDataAsset.h"
+#include "Data/NiagaraDataAsset.h"
 
 #include "Engine/AssetManager.h" // 에셋 매니저 포함
 #include "Kismet/GameplayStatics.h"

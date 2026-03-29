@@ -1,8 +1,8 @@
-#include "BaseProjectile.h"
+#include "Item/Projectile/BaseProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/World.h"
-#include "ObjectPoolSubsystem.h"
+#include "Subsystem/ObjectPoolSubsystem.h"
 #include "Engine/GameInstance.h"
 
 DEFINE_LOG_CATEGORY(LogBaseProjectile);

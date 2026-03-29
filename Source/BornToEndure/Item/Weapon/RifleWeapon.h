@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseWeapon.h"
+#include "Item/Weapon/BaseWeapon.h"
 #include "RifleWeapon.generated.h"
 
 class UArrowComponent;

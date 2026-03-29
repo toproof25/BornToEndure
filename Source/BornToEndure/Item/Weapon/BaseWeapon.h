@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Delegates/Delegate.h"
-#include "Interactable.h" // Interface 상속을 위한 헤더
+#include "Interface/Interactable.h" // Interface 상속을 위한 헤더
 #include "BaseWeapon.generated.h"
 
 // Delegate 선언

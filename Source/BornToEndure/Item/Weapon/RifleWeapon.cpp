@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RifleWeapon.h"
+#include "Item/Weapon/RifleWeapon.h"
 #include "Components/ArrowComponent.h"
-#include "BaseProjectile.h"
+#include "Item/Projectile/BaseProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "ObjectPoolSubsystem.h"
+#include "Subsystem/ObjectPoolSubsystem.h"
 #include "Components/SphereComponent.h"
 
 ARifleWeapon::ARifleWeapon()
