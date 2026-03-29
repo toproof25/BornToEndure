@@ -5,16 +5,10 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 
-
-
 DECLARE_LOG_CATEGORY_EXTERN(LogEffectSubsystem, Log, All);
 
 #include "EffectSubsystem.generated.h"
 
-
-
-
-class UParticleSystem;
 
 UCLASS()
 class BORNTOENDURE_API UEffectSubsystem : public UWorldSubsystem
@@ -26,9 +20,16 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	
 	UFUNCTION()
-	void SpawnSoundAtLocation(FString SoundName, FVector SoundSpawnLocation);
-
+	void SpawnSoundAtLocation(FName SoundName, FVector SoundSpawnLocation);
 
 	UFUNCTION()
 	void OnSoundLoaded(FPrimaryAssetId LoadedAssetId, FVector Location);
+
+
+
+	UFUNCTION()
+	void SpawnNiagaraAtLocation(FName NiagaraName, FVector NiagaraSpawnLocation);
+
+	UFUNCTION()
+	void OnNiagaraLoaded(FPrimaryAssetId LoadedAssetId, FVector Location);
 };

@@ -13,8 +13,9 @@ public class BornToEndure : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore", 
-			"EnhancedInput", 
-			"ImGui" 
+			"EnhancedInput",
+            "Niagara",
+            "ImGui" 
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
