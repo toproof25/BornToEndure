@@ -70,23 +70,23 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	// PlayerInputComponent를 Enhanced Input을 사용하기 위해 UEnhancedInputComponent로 캐스팅
 	if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-			Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Moving);
+		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Moving);
 
-			Input->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerCharacter::Sprint);
-			Input->BindAction(SprintAction, ETriggerEvent::Canceled, this, &APlayerCharacter::Sprint);
-			Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::Sprint);
+		Input->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerCharacter::Sprint);
+		Input->BindAction(SprintAction, ETriggerEvent::Canceled, this, &APlayerCharacter::Sprint);
+		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::Sprint);
 
-			Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jumping);
-			Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::JumpingStop);
+		Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jumping);
+		Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::JumpingStop);
 
-			Input->BindAction(LookUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::TurnAndLookUp);
+		Input->BindAction(LookUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::TurnAndLookUp);
 		
-			Input->BindAction(InteractionAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+		Input->BindAction(InteractionAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
 
-			Input->BindAction(ClickLeftAction, ETriggerEvent::Started, this, &APlayerCharacter::ClickLeft);
+		Input->BindAction(ClickLeftAction, ETriggerEvent::Triggered, this, &APlayerCharacter::ClickLeft);
 
 
-
+		 
 
 		UE_LOG(LogTemp, Log, TEXT("Binding MoveAction to Moving function"));
 	}

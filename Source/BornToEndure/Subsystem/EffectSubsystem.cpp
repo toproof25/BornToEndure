@@ -123,7 +123,14 @@ void UEffectSubsystem::OnNiagaraLoaded(FPrimaryAssetId LoadedAssetId, FVector Lo
         UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
             GetWorld(),
             LoadedData->Niagara, 
-            Location);
+            Location,
+			FRotator::ZeroRotator,
+			FVector(1.0f),
+			true,  // bAutoDestroy
+			true,  // bAutoActivate
+            ENCPoolMethod::AutoRelease,
+			true   // bPreCullCheck
+        );
     }
     else
     {
