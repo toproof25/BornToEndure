@@ -83,7 +83,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		
 		Input->BindAction(InteractionAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
 
-		Input->BindAction(ClickLeftAction, ETriggerEvent::Triggered, this, &APlayerCharacter::ClickLeft);
+		Input->BindAction(ClickLeftAction, ETriggerEvent::Started, this, &APlayerCharacter::ClickLeft);
 
 
 		 

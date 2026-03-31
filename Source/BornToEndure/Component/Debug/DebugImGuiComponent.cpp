@@ -275,7 +275,7 @@ void UDebugImGuiComponent::DrawWeaponInfo()
 				AActor* InstigatorActor = EquippedWeapon->GetInstigator();
 				ImGuiUtils::DrawRowText("소유자 (Instigator)", "%s", InstigatorActor ? TCHAR_TO_UTF8(*InstigatorActor->GetName()) : "없음 (None)");
 
-				if (USkeletalMeshComponent* WeaponMesh = EquippedWeapon->GetWeaponMesh())
+				if (UStaticMeshComponent* WeaponMesh = EquippedWeapon->GetWeaponStaticMesh())
 				{
 					ImGuiUtils::DrawRowBool("물리 시뮬레이션 활성화", WeaponMesh->IsSimulatingPhysics());
 
