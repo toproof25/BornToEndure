@@ -4,6 +4,10 @@
 #include "Character/Enemy/BaseEnemy.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Subsystem/EffectSubsystem.h"
+#include "NiagaraComponent.h"
+#include "Delegates/Delegate.h"
+
 
 DEFINE_LOG_CATEGORY(LogBaseEnemy);
 
@@ -28,6 +32,13 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	UWorld* world = GetWorld();
+	if (world == nullptr) return;
+	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
+	check(EffectSubsystem);
+
+	OnEnemyHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
+	OnEnemyHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
 
 	UE_LOG(LogBaseEnemy, Warning, TEXT("Spawn Test Enemy!!"));
 }
@@ -51,6 +62,15 @@ float ABaseEnemy::TakeDamage(
 	AActor* DamageCauser
 )
 {
+	if (HitEnemySoundId.IsValid())
+	{
+		OnEnemyHitSound.ExecuteIfBound(HitEnemySoundId.PrimaryAssetName, GetActorLocation());
+	}
+	if (HitEnemyNiagaraId.IsValid())
+	{
+		OnEnemyHitNiagara.ExecuteIfBound(HitEnemyNiagaraId.PrimaryAssetName, GetActorLocation());
+	}
+
 	// 대충 물리 방어력 적용했다고 가정
 	DamageAmount -= 5;
 

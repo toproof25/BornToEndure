@@ -4,12 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Delegates/Delegate.h"
 #include "BaseEnemy.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseEnemy, Log, All);
 
 class UStaticMeshComponent;
 class UCapsuleComponent;
+
+// Delegate ¼±¾ð
+DECLARE_DELEGATE_TwoParams(FOnEnemyHitSound, FName, FVector);
+DECLARE_DELEGATE_TwoParams(FOnEnemyHitNiagara, FName, FVector);
 
 UCLASS()
 class BORNTOENDURE_API ABaseEnemy : public APawn
@@ -40,4 +45,15 @@ public:
 		AController* EventInstigator,
 		AActor* DamageCauser
 	);
+
+private:
+	FOnEnemyHitSound OnEnemyHitSound;
+	FOnEnemyHitNiagara OnEnemyHitNiagara;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy | HitEffects | Sound", meta = (AllowedTypes = "SoundDataAsset"))
+	FPrimaryAssetId HitEnemySoundId;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy | HitEffects | Niagara", meta = (AllowedTypes = "NiagaraDataAsset"))
+	FPrimaryAssetId HitEnemyNiagaraId;
+
 };

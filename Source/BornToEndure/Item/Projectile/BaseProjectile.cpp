@@ -3,7 +3,11 @@
 #include "Components/SphereComponent.h"
 #include "Engine/World.h"
 #include "Subsystem/ObjectPoolSubsystem.h"
+#include "Subsystem/EffectSubsystem.h"
+#include "NiagaraComponent.h"
+#include "Components/AudioComponent.h"
 #include "Engine/GameInstance.h"
+#include "Delegates/Delegate.h"
 
 DEFINE_LOG_CATEGORY(LogBaseProjectile);
 
@@ -21,11 +25,19 @@ ABaseProjectile::ABaseProjectile()
 	ProjectileMovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComp"));
 	check(ProjectileMovementComp != nullptr);
 
+	NiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComp"));
+	check(NiagaraComp != nullptr);
+
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+	check(AudioComp != nullptr);
+
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	check(SphereComp != nullptr);
 
-	// 발사체 메쉬를 콜리젼 자식으로 설정
+	// 발사체 Mesh, Niagara, Audio를 콜리젼 자식으로 설정
 	ProjectileMesh->SetupAttachment(SphereComp);
+	NiagaraComp->SetupAttachment(SphereComp);
+	AudioComp->SetupAttachment(SphereComp);
 
 	// 콜리젼 초기 크기 설정 및 충돌 채널 설정
 	SphereComp->InitSphereRadius(5.0f);
@@ -60,6 +72,10 @@ void ABaseProjectile::BeginPlay()
 	UWorld* world = GetWorld();
 	if (world == nullptr) return;
 	UObjectPoolSubsystem* ObjectPoolSubsystem = world->GetSubsystem<UObjectPoolSubsystem>();
+	check(ObjectPoolSubsystem);
+	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
+	check(EffectSubsystem);
+
 	if (ObjectPoolSubsystem)
 	{
 		TimerDelegate.BindUObject(ObjectPoolSubsystem, &UObjectPoolSubsystem::ReturnPoolActor, Cast<AActor>(this));
@@ -70,8 +86,8 @@ void ABaseProjectile::BeginPlay()
 		SphereComp->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnProjectileHit);
 	}
 
-
-
+	OnProjectileHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
+	OnProjectileHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
 }
 
 void ABaseProjectile::ActivateActor_Implementation()
@@ -103,6 +119,17 @@ void ABaseProjectile::ActivateActor_Implementation()
 		ProjectileMovementComp->SetUpdatedComponent(SphereComp);
 	}
 
+	if (NiagaraComp)
+	{
+		NiagaraComp->ResetSystem();
+		NiagaraComp->Activate();
+	}
+
+	if (AudioComp)
+	{
+		AudioComp->Play();
+	}
+
 	UE_LOG(LogBaseProjectile, Display, TEXT("ActivateProjectile: %s"), *GetName());
 }
 
@@ -126,6 +153,16 @@ void ABaseProjectile::DeactivateActor_Implementation()
 	if (SphereComp)
 	{
 		SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (NiagaraComp)
+	{
+		NiagaraComp->Deactivate();
+	}
+
+	if (AudioComp)
+	{
+		AudioComp->Stop();
 	}
 
 	UE_LOG(LogBaseProjectile, Display, TEXT("ReturnProjectile: %s"), *GetName());
@@ -152,6 +189,15 @@ void ABaseProjectile::OnProjectileHit(
 	// 부모 클래스에서 사용한 발사체를 풀로 반환
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
+		if (HitSoundId.IsValid())
+		{
+			OnProjectileHitSound.ExecuteIfBound(HitSoundId.PrimaryAssetName, GetActorLocation());
+		}
+		if (HitNiagaraId.IsValid())
+		{
+			OnProjectileHitNiagara.ExecuteIfBound(HitNiagaraId.PrimaryAssetName, GetActorLocation());
+		}
+
 		// 타이머 초기화 후 반환
 		GetWorld()->GetTimerManager().ClearTimer(LifeSpanTimerHandle);
 		UWorld* world = GetWorld();
