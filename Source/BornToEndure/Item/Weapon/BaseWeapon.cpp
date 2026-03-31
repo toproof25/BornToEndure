@@ -14,13 +14,13 @@ ABaseWeapon::ABaseWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	RootComponent = WeaponMesh;
+	WeaponStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponStaticMesh"));
+	RootComponent = WeaponStaticMesh;
 
 	// 물리 충돌 허용
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->SetCollisionProfileName(TEXT("BlockAll"));
+	WeaponStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WeaponStaticMesh->SetSimulatePhysics(true);
+	WeaponStaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
 }
 
 void ABaseWeapon::Interact_Implementation(APlayerCharacter* InstigatorCharacter)
@@ -28,8 +28,8 @@ void ABaseWeapon::Interact_Implementation(APlayerCharacter* InstigatorCharacter)
 	if (InstigatorCharacter == nullptr) return;
 
 	// 무기 메쉬의 물리와 콜리젼 제거
-	WeaponMesh->SetSimulatePhysics(false);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponStaticMesh->SetSimulatePhysics(false);
+	WeaponStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// 플레이어 메쉬와 소켓에 무기 부착
 	USkeletalMeshComponent* PlayerMesh = InstigatorCharacter->GetMesh();

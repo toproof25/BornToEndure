@@ -8,12 +8,15 @@
 #include "Interface/Interactable.h" // Interface 상속을 위한 헤더
 #include "BaseWeapon.generated.h"
 
+class UStaticMeshComponent;
+
 // Delegate 선언
 DECLARE_DELEGATE_TwoParams(FSpawnSoundAtLocation, FName, FVector);
 DECLARE_DELEGATE_TwoParams(FSpawnNiagaraAtLocation, FName, FVector);
 
 // 로그 카테고리 선언
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseWeapon, Log, All);
+
 
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
@@ -45,8 +48,7 @@ protected:
 	 * @note 상호작용 시 해당 메쉬를 플레이어 소켓에 연결
 	 */
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
-
+	TObjectPtr<UStaticMeshComponent> WeaponStaticMesh;
 
 public:
 	/**
@@ -71,7 +73,7 @@ public:
 	 * @return USkeletalMeshComponent를 가리키는 포인터
 	 */
 	UFUNCTION(BlueprintPure)
-	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	UStaticMeshComponent* GetWeaponStaticMesh() const { return WeaponStaticMesh; }
 
 	/**
 	 * @brief Delegate 시그니처 선언으로, 공격 시 사운드와 나이아가라 스폰 호출
