@@ -17,6 +17,8 @@ public class BornToEndure : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
             "Niagara",
+            "NavigationSystem",
+			"AIModule",
             "ImGui" 
 		});
 
