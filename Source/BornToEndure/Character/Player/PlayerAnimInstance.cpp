@@ -41,11 +41,11 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	ABaseWeapon* CurrentWeapon;
 	PlayerCharacter->GetWeaponBase(CurrentWeapon);
 
-	if (CurrentWeapon && CurrentWeapon->GetWeaponMesh())
+	if (CurrentWeapon && CurrentWeapon->GetWeaponStaticMesh())
 	{
 		// 무기를 들고 있다면, "LHIK" 소켓 좌표를 계속 저장
 		WeaponBaseComp = CurrentWeapon;
-		LHIKTargetTransform = CurrentWeapon->GetWeaponMesh()->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
+		LHIKTargetTransform = CurrentWeapon->GetWeaponStaticMesh()->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
 		Alpha = 1.0f; // IK 적용
 		CurrentWeaponType = WeaponBaseComp->WeaponType;
 	}

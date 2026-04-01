@@ -26,7 +26,7 @@ void ATestNiagaraPoolActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	LoadKoreanFontToImGui();
+	//LoadKoreanFontToImGui();
 
 	if (FImGuiModule::IsAvailable())
 	{
