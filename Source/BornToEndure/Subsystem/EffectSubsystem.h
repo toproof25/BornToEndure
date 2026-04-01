@@ -32,4 +32,8 @@ public:
 
 	UFUNCTION()
 	void OnNiagaraLoaded(FPrimaryAssetId LoadedAssetId, FVector Location);
+
+	void PreloadEffectAssets(FName AssetName);
+	void UnloadEffectAssets(FName AssetName);
+
 };

@@ -3,7 +3,7 @@
 #include "Data/SoundDataAsset.h"
 #include "Data/NiagaraDataAsset.h"
 
-#include "Engine/AssetManager.h" // 에셋 매니저 포함
+#include "Engine/AssetManager.h" 
 #include "Kismet/GameplayStatics.h"
 
 #include "NiagaraFunctionLibrary.h"
@@ -136,5 +136,17 @@ void UEffectSubsystem::OnNiagaraLoaded(FPrimaryAssetId LoadedAssetId, FVector Lo
     {
         UE_LOG(LogEffectSubsystem, Error, TEXT("Loaded asset invalid or missing Niagara for %s"), *LoadedAssetId.ToString());
     }
+}
+
+void UEffectSubsystem::PreloadEffectAssets(FName AssetName)
+{
+    FPrimaryAssetType AssetType(FName(TEXT("NiagaraDataAsset")));
+    FPrimaryAssetId AssetId(AssetType, AssetName);
+    UAssetManager& AssetManager = UAssetManager::Get();
+    UNiagaraDataAsset* LoadedData = Cast<UNiagaraDataAsset>(AssetManager.GetPrimaryAssetObject(AssetId));
+}
+
+void UEffectSubsystem::UnloadEffectAssets(FName AssetName)
+{
 }
 
