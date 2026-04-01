@@ -1,6 +1,5 @@
 ﻿#include "TestCode/TestNiagaraPoolActor.h"
 
-#include "Data/DebugFont/KoreanFont.h"
 #include "imgui.h"
 #include "ImGuiModule.h"     
 #include "ImGuiDelegates.h" 
@@ -26,7 +25,6 @@ void ATestNiagaraPoolActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//LoadKoreanFontToImGui();
 
 	if (FImGuiModule::IsAvailable())
 	{
@@ -103,25 +101,6 @@ void ATestNiagaraPoolActor::RenderImGui()
 		}
 	}
 	ImGui::End();
-}
-
-void ATestNiagaraPoolActor::LoadKoreanFontToImGui()
-{
-	TSharedPtr<ImFontConfig> KoreanFontConfig = MakeShareable(new ImFontConfig());
-	if (KoreanFontConfig.IsValid())
-	{
-		static const ImWchar* KoreanRanges = ImGui::GetIO().Fonts->GetGlyphRangesKorean();
-		KoreanFontConfig->FontDataOwnedByAtlas = false;
-		KoreanFontConfig->FontData = (void*)KoreanFont_data;
-		KoreanFontConfig->FontDataSize = KoreanFont_size;
-		KoreanFontConfig->SizePixels = 18.0f;
-		KoreanFontConfig->MergeMode = true;
-		KoreanFontConfig->GlyphRanges = KoreanRanges;
-		KoreanFontConfig->PixelSnapH = true;
-
-		FImGuiModule::Get().GetProperties().AddCustomFont("KoreanFont", KoreanFontConfig);
-		FImGuiModule::Get().RebuildFontAtlas();
-	}
 }
 
 // -------------------------------------------------------------------------

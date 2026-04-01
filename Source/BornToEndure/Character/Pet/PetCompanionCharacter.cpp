@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h" 
+#include "Component/PetCombatComponent.h"
 
 APetCompanionCharacter::APetCompanionCharacter()
 {
@@ -31,6 +32,8 @@ APetCompanionCharacter::APetCompanionCharacter()
 	DetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DetectionSphere"));
 	DetectionSphere->SetupAttachment(RootComponent);
 	DetectionSphere->SetSphereRadius(800.0f); // 탐지 반경 설정
+
+	PetCombatComp = CreateDefaultSubobject<UPetCombatComponent>(TEXT("PetCombatComponent"));
 }
 
 void APetCompanionCharacter::BeginPlay()
@@ -68,17 +71,19 @@ void APetCompanionCharacter::BeginPlay()
 	}
 }
 
-// Called every frame
 void APetCompanionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-// Called to bind functionality to input
-void APetCompanionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+void APetCompanionCharacter::OnAttack(const FVector& TargetVector)
+{
+	if (PetCombatComp)
+	{
+		PetCombatComp->OnAttack(TargetVector);
+	}
 }
+
 

@@ -96,6 +96,7 @@ private:
 
 public:
 
+	UFUNCTION(BlueprintCallable)
 	void GetProjectileMovementComponent(UProjectileMovementComponent*& OutProjectileMovementComp) const { OutProjectileMovementComp = ProjectileMovementComp; }
 	void GetSphereComponent(USphereComponent*& OutSphereComp) const { OutSphereComp = SphereComp; }
 
