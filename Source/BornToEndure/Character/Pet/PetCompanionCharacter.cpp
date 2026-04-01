@@ -4,8 +4,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "TimerManager.h" 
 
-// Sets default values
 APetCompanionCharacter::APetCompanionCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -33,25 +33,39 @@ APetCompanionCharacter::APetCompanionCharacter()
 	DetectionSphere->SetSphereRadius(800.0f); // 탐지 반경 설정
 }
 
-// Called when the game starts or when spawned
 void APetCompanionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// 🌟 [테스트용 안전장치] 
-		// 누군가 나를 스폰하면서 SetPlayerTarget을 안 불렀다면? (즉, 에디터에 그냥 드래그해서 배치했다면)
+
 	APetCompanionAIController* PetAI = Cast<APetCompanionAIController>(GetController());
 
 	if (PetAI)
 	{
-		// 0번 로컬 플레이어 폰을 찾아서 임시로 주인으로 셋팅해 줍니다.
 		APawn* LocalPlayer = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+
 		if (LocalPlayer)
 		{
 			PetAI->SetPlayerTarget(LocalPlayer);
 		}
+		else
+		{
+			// 0.5초 뒤에 다시 시도하는 지연 탐색 추가
+			FTimerHandle WaitHandle;
+			GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([this, PetAI]()
+				{
+					APawn* DelayedPlayer = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+					if (DelayedPlayer)
+					{
+						PetAI->SetPlayerTarget(DelayedPlayer);
+						UE_LOG(LogTemp, Log, TEXT("지연 탐색: 주인을 찾았습니다!"));
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("지연 탐색 실패: 0.5초 뒤에도 주인이 없습니다."));
+					}
+				}), 0.5f, false);
+		}
 	}
-
 }
 
 // Called every frame

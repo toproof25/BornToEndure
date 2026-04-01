@@ -25,7 +25,9 @@ public:
 
 public:
 
-	// 추후 적 탐지 시스템을 위해 남겨두는 구형 충돌체 컴포넌트
+	/**
+	 * @brief 적 탐지 충돌체 컴포넌트
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> DetectionSphere;
 };

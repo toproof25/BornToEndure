@@ -6,9 +6,8 @@
 #include "AIController.h"
 #include "PetCompanionAIController.generated.h"
 
-
 class APawn;
-struct FTimerHandle;
+class UBehaviorTree;
 
 UCLASS()
 class BORNTOENDURE_API APetCompanionAIController : public AAIController
@@ -22,26 +21,19 @@ public:
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
-
 public:
+
+	/**
+	 * @brief 따라다닐 Player Pawn을 설정하는 함수
+	 * @param NewOwnerPawn 새로 설정할 Player Pawn
+	 */
 	void SetPlayerTarget(APawn* NewOwnerPawn);
 
 private:
-
-	// 이동을 담당하는 함수
-	void UpdateRandomMoveLocation();
-
-	// 타이머 핸들러
-	FTimerHandle MoveTimerHandle;
-
-	// 추적할 플레이어의 포인터 캐싱
-	UPROPERTY()
-	TObjectPtr<APawn> PlayerPawn;
-
-	// 설정값
-	float MinRadius = 200.0f;           // 플레이어와 너무 가깝지 않게 유지할 최소 거리
-	float MaxRadius = 500.0f;           // 플레이어 주변에서 돌아다닐 최대 반경
-	float ReturnRadiusSquared = 1000000.0f; // 1000^2 (강제 복귀 거리의 제곱)
-	float MoveInterval = 3.0f;          // 몇 초마다 새로운 장소를 찾을 것인가?
-
+	
+	/**
+	 * @brief AI 행동 트리 Behavior Tree Asset
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
 };
