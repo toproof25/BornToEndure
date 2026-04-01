@@ -24,6 +24,7 @@ public:
 	 * @param ActorClass 타입
 	 * @param PoolSize 관리할 발사체 수
 	 */
+	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	void InitializePoolForClass(TSubclassOf<AActor> ActorClass, int32 PoolSize);
 
 	/**
@@ -31,12 +32,14 @@ public:
 	 * @param ActorClass 요청할 AActor Class 타입
 	 * @return 요청한 발사체 인스턴스에 대한 포인터를 반환합니다.
 	 */
+	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	AActor* RequestPoolActor(TSubclassOf<AActor> ActorClass);
 
 	/**
 	 * @brief 사용한 AActor 액터를 풀로 반환
 	 * @param PoolActor
 	 */
+	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	void ReturnPoolActor(AActor* PoolActor);
 
 
