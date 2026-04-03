@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -64,5 +64,8 @@ private:
 	void DrawMovement_Speed();
 	void DrawMovement_Input();
 	void DrawMovement_Physics();
-		
+
+	// 월드 및 서브시스템 전용 디버그 렌더링 함수
+	void DrawSystemAndMemoryInfo();
+
 };
