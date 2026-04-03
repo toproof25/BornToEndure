@@ -210,3 +210,12 @@ void ABaseProjectile::OnProjectileHit(
 	}
 }
 
+void ABaseProjectile::FireProjectile(const FVector& Direction)
+{
+	if (ProjectileMovementComp)
+	{
+		ProjectileMovementComp->Velocity = Direction * ProjectileMovementComp->InitialSpeed;
+		ProjectileMovementComp->Activate(true);
+	}
+}
+

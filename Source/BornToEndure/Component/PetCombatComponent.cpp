@@ -35,11 +35,17 @@ void UPetCombatComponent::OnAttack(const FVector& TargetVector)
 	if (World == nullptr) return;
 	UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
 	
+	// 사용할 발사체 오브젝트 풀에서 가져오기
+	UClass* ProjectileClassKey = ProjectileClass.Get();
+	AActor* GetPoolActor = ObjectPoolSubsystem->RequestPoolActor(ProjectileClassKey);
+	if (GetPoolActor == nullptr) return;
+	ABaseProjectile* Projectile = Cast<ABaseProjectile>(GetPoolActor);
+	if (Projectile == nullptr) return;
+
 	AActor* OwnerActor = GetOwner();
 
 	// 발사체 스폰 위치와 회전 설정
 	FVector SpawnLocation = OwnerActor->GetActorLocation();
-	FRotator SpawnRotation = OwnerActor->GetActorRotation();
 
 	// 적 위치에 대한 방향과 회전 설정
 	FVector Direction = (TargetVector - SpawnLocation).GetSafeNormal();
@@ -49,28 +55,15 @@ void UPetCombatComponent::OnAttack(const FVector& TargetVector)
 	OnAttackSound(SpawnLocation);
 	OnAttackNiagara(SpawnLocation);
 
-	// 사용할 발사체 오브젝트 풀에서 가져오기
-	UClass* ProjectileClassKey = ProjectileClass.Get();
-	AActor* GetPoolActor = ObjectPoolSubsystem->RequestPoolActor(ProjectileClassKey);
-	if (GetPoolActor == nullptr) return;
-	ABaseProjectile* Projectile = Cast<ABaseProjectile>(GetPoolActor);
-	if (Projectile == nullptr) return;
-
 	// 발사체에 대한 소유자와 주체자 초기화
 	Projectile->Owner = OwnerActor;
 	Projectile->SetInstigator(OwnerActor->GetInstigator());
 
 	// 이동 시 발사체가 충돌하지 않도록 위치와 회전을 설정 (위치 초기화)
 	Projectile->SetActorLocationAndRotation(SpawnLocation, TargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
-
-	// 발사체 컴포넌트를 찾아 발사
-	UProjectileMovementComponent* ProjectileMovementComp;
-	Projectile->GetProjectileMovementComponent(ProjectileMovementComp);
-	if (ProjectileMovementComp)
-	{
-		ProjectileMovementComp->Velocity = Direction * ProjectileMovementComp->InitialSpeed;
-		ProjectileMovementComp->Activate(true);
-	}
+	
+	// 발사체 발사
+	Projectile->FireProjectile(Direction);
 }
 
 

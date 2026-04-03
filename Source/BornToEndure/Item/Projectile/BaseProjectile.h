@@ -70,6 +70,9 @@ public:
 		const FHitResult& Hit
 	);
 
+	void FireProjectile(const FVector& Direction);
+
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
