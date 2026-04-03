@@ -8,6 +8,7 @@
 #include "Components/AudioComponent.h"
 #include "Engine/GameInstance.h"
 #include "Delegates/Delegate.h"
+#include "UObject/PrimaryAssetId.h"
 
 DEFINE_LOG_CATEGORY(LogBaseProjectile);
 
@@ -70,7 +71,7 @@ void ABaseProjectile::BeginPlay()
 	Super::BeginPlay();
 
 	UWorld* world = GetWorld();
-	if (world == nullptr) return;
+	check(world);
 	UObjectPoolSubsystem* ObjectPoolSubsystem = world->GetSubsystem<UObjectPoolSubsystem>();
 	check(ObjectPoolSubsystem);
 	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
@@ -86,8 +87,41 @@ void ABaseProjectile::BeginPlay()
 		SphereComp->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnProjectileHit);
 	}
 
+	// 사용하는 Asset Preload
+	FPrimaryAssetType SoundAssetType(FName(TEXT("SoundDataAsset")));
+	FPrimaryAssetType NiagaraAssetType(FName(TEXT("NiagaraDataAsset")));
+
+	FPrimaryAssetId SoundAssetId(SoundAssetType, HitSoundId.PrimaryAssetName);
+	FPrimaryAssetId NiagaraAssetId(NiagaraAssetType, HitNiagaraId.PrimaryAssetName);
+
+	EffectSubsystem->PreloadEffectAssets(SoundAssetId);
+	EffectSubsystem->PreloadEffectAssets(NiagaraAssetId);
+
 	OnProjectileHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 	OnProjectileHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
+}
+
+void ABaseProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 타이머 초기화
+	GetWorld()->GetTimerManager().ClearTimer(LifeSpanTimerHandle);
+
+	UWorld* world = GetWorld();
+	check(world);
+	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
+	check(EffectSubsystem);
+
+	// 사용하는 Asset Unload
+	FPrimaryAssetType SoundAssetType(FName(TEXT("SoundDataAsset")));
+	FPrimaryAssetType NiagaraAssetType(FName(TEXT("NiagaraDataAsset")));
+
+	FPrimaryAssetId SoundAssetId(SoundAssetType, HitSoundId.PrimaryAssetName);
+	FPrimaryAssetId NiagaraAssetId(NiagaraAssetType, HitNiagaraId.PrimaryAssetName);
+
+	EffectSubsystem->UnloadEffectAssets(SoundAssetId);
+	EffectSubsystem->UnloadEffectAssets(NiagaraAssetId);
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ABaseProjectile::ActivateActor_Implementation()

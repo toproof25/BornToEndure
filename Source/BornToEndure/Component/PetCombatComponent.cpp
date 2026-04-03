@@ -4,6 +4,7 @@
 #include "Delegates/Delegate.h"
 #include "Item/Projectile/BaseProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "UObject/PrimaryAssetId.h"
 
 UPetCombatComponent::UPetCombatComponent()
 {
@@ -20,10 +21,40 @@ void UPetCombatComponent::BeginPlay()
 	UEffectSubsystem* EffectSubsystem = GetWorld()->GetSubsystem<UEffectSubsystem>();
 	check(EffectSubsystem);
 
+	// 사용하는 Asset Preload
+	FPrimaryAssetType SoundIdType(FName(TEXT("SoundDataAsset")));
+	FPrimaryAssetType NiagaraType(FName(TEXT("NiagaraDataAsset")));
+
+	FPrimaryAssetId AttackSoundPrimaryId(SoundIdType, AttackSoundId.PrimaryAssetName);
+	FPrimaryAssetId AttackNiagaraPrimaryId(NiagaraType, AttackNiagaraId.PrimaryAssetName);
+
+	EffectSubsystem->PreloadEffectAssets(AttackSoundPrimaryId);
+	EffectSubsystem->PreloadEffectAssets(AttackNiagaraPrimaryId);
+
 	SoundDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 	NiagaraDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);
 
 	InitializeProjectilePool();
+}
+
+void UPetCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UWorld* World = GetWorld();
+	check(World);
+	UEffectSubsystem* EffectSubsystem = GetWorld()->GetSubsystem<UEffectSubsystem>();
+	check(EffectSubsystem);
+
+	// 사용하는 Asset Preload
+	FPrimaryAssetType SoundIdType(FName(TEXT("SoundDataAsset")));
+	FPrimaryAssetType NiagaraType(FName(TEXT("NiagaraDataAsset")));
+
+	FPrimaryAssetId AttackSoundPrimaryId(SoundIdType, AttackSoundId.PrimaryAssetName);
+	FPrimaryAssetId AttackNiagaraPrimaryId(NiagaraType, AttackNiagaraId.PrimaryAssetName);
+
+	EffectSubsystem->UnloadEffectAssets(AttackSoundPrimaryId);
+	EffectSubsystem->UnloadEffectAssets(AttackNiagaraPrimaryId);
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void UPetCombatComponent::OnAttack(const FVector& TargetVector)
