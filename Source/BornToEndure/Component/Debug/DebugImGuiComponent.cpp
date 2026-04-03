@@ -508,16 +508,21 @@ void UDebugImGuiComponent::DrawMovement_Physics()
 
 void UDebugImGuiComponent::DrawSystemAndMemoryInfo()
 {
-	if (ImGui::CollapsingHeader("이펙트 서브시스템 (Effect Subsystem) Memory", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		UWorld* World = GetWorld();
-		if (!World) return;
+	UWorld* World = GetWorld();
+	if (!World) return;
 
-		// 🌟 안전하게 이펙트 서브시스템 가져오기
+	// ========================================================
+	// 1. 이펙트 서브시스템 (Effect Subsystem) Memory
+	// ========================================================
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.4f, 0.6f, 1.0f));
+	bool bEffectHeaderOpen = ImGui::CollapsingHeader("이펙트 서브시스템 (Effect Subsystem) Memory", ImGuiTreeNodeFlags_DefaultOpen);
+	ImGui::PopStyleColor();
+
+	if (bEffectHeaderOpen)
+	{
 		UEffectSubsystem* EffectSubsys = World->GetSubsystem<UEffectSubsystem>();
 		if (EffectSubsys)
 		{
-			// 서브시스템에서 Preload된 에셋 TMap 가져오기
 			const TMap<FPrimaryAssetId, FLoadedAsset>& AssetMap = EffectSubsys->GetPreloadAssetCounts();
 
 			ImGui::Text("추적 중인 고유 에셋 종류: %d 개", AssetMap.Num());
@@ -525,7 +530,6 @@ void UDebugImGuiComponent::DrawSystemAndMemoryInfo()
 
 			if (AssetMap.Num() > 0)
 			{
-				// 3열 테이블: 에셋 타입, 에셋 이름, 참조 카운트
 				if (ImGui::BeginTable("EffectMemoryTable", 3, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
 				{
 					ImGui::TableSetupColumn("에셋 타입 (Type)");
@@ -535,29 +539,21 @@ void UDebugImGuiComponent::DrawSystemAndMemoryInfo()
 
 					for (const auto& Pair : AssetMap)
 					{
-						// FPrimaryAssetId 분리
 						FString AssetType = Pair.Key.PrimaryAssetType.ToString();
 						FString AssetName = Pair.Key.PrimaryAssetName.ToString();
 						int32 RefCount = Pair.Value.Count;
 
 						ImGui::TableNextRow();
-
 						ImGui::TableSetColumnIndex(0);
 						ImGui::TextDisabled("%s", TCHAR_TO_UTF8(*AssetType));
-
 						ImGui::TableSetColumnIndex(1);
 						ImGui::Text("%s", TCHAR_TO_UTF8(*AssetName));
-
 						ImGui::TableSetColumnIndex(2);
-						// 카운트가 0이면 해제 대기 상태(노란색), 사용 중이면 정상(초록색)으로 렌더링
+
 						if (RefCount > 0)
-						{
 							ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "%d (Active)", RefCount);
-						}
 						else
-						{
 							ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.3f, 1.0f), "%d (Will GC)", RefCount);
-						}
 					}
 					ImGui::EndTable();
 				}
@@ -565,6 +561,75 @@ void UDebugImGuiComponent::DrawSystemAndMemoryInfo()
 			else
 			{
 				ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "현재 메모리에 로드(Preload)된 이펙트 에셋이 없습니다.");
+			}
+		}
+	}
+
+	ImGui::Spacing();
+
+	// ========================================================
+	// 2. 오브젝트 풀 서브시스템 (Object Pool Subsystem)
+	// ========================================================
+	ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.6f, 0.4f, 0.2f, 1.0f));
+	// 🌟 이 헤더가 접혀있을 때는 내부의 루프와 연산이 아예 실행되지 않습니다! (지연 평가)
+	bool bPoolHeaderOpen = ImGui::CollapsingHeader("오브젝트 풀 상태 (Object Pool Stats)", ImGuiTreeNodeFlags_DefaultOpen);
+	ImGui::PopStyleColor();
+
+	if (bPoolHeaderOpen)
+	{
+		UObjectPoolSubsystem* PoolSubsys = World->GetSubsystem<UObjectPoolSubsystem>();
+		if (PoolSubsys)
+		{
+			const auto& ActorPools = PoolSubsys->GetActorPools();
+
+			ImGui::Text("관리 중인 클래스 종류: %d 개", ActorPools.Num());
+			ImGui::Spacing();
+
+			if (ActorPools.Num() > 0)
+			{
+				if (ImGui::BeginTable("ObjectPoolTable", 4, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+				{
+					ImGui::TableSetupColumn("클래스 (Class)");
+					ImGui::TableSetupColumn("전체 (Total)");
+					ImGui::TableSetupColumn("활성 (Active)");
+					ImGui::TableSetupColumn("대기 (Inactive)");
+					ImGui::TableHeadersRow();
+
+					for (const auto& Pair : ActorPools)
+					{
+						TSubclassOf<AActor> ActorClass = Pair.Key;
+						if (!ActorClass) continue;
+
+						// UI가 펼쳐져 있을 때만 순회하여 상태를 카운트합니다.
+						int32 Total = 0, Active = 0, Inactive = 0;
+						PoolSubsys->GetPoolStats(ActorClass, Total, Active, Inactive);
+
+						ImGui::TableNextRow();
+
+						// 클래스명 출력 (접두어 제거를 위해 GetName() 사용)
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("%s", TCHAR_TO_UTF8(*ActorClass->GetName()));
+
+						// 전체 개수
+						ImGui::TableSetColumnIndex(1);
+						ImGui::Text("%d", Total);
+
+						// 활성화(날아가는 중) 개수 - 초록색
+						ImGui::TableSetColumnIndex(2);
+						if (Active > 0) ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "%d", Active);
+						else ImGui::TextDisabled("0");
+
+						// 비활성화(풀 대기 중) 개수 - 회색
+						ImGui::TableSetColumnIndex(3);
+						if (Inactive > 0) ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "%d", Inactive);
+						else ImGui::TextDisabled("0");
+					}
+					ImGui::EndTable();
+				}
+			}
+			else
+			{
+				ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "현재 초기화된 오브젝트 풀이 없습니다.");
 			}
 		}
 	}
