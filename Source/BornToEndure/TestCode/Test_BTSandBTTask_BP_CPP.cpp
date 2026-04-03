@@ -33,6 +33,10 @@ void ATest_BTSandBTTask_BP_CPP::BeginPlay()
 		FImGuiDelegate Delegate = FImGuiDelegate::CreateUObject(this, &ATest_BTSandBTTask_BP_CPP::RenderImGui);
 		ImGuiDelegateHandle = FImGuiModule::Get().AddWorldImGuiDelegate(Delegate);
 	}
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	LoadEnemy = GetWorld()->SpawnActor<AActor>(EnemyClass, GetActorLocation() + FVector(10000.f, 0.f, 0.f), GetActorRotation(), SpawnParams);
 }
 
 void ATest_BTSandBTTask_BP_CPP::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -53,23 +57,6 @@ void ATest_BTSandBTTask_BP_CPP::RenderImGui()
 		ImGui::Separator();
 		FString ClassName = EnemyClass ? EnemyClass->GetName() : TEXT("None (Set in Details)");
 		ImGui::Text("Target: %s", TCHAR_TO_ANSI(*ClassName));
-
-
-		if (ImGui::Button("적 스폰 (애셋 로드용)", ImVec2(-1, 30)))
-		{
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-			LoadEnemy = GetWorld()->SpawnActor<AActor>(EnemyClass, GetActorLocation(), GetActorRotation(), SpawnParams);
-
-		}
-		if (ImGui::Button("적 제거 (로드 후 제거)", ImVec2(-1, 30)))
-		{
-			if (LoadEnemy && IsValid(LoadEnemy))
-			{
-				LoadEnemy->Destroy();
-				LoadEnemy = nullptr; // 안전하게 포인터 초기화
-			}
-		}
 
 		ImGui::Spacing();
 

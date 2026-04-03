@@ -7,6 +7,7 @@
 #include "Subsystem/EffectSubsystem.h"
 #include "NiagaraComponent.h"
 #include "Delegates/Delegate.h"
+#include "UObject/PrimaryAssetId.h"
 
 
 DEFINE_LOG_CATEGORY(LogBaseEnemy);
@@ -37,11 +38,43 @@ void ABaseEnemy::BeginPlay()
 	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
 	check(EffectSubsystem);
 
+	// 사용하는 Asset Preload
+	FPrimaryAssetType SoundIdType(FName(TEXT("SoundDataAsset")));
+	FPrimaryAssetType NiagaraType(FName(TEXT("NiagaraDataAsset")));
+
+
+	FPrimaryAssetId HitSoundIdId(SoundIdType, HitEnemySoundId.PrimaryAssetName);
+	FPrimaryAssetId HitNiagaraId(NiagaraType, HitEnemyNiagaraId.PrimaryAssetName);
+
+	EffectSubsystem->PreloadEffectAssets(HitSoundIdId);
+	EffectSubsystem->PreloadEffectAssets(HitNiagaraId);
+
 	OnEnemyHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 	OnEnemyHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
 
 	UE_LOG(LogBaseEnemy, Warning, TEXT("Spawn Test Enemy!!"));
 }
+
+void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UWorld* world = GetWorld();
+	if (world == nullptr) return;
+	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
+	check(EffectSubsystem);
+
+	// 사용하는 Asset Unload
+	FPrimaryAssetType SoundIdType(FName(TEXT("SoundDataAsset")));
+	FPrimaryAssetType NiagaraType(FName(TEXT("NiagaraDataAsset")));
+
+	FPrimaryAssetId HitSoundIdId(SoundIdType, HitEnemySoundId.PrimaryAssetName);
+	FPrimaryAssetId HitNiagaraId(NiagaraType, HitEnemyNiagaraId.PrimaryAssetName);
+
+	EffectSubsystem->UnloadEffectAssets(HitSoundIdId);
+	EffectSubsystem->UnloadEffectAssets(HitNiagaraId);
+
+	Super::EndPlay(EndPlayReason);
+}
+
 
 void ABaseEnemy::Tick(float DeltaTime)
 {

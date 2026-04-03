@@ -14,18 +14,19 @@ class ABaseProjectile;
 DECLARE_DELEGATE_TwoParams(FSpawnSoundAtLocation, FName, FVector);
 DECLARE_DELEGATE_TwoParams(FSpawnNiagaraAtLocation, FName, FVector);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BORNTOENDURE_API UPetCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UPetCombatComponent();
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-public:	
+public:
 
 	/** * @brief Delegate 시그니처 선언으로, 공격 시 사운드와 나이아가라 스폰 호출 */
 	FSpawnSoundAtLocation SoundDelegate;

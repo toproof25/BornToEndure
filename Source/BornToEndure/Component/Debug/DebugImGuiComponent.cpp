@@ -19,6 +19,7 @@
 #include "Components/SphereComponent.h"
 
 #include "Subsystem/ObjectPoolSubsystem.h"
+#include "Subsystem/EffectSubsystem.h"
 
 #include "GameFramework/Character.h"
 
@@ -150,25 +151,51 @@ void UDebugImGuiComponent::LoadKoreanFontToImGui()
 
 void UDebugImGuiComponent::DebugDrawPlayerInfo()
 {
-	// 알파값을 주어 게임 화면이 너무 가려지지 않도록 설정
+	// 알파값 및 초기 윈도우 사이즈 지정
 	ImGui::SetNextWindowBgAlpha(0.85f);
-	ImGui::Begin("플레이어 정보 윈도우", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::SetNextWindowSize(ImVec2(500, 600), ImGuiCond_FirstUseEver);
 
-	ImGui::Text("이 창은 플레이어 캐릭터의 다양한 정보를 실시간으로 보여줍니다.\n각 섹션을 펼쳐서 자세한 데이터를 확인하세요.");
+	// 윈도우 이름 변경
+	ImGui::Begin("종합 디버그 패널 (System Debug Panel)");
 
-	DrawCameraInfo();
-	DrawPlayerCharacterInfo();
-	DrawAnimationBasic();
-	DrawWeaponInfo();
-	DrawStatInfo();
+	ImGui::Text("게임 내 다양한 시스템과 플레이어 상태를 실시간으로 모니터링합니다.");
+	ImGui::Separator();
 
-	if (PlayerMovementComponent && ImGui::CollapsingHeader("이동 (Movement)", ImGuiTreeNodeFlags_DefaultOpen))
+	// 🌟 탭 바(Tab Bar)를 도입하여 플레이어와 월드 시스템을 분리!
+	if (ImGui::BeginTabBar("MainDebugTabBar"))
 	{
-		DrawMovement_Basic();
-		DrawMovement_State();
-		DrawMovement_Speed();
-		DrawMovement_Input();
-		DrawMovement_Physics();
+		// ==============================================
+		// 탭 1: 플레이어 전용 (Player)
+		// ==============================================
+		if (ImGui::BeginTabItem("플레이어 (Player)"))
+		{
+			DrawCameraInfo();
+			DrawPlayerCharacterInfo();
+			DrawAnimationBasic();
+			DrawWeaponInfo();
+			DrawStatInfo();
+
+			if (PlayerMovementComponent && ImGui::CollapsingHeader("이동 (Movement)", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				DrawMovement_Basic();
+				DrawMovement_State();
+				DrawMovement_Speed();
+				DrawMovement_Input();
+				DrawMovement_Physics();
+			}
+			ImGui::EndTabItem();
+		}
+
+		// ==============================================
+		// 탭 2: 월드 & 서브시스템 전용 (World & Memory)
+		// ==============================================
+		if (ImGui::BeginTabItem("월드 & 메모리 (World & Memory)"))
+		{
+			DrawSystemAndMemoryInfo();
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
 	}
 
 	ImGui::End();
@@ -475,5 +502,70 @@ void UDebugImGuiComponent::DrawMovement_Physics()
 			ImGui::EndTable();
 		}
 		ImGui::TreePop();
+	}
+}
+
+
+void UDebugImGuiComponent::DrawSystemAndMemoryInfo()
+{
+	if (ImGui::CollapsingHeader("이펙트 서브시스템 (Effect Subsystem) Memory", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		UWorld* World = GetWorld();
+		if (!World) return;
+
+		// 🌟 안전하게 이펙트 서브시스템 가져오기
+		UEffectSubsystem* EffectSubsys = World->GetSubsystem<UEffectSubsystem>();
+		if (EffectSubsys)
+		{
+			// 서브시스템에서 Preload된 에셋 TMap 가져오기
+			const TMap<FPrimaryAssetId, FLoadedAsset>& AssetMap = EffectSubsys->GetPreloadAssetCounts();
+
+			ImGui::Text("추적 중인 고유 에셋 종류: %d 개", AssetMap.Num());
+			ImGui::Spacing();
+
+			if (AssetMap.Num() > 0)
+			{
+				// 3열 테이블: 에셋 타입, 에셋 이름, 참조 카운트
+				if (ImGui::BeginTable("EffectMemoryTable", 3, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+				{
+					ImGui::TableSetupColumn("에셋 타입 (Type)");
+					ImGui::TableSetupColumn("에셋 이름 (Name)");
+					ImGui::TableSetupColumn("상태 (Ref Count)");
+					ImGui::TableHeadersRow();
+
+					for (const auto& Pair : AssetMap)
+					{
+						// FPrimaryAssetId 분리
+						FString AssetType = Pair.Key.PrimaryAssetType.ToString();
+						FString AssetName = Pair.Key.PrimaryAssetName.ToString();
+						int32 RefCount = Pair.Value.Count;
+
+						ImGui::TableNextRow();
+
+						ImGui::TableSetColumnIndex(0);
+						ImGui::TextDisabled("%s", TCHAR_TO_UTF8(*AssetType));
+
+						ImGui::TableSetColumnIndex(1);
+						ImGui::Text("%s", TCHAR_TO_UTF8(*AssetName));
+
+						ImGui::TableSetColumnIndex(2);
+						// 카운트가 0이면 해제 대기 상태(노란색), 사용 중이면 정상(초록색)으로 렌더링
+						if (RefCount > 0)
+						{
+							ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "%d (Active)", RefCount);
+						}
+						else
+						{
+							ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.3f, 1.0f), "%d (Will GC)", RefCount);
+						}
+					}
+					ImGui::EndTable();
+				}
+			}
+			else
+			{
+				ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "현재 메모리에 로드(Preload)된 이펙트 에셋이 없습니다.");
+			}
+		}
 	}
 }
