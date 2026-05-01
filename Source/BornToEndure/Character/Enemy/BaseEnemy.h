@@ -13,8 +13,8 @@ class UStaticMeshComponent;
 class UCapsuleComponent;
 
 // Delegate ¼±¾ð
-DECLARE_DELEGATE_TwoParams(FOnEnemyHitSound, FName, FVector);
-DECLARE_DELEGATE_TwoParams(FOnEnemyHitNiagara, FName, FVector);
+//DECLARE_DELEGATE_TwoParams(FOnEnemyHitSound, FName, FVector);
+//DECLARE_DELEGATE_TwoParams(FOnEnemyHitNiagara, FName, FVector);
 
 UCLASS()
 class BORNTOENDURE_API ABaseEnemy : public APawn
@@ -46,6 +46,14 @@ public:
 		AController* EventInstigator,
 		AActor* DamageCauser
 	);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | Stat")
+	float MaxHealth = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | Stat")
+	float CurrentHealth = 200.0f;
+
+
 
 private:
 	FOnEnemyHitSound OnEnemyHitSound;

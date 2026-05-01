@@ -24,6 +24,9 @@ class UInputComponent;
 class UStatComponent;
 class UInteractionComponent;
 class ABaseWeapon;
+class USpringArmComponent;
+class UCameraComponent;
+class UPetManagerComponent;
 
 UCLASS()
 class BORNTOENDURE_API APlayerCharacter : public ACharacter
@@ -45,11 +48,11 @@ protected:
 
 	/** * @brief 카메라를 뒤에 위치시키는 Spring Arm 컴포넌트. 카메라가 캐릭터를 따라 움직이도록 설정 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class USpringArmComponent* SpringArmComp;
+	TObjectPtr<USpringArmComponent> SpringArmComp;
 	
 	/** * @brief 카메라를 가리키는 컴포넌트 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	class UCameraComponent* CameraComp;
+	TObjectPtr<UCameraComponent> CameraComp;
 
 
 	/** * @brief WASD의 상하좌우 이동을 처리) */
@@ -112,11 +115,16 @@ private:
 
 public:
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UPetManagerComponent> PetManagerComp;
+
 	UFUNCTION()
 	void SetWeaponBase(ABaseWeapon* NewWeaponBase) { WeaponBaseComp = NewWeaponBase; }
 	
 	UFUNCTION(BlueprintPure)
 	void GetWeaponBase(ABaseWeapon*& OutWeaponBase) const { OutWeaponBase = WeaponBaseComp; }
+
+	void GetPerManagerComp(UPetManagerComponent*& OutPetManagerComp) const { OutPetManagerComp = PetManagerComp; }
 };
 
 

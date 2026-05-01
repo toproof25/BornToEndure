@@ -19,6 +19,9 @@ class UStatComponent;
 class UCharacterMovementComponent;
 class USpringArmComponent;
 class UCameraComponent;
+class UPetManagerComponent;
+class UEnemyDetectorComponent;
+class UPlayerExperienceComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BORNTOENDURE_API UDebugImGuiComponent : public UActorComponent
@@ -47,6 +50,9 @@ private:
 	UPlayerAnimInstance* PlayerAnimInstance;
 	UStatComponent* PlayerStatComponent;
 	UCharacterMovementComponent* PlayerMovementComponent;
+	UPetManagerComponent* PetManagerComponent;
+	UEnemyDetectorComponent* EnemyDetectorComponent;
+	UPlayerExperienceComponent* PlayerExperienceComponent;
 
 	// Draw Debug ImGui Window
 	void DebugDrawPlayerInfo();
@@ -57,6 +63,8 @@ private:
 	void DrawAnimationBasic();
 	void DrawWeaponInfo();
 	void DrawStatInfo();
+	void DrawEnemyDetectionInfo();
+	void DrawExperienceInfo();
 
 	// Player Character Movement Debug Functions
 	void DrawMovement_Basic();
@@ -67,5 +75,8 @@ private:
 
 	// 월드 및 서브시스템 전용 디버그 렌더링 함수
 	void DrawSystemAndMemoryInfo();
+
+	// 펫 시스템 전용 디버그 렌더링 함수
+	void DrawPetInfo();
 
 };
