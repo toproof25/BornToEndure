@@ -1,6 +1,7 @@
 ﻿#include "Character/Pet/PetCompanionAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Character/Pet/PetCompanionCharacter.h"
 
 APetCompanionAIController::APetCompanionAIController()
 {
@@ -10,6 +11,16 @@ APetCompanionAIController::APetCompanionAIController()
 void APetCompanionAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+
+	if (APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(InPawn))
+	{
+		// 펫한테서 BT를 직접 달라고 요청
+		if (UBehaviorTree* BT = Pet->GetBehaviorTree())
+		{
+			BehaviorTreeAsset = BT;
+			RunBehaviorTree(BehaviorTreeAsset);
+		}
+	}
 }
 
 void APetCompanionAIController::SetPlayerTarget(APawn* NewOwnerPawn)
@@ -33,6 +44,15 @@ void APetCompanionAIController::SetPlayerTarget(APawn* NewOwnerPawn)
 
 			UE_LOG(LogTemp, Log, TEXT("Player를 변경: %s"), *NewOwnerPawn->GetName());
 		}
+	}
+}
+
+void APetCompanionAIController::SetAndRunBehaviorTree(UBehaviorTree* NewBehaviorTree)
+{
+	BehaviorTreeAsset = NewBehaviorTree;
+	if (BehaviorTreeAsset)
+	{
+		RunBehaviorTree(BehaviorTreeAsset);
 	}
 }
 

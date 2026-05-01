@@ -42,6 +42,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	void ReturnPoolActor(AActor* PoolActor);
 
+	/**
+	 * @brief 특정 액터를 풀에서 제거하는 함수
+	 * @param PoolActor 제거하고자 하는 Actor class
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Object Pool")
+	void RemovePoolActor(TSubclassOf<AActor> PoolActor);
 
 public:
 	/**

@@ -70,7 +70,7 @@ AActor* UObjectPoolSubsystem::RequestPoolActor(TSubclassOf<AActor> ActorClass)
     // 요청한 발사체 중 비활성화된 발사체를 활성화 하고 반환
     for (AActor* PoolActor : *PoolPtr)
     {
-        if (PoolActor && PoolActor->IsHidden())
+        if (IsValid(PoolActor) && PoolActor->IsHidden())
         {
             if (IPoolable* Poolable = Cast<IPoolable>(PoolActor))
             {
@@ -83,7 +83,11 @@ AActor* UObjectPoolSubsystem::RequestPoolActor(TSubclassOf<AActor> ActorClass)
 
     // 발사체가 없으면 추가 생성 ( 스폰 -> 활성화 -> 바로 반환 )
     UWorld* World = GetWorldChecked();
-    AActor* PoolActor = World->SpawnActor<AActor>(ClassKey, FVector::ZeroVector, FRotator::ZeroRotator);
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AActor* PoolActor = World->SpawnActor<AActor>(ClassKey, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
     if (PoolActor)
     {
         PoolPtr->Add(PoolActor);
@@ -94,13 +98,21 @@ AActor* UObjectPoolSubsystem::RequestPoolActor(TSubclassOf<AActor> ActorClass)
         {
             (*SizePtr)++;
         }
+
+        if (IPoolable* Poolable = Cast<IPoolable>(PoolActor))
+        {
+            Poolable->Execute_ActivateActor(PoolActor);
+            UE_LOG(LogObjectPoolSubsystem, Display, TEXT("No available UObjectPoolSubsystem, spawned new one for Class: %s"), *ClassKey->GetName());
+            return PoolActor;
+        }
+    }
+    else
+    {
+		UE_LOG(LogObjectPoolSubsystem, Error, TEXT("Failed to spawn new UObjectPoolSubsystem for Class: %s"), *ClassKey->GetName());
     }
 
+    return nullptr;
 
-    IPoolable* Poolable = Cast<IPoolable>(PoolActor);
-    Poolable->Execute_ActivateActor(PoolActor);
-    UE_LOG(LogObjectPoolSubsystem, Display, TEXT("No available UObjectPoolSubsystem, spawned new one for Class: %s"), *ClassKey->GetName());
-    return PoolActor;
 }
 
 void UObjectPoolSubsystem::ReturnPoolActor(AActor* PoolActor)
@@ -113,6 +125,31 @@ void UObjectPoolSubsystem::ReturnPoolActor(AActor* PoolActor)
             UE_LOG(LogObjectPoolSubsystem, Display, TEXT("Returned UObjectPoolSubsystem to Pool: %s"), *PoolActor->GetName());
         }
     }
+}
+
+void UObjectPoolSubsystem::RemovePoolActor(TSubclassOf<AActor> PoolActor)
+{
+    if (PoolActor == nullptr) return;
+
+    UClass* ClassKey = PoolActor.Get();
+
+    // 요청한 발사체가 풀에 존재하는지 확인 (PoolPtr은 배열의 시작 포인터가됨)
+    TArray<AActor*>* PoolPtr = ActorPools.Find(ClassKey);
+    if (!PoolPtr)
+    {
+        UE_LOG(LogObjectPoolSubsystem, Warning, TEXT("RemovePoolActor UObjectPoolSubsystem Class not found in Pool: %s"), *ClassKey->GetName());
+        return;
+    }
+
+    for (AActor* PoolActor : *PoolPtr)
+    {
+        if (PoolActor)
+        {
+			PoolActor->Destroy();
+        }
+    }
+
+	ActorPools.Remove(ClassKey);
 }
 
 void UObjectPoolSubsystem::GetPoolStats(TSubclassOf<AActor> ActorClass, int32& OutTotal, int32& OutActive, int32& OutInactive) const
