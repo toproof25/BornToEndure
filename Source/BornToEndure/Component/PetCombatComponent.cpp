@@ -42,7 +42,6 @@ void UPetCombatComponent::BeginPlay()
 
 void UPetCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	UWorld* World = GetWorld();
     if (UWorld* World = GetWorld())
     {
         if (UEffectSubsystem* EffectSubsystem = GetWorld()->GetSubsystem<UEffectSubsystem>())
