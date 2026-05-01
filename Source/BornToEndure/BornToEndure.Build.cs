@@ -19,7 +19,7 @@ public class BornToEndure : ModuleRules
             "Niagara",
             "NavigationSystem",
 			"AIModule",
-            "GameplayTasks",
+            "GameplayTags",
             "ImGui" 
 		});
 

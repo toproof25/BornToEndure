@@ -15,6 +15,7 @@ class UDamageType;
 class UNiagaraComponent;
 class UAudioComponent;
 struct FTimerHandle;
+struct FPetAttackInfo;
 
 // 로그 분류 커스텀
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseProjectile, Log, All);
@@ -71,7 +72,8 @@ public:
 		const FHitResult& Hit
 	);
 
-	void FireProjectile(const FVector& Direction);
+	void SetHomingTarget(AActor* NewTarget);
+	void FireProjectile(FPetAttackInfo AtkInfo, const FVector& Direction);
 
 
 protected:

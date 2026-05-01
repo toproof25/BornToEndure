@@ -9,6 +9,7 @@
 #include "Engine/GameInstance.h"
 #include "Delegates/Delegate.h"
 #include "UObject/PrimaryAssetId.h"
+#include "Component/PetCombatComponent.h"
 
 DEFINE_LOG_CATEGORY(LogBaseProjectile);
 
@@ -244,11 +245,22 @@ void ABaseProjectile::OnProjectileHit(
 	}
 }
 
-void ABaseProjectile::FireProjectile(const FVector& Direction)
+void ABaseProjectile::SetHomingTarget(AActor* NewTarget)
 {
 	if (ProjectileMovementComp)
 	{
-		ProjectileMovementComp->Velocity = Direction * ProjectileMovementComp->InitialSpeed;
+		ProjectileMovementComp->bIsHomingProjectile = true;
+		ProjectileMovementComp->HomingAccelerationMagnitude = 50000.f;
+		ProjectileMovementComp->HomingTargetComponent = NewTarget ? NewTarget->GetRootComponent() : nullptr;
+	}
+}
+
+void ABaseProjectile::FireProjectile(FPetAttackInfo AtkInfo, const FVector& Direction)
+{
+	if (ProjectileMovementComp)
+	{
+		ProjectileDamage = AtkInfo.FinalDamage;
+		ProjectileMovementComp->Velocity = Direction * AtkInfo.ProjectileSpeed;
 		ProjectileMovementComp->Activate(true);
 	}
 }

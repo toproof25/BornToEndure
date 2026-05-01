@@ -51,6 +51,8 @@ void ABaseEnemy::BeginPlay()
 
 	OnEnemyHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 	OnEnemyHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
+	
+	CurrentHealth = MaxHealth;
 
 	UE_LOG(LogBaseEnemy, Warning, TEXT("Spawn Test Enemy!!"));
 }
@@ -106,6 +108,14 @@ float ABaseEnemy::TakeDamage(
 
 	// 대충 물리 방어력 적용했다고 가정
 	DamageAmount -= 5;
+	CurrentHealth -= DamageAmount;
+	if (CurrentHealth <= 0)
+	{
+		// Handle enemy death
+		UE_LOG(LogBaseEnemy, Warning, TEXT("Enemy died"));
+		Destroy();
+	}
+
 
 	FString CauserName = DamageCauser ? DamageCauser->GetName() : TEXT("Unknown");
 	UE_LOG(LogBaseEnemy, Warning, TEXT("Enemy took damage: %f, Attacker: %s"), DamageAmount, *CauserName);

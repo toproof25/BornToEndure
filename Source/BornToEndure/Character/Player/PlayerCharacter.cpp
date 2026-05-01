@@ -11,6 +11,7 @@
 #include "Component/StatComponent.h"
 #include "Component/InteractionComponent.h"
 #include "Item/Weapon/BaseWeapon.h"
+#include "Component/PetManagerComponent.h"
 
 // Camera 관련 헤더 포함
 #include "Camera/CameraComponent.h"
@@ -34,7 +35,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// 현재 매쉬에 자식으로 붙여 고정 
 	SpringArmComp->SetupAttachment(RootComponent);
-	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
+	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);\
 
 	// Spring Arm이 캐릭터 회전을 따라가도록 설정
 	SpringArmComp->bUsePawnControlRotation = true;
@@ -45,6 +46,8 @@ APlayerCharacter::APlayerCharacter()
 
 	// 컨트롤러가 원하는 회전을 사용하도록 활성화
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
+	PetManagerComp = CreateDefaultSubobject<UPetManagerComponent>(TEXT("PetManagerComp"));
 
 }
 
