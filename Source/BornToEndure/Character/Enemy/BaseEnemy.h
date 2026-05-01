@@ -56,8 +56,8 @@ public:
 
 
 private:
-	FOnEnemyHitSound OnEnemyHitSound;
-	FOnEnemyHitNiagara OnEnemyHitNiagara;
+	//FOnEnemyHitSound OnEnemyHitSound;
+	//FOnEnemyHitNiagara OnEnemyHitNiagara;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy | HitEffects | Sound", meta = (AllowedTypes = "SoundDataAsset"))
 	FPrimaryAssetId HitEnemySoundId;

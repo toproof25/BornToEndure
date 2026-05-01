@@ -49,8 +49,8 @@ void ABaseEnemy::BeginPlay()
 	EffectSubsystem->PreloadEffectAssets(HitSoundIdId);
 	EffectSubsystem->PreloadEffectAssets(HitNiagaraId);
 
-	OnEnemyHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
-	OnEnemyHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
+	//OnEnemyHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
+	//OnEnemyHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
 	
 	CurrentHealth = MaxHealth;
 
@@ -99,11 +99,11 @@ float ABaseEnemy::TakeDamage(
 {
 	if (HitEnemySoundId.IsValid())
 	{
-		OnEnemyHitSound.ExecuteIfBound(HitEnemySoundId.PrimaryAssetName, GetActorLocation());
+		//OnEnemyHitSound.ExecuteIfBound(HitEnemySoundId.PrimaryAssetName, GetActorLocation());
 	}
 	if (HitEnemyNiagaraId.IsValid())
 	{
-		OnEnemyHitNiagara.ExecuteIfBound(HitEnemyNiagaraId.PrimaryAssetName, GetActorLocation());
+		//OnEnemyHitNiagara.ExecuteIfBound(HitEnemyNiagaraId.PrimaryAssetName, GetActorLocation());
 	}
 
 	// 대충 물리 방어력 적용했다고 가정
