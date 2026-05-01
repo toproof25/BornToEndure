@@ -10,7 +10,7 @@
 #if !UE_BUILD_SHIPPING
 #include "imgui.h"
 #include "ImGuiModule.h"
-#include "ImGuiTextureHandle.h" // 🌟 UnrealImGui 텍스처 핸들 공식 헤더
+#include "ImGuiTextureHandle.h"
 #endif
 
 APetItemDebugActor::APetItemDebugActor()
