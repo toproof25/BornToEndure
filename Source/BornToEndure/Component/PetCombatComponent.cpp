@@ -56,10 +56,11 @@ void UPetCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
             EffectSubsystem->UnloadEffectAssets(AttackSoundPrimaryId);
             EffectSubsystem->UnloadEffectAssets(AttackNiagaraPrimaryId);
         }
+
+        // 타이머 반드시 정리 — 누락 시 컴포넌트 파괴 후 콜백이 실행되어 크래시 발생
+        World->GetTimerManager().ClearTimer(AttackTimerHandle);
     }
 
-	// 타이머 반드시 정리 — 누락 시 컴포넌트 파괴 후 콜백이 실행되어 크래시 발생
-	World->GetTimerManager().ClearTimer(AttackTimerHandle);
 
 	Super::EndPlay(EndPlayReason);
 }
