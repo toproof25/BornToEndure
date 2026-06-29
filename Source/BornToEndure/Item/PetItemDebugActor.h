@@ -11,6 +11,8 @@
 #include "ImGuiDelegates.h" 
 #endif
 
+#include "Engine/DataTable.h"
+#include "Data/DataTableRow/ItemDataRow.h"
 #include "PetItemDebugActor.generated.h"
 
 class UPetManagerComponent;
@@ -36,6 +38,12 @@ private:
 #if !UE_BUILD_SHIPPING
 	FImGuiDelegateHandle ImGuiDelegateHandle;
 #endif
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	TObjectPtr<UDataTable> ItemDataTable; // 아이템 데이터 테이블 (FItemDataRow 구조체 사용)
+
+	TArray<FItemDataRow*> AllStatItemDataRows; // 데이터 테이블에서 로드된 모든 아이템 데이터 행
+	TArray<FItemDataRow*> AllProjectileItemDataRows; // 데이터 테이블에서 로드된 모든 아이템 데이터 행
 
 	// --- 윈도우 상태 관리 ---
 	bool bIsWindowOpen = true;

@@ -6,6 +6,8 @@
 #include "Stat/PetStatTypes.h"
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
+#include "Engine/DataTable.h"
+#include "Data/DataTableRow/ItemDataRow.h"
 
 #if !UE_BUILD_SHIPPING
 #include "imgui.h"
@@ -29,8 +31,38 @@ void APetItemDebugActor::BeginPlay()
 		ImGuiDelegateHandle = FImGuiModule::Get().AddWorldImGuiDelegate(Delegate);
 	}
 #endif
+	//LoadAllPetItemsAsync();
 
-	LoadAllPetItemsAsync();
+
+	// DataTable 테스트 (정상 로드 확인)
+	if (ItemDataTable)
+	{
+		TArray<FName> RowNames = ItemDataTable->GetRowNames();
+		UE_LOG(LogTemp, Warning, TEXT("[PetItemDebug] --- 데이터 테이블 내부 행 목록 시작 (총 %d개) ---"), RowNames.Num());
+
+		for (const FName& Name : RowNames)
+		{
+			// 이름 양옆에 대괄호[]를 붙여 공백이 있는지 시각적으로 확인합니다.
+			UE_LOG(LogTemp, Log, TEXT("[PetItemDebug] 행 이름 발견: [%s]"), *Name.ToString());
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("[PetItemDebug] --- 데이터 테이블 내부 행 목록 끝 ---"));
+
+		// 디버그용 아이템 지급 Chach
+		TArray<FItemDataRow*> AllRows;
+		ItemDataTable->GetAllRows<FItemDataRow>(TEXT("Debug Actor LoadAllPetItemsAsync"), AllRows);
+
+		AllStatItemDataRows = AllRows.FilterByPredicate([](FItemDataRow* Row) { return Row->ItemType == EItemType::Stat; });
+		AllProjectileItemDataRows = AllRows.FilterByPredicate([](FItemDataRow* Row) { return Row->ItemType == EItemType::Projectile; });
+		bIsLoadingAssets = true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[PetItemDebug] ItemDataTable이 null입니다! 에디터에서 에셋이 할당되었는지 확인하세요."));
+		return;
+	}
+
+
 }
 
 void APetItemDebugActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -86,6 +118,9 @@ void APetItemDebugActor::OnItemsLoaded(TArray<FPrimaryAssetId> LoadedIds)
 
 	bIsLoadingAssets = false;
 	UE_LOG(LogTemp, Log, TEXT("[PetItemDebug] 아이템 로드 완료! Stat: %d개, Projectile: %d개"), LoadedStatItems.Num(), LoadedProjectileItems.Num());
+
+
+
 }
 
 #if !UE_BUILD_SHIPPING
@@ -125,13 +160,6 @@ void APetItemDebugActor::RenderImGui()
 		ImGui::Separator();
 		ImGui::Spacing();
 
-		if (bIsLoadingAssets)
-		{
-			ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "데이터 애셋 로딩 중...");
-			ImGui::End();
-			return;
-		}
-
 		// 탭 바 구성
 		if (ImGui::BeginTabBar("ItemTypeTabs"))
 		{
@@ -155,7 +183,7 @@ void APetItemDebugActor::RenderImGui()
 
 void APetItemDebugActor::DrawPetSelectionCombo(UPetManagerComponent* PetManager)
 {
-	const TArray<TObjectPtr<APetCompanionCharacter>>& OwnedPets = PetManager->GetOwnedPets();
+	const TArray<TObjectPtr<APetCompanionCharacter>>& OwnedPets = PetManager->GetPetList();
 
 	ImGui::TextColored(ImVec4(0.7f, 0.9f, 1.0f, 1.0f), "타겟 펫 선택 (Target Pet) :");
 	ImGui::SameLine();
@@ -202,7 +230,7 @@ void APetItemDebugActor::DrawPetSelectionCombo(UPetManagerComponent* PetManager)
 
 void APetItemDebugActor::DrawStatItemsTab()
 {
-	if (LoadedStatItems.IsEmpty())
+	if (AllStatItemDataRows.IsEmpty())
 	{
 		ImGui::TextDisabled("로드된 스탯 아이템이 없습니다.");
 		return;
@@ -213,117 +241,58 @@ void APetItemDebugActor::DrawStatItemsTab()
 	if (ImGui::BeginTable("StatItemsTable", 6, TableFlags))
 	{
 		// 1. 아이콘: 42픽셀 고정
-		ImGui::TableSetupColumn("아이콘", ImGuiTableColumnFlags_WidthFixed, 42.0f);
+		//ImGui::TableSetupColumn("아이콘", ImGuiTableColumnFlags_WidthFixed, 42.0f);
 
 		// 2. 가변 영역 (비율 할당)
-		ImGui::TableSetupColumn("아이템 이름", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
-		ImGui::TableSetupColumn("설명", ImGuiTableColumnFlags_WidthStretch, 2.0f);       // 2 비율
-		ImGui::TableSetupColumn("시너지 태그", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
-		ImGui::TableSetupColumn("스탯 변화량", ImGuiTableColumnFlags_WidthStretch, 3.0f); // 3 비율 (가장 넓음!)
+		ImGui::TableSetupColumn("아이템 ID", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
+		ImGui::TableSetupColumn("Item Name", ImGuiTableColumnFlags_WidthStretch, 2.0f);       // 2 비율
+		ImGui::TableSetupColumn("Item Description", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
+		ImGui::TableSetupColumn("Item Type", ImGuiTableColumnFlags_WidthStretch, 3.0f); // 3 비율 (가장 넓음!)
 
 		// 3. 버튼: 100픽셀 고정
 		ImGui::TableSetupColumn("액션", ImGuiTableColumnFlags_WidthFixed, 100.0f);
 
 		ImGui::TableHeadersRow();
-
-		for (UPetStatItemDataAsset* Item : LoadedStatItems)
+		
+		for (FItemDataRow* DataRow : AllStatItemDataRows)
 		{
-			if (!Item) continue;
-
-			ImGui::PushID(Item);
+			if (!DataRow) continue;
+			ImGui::PushID(DataRow);
 			ImGui::TableNextRow();
 
 			// ----------------------------------------------------
-			// 1. 아이콘 (GC 방지 및 ImGui 렌더링 완벽 대응)
+			// 1. 아이템 ID
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(0);
-
-			if (UTexture2D* IconTex = Item->ItemIcon.LoadSynchronous())
-			{
-				// 🌟 핵심 1: 언리얼 GC가 텍스처를 메모리에서 날리지 못하게 멱살을 잡습니다.
-				CachedIcons.AddUnique(IconTex);
-
-				// 🌟 핵심 2: 기존에 망가진 캐시와 이름이 겹치지 않도록, 고유한 접두사(ImGuiTex_)를 붙여 새롭게 등록합니다.
-				FName TexName = FName(*FString::Printf(TEXT("ImGuiTex_%s"), *IconTex->GetName()));
-				FImGuiTextureHandle TexHandle = FImGuiModule::Get().FindTextureHandle(TexName);
-
-				if (!TexHandle.IsValid())
-				{
-					// 텍스처를 ImGui 모듈에 등록
-					TexHandle = FImGuiModule::Get().RegisterTexture(TexName, IconTex);
-				}
-
-				if (TexHandle.IsValid())
-				{
-					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-					// 흰색 틴트(1,1,1,1)를 적용하여 원본 색상과 투명도(Alpha)를 유지합니다.
-					ImGui::Image(TexHandle.GetTextureId(), ImVec2(36, 36), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1));
-				}
-			}
-			else
-			{
-				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-				ImGui::TextDisabled(" N/A ");
-			}
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", TCHAR_TO_UTF8(*DataRow->ItemID.ToString()));
 
 			// ----------------------------------------------------
-			// 2. 아이템 이름 (세로 중앙 정렬 느낌을 위해 Spacing 추가)
+			// 2. 아이템 이름
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", TCHAR_TO_UTF8(*Item->ItemName.ToString()));
+			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", TCHAR_TO_UTF8(*DataRow->ItemText.Name.ToString()));
 
 			// ----------------------------------------------------
 			// 3. 설명
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(2);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-			ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*Item->ItemDescription.ToString()));
+			ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*DataRow->ItemText.Description.ToString()));
 
 			// ----------------------------------------------------
-			// 4. 시너지 태그
+			// 4. 아이템 타입
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(3);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-			FString TagsStr = Item->SynergyTags.ToStringSimple();
-			if (TagsStr.IsEmpty()) ImGui::TextDisabled("없음");
-			else ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s", TCHAR_TO_UTF8(*TagsStr));
+			FString Type = DataRow->ItemType == EItemType::Stat ? "Stat Item" : "Projectile Item";
+			ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*Type));
 
 			// ----------------------------------------------------
-			// 5. 스탯 변화량 (한국어 DisplayName 적용)
+			// 5. 지급 버튼 (높이를 36으로 맞추어 아이콘과 세로 정렬 동기화)
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(4);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-
-			for (const FStatModifier& Mod : Item->StatModifiers)
-			{
-				// 🌟 템플릿 함수를 사용하여 한국어 DisplayName을 가져옵니다.
-				FString StatName = GetEnumDisplayName<EPetStatType>(TEXT("EPetStatType"), Mod.StatType);
-				FString ModName = GetEnumDisplayName<EStatModifierType>(TEXT("EStatModifierType"), Mod.ModType);
-
-				ImVec4 ValColor = Mod.Value >= 0 ? ImVec4(0.3f, 0.9f, 0.3f, 1.0f) : ImVec4(0.9f, 0.3f, 0.3f, 1.0f);
-
-				// 출력 예시: [고정값 추가] 공격력 : 10.0
-				ImGui::TextDisabled("[%s]", TCHAR_TO_UTF8(*ModName));
-				ImGui::SameLine();
-				ImGui::Text("%s : ", TCHAR_TO_UTF8(*StatName));
-				ImGui::SameLine();
-
-				// 퍼센트 연산일 경우 % 기호를 붙여주면 더 직관적입니다.
-				if (Mod.ModType == EStatModifierType::Multiplicative)
-				{
-					ImGui::TextColored(ValColor, "%.1f%%", Mod.Value * 100.f);
-				}
-				else
-				{
-					ImGui::TextColored(ValColor, "%.1f", Mod.Value);
-				}
-			}
-
-			// ----------------------------------------------------
-			// 6. 지급 버튼 (높이를 36으로 맞추어 아이콘과 세로 정렬 동기화)
-			// ----------------------------------------------------
-			ImGui::TableSetColumnIndex(5);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
 
 			bool bIsPetValid = SelectedPet.IsValid();
@@ -336,12 +305,15 @@ void APetItemDebugActor::DrawStatItemsTab()
 
 			if (ImGui::Button("지급 (Give)", ImVec2(-FLT_MIN, 36.0f)))
 			{
+
+				UPetStatItemDataAsset* ItemAsset = Cast<UPetStatItemDataAsset>(DataRow->ItemDataAsset.LoadSynchronous());
+
 				APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 				UPetManagerComponent* PetManager = PlayerChar->FindComponentByClass<UPetManagerComponent>();
 				if (PetManager)
 				{
-					PetManager->GiveItemToPet(SelectedPet.Get(), Item);
-					UE_LOG(LogTemp, Log, TEXT("[Debug] %s 지급 완료"), *Item->ItemName.ToString());
+					PetManager->GiveItemToPet(SelectedPet.Get(), ItemAsset);
+					UE_LOG(LogTemp, Log, TEXT("[Debug] %s 지급 완료"), *ItemAsset->ItemName.ToString());
 				}
 			}
 
@@ -356,7 +328,7 @@ void APetItemDebugActor::DrawStatItemsTab()
 
 void APetItemDebugActor::DrawProjectileItemsTab()
 {
-	if (LoadedProjectileItems.IsEmpty())
+	if (AllProjectileItemDataRows.IsEmpty())
 	{
 		ImGui::TextDisabled("로드된 발사체 아이템이 없습니다.");
 		return;
@@ -367,122 +339,79 @@ void APetItemDebugActor::DrawProjectileItemsTab()
 	if (ImGui::BeginTable("ProjItemsTable", 6, TableFlags))
 	{
 		// 1. 아이콘: 42픽셀 고정
-		ImGui::TableSetupColumn("아이콘", ImGuiTableColumnFlags_WidthFixed, 42.0f);
+		//ImGui::TableSetupColumn("아이콘", ImGuiTableColumnFlags_WidthFixed, 42.0f);
 
 		// 2. 가변 영역 (비율 할당)
-		ImGui::TableSetupColumn("아이템 이름", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
-		ImGui::TableSetupColumn("설명", ImGuiTableColumnFlags_WidthStretch, 2.0f);       // 2 비율
-		ImGui::TableSetupColumn("시너지 태그", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
-		ImGui::TableSetupColumn("발사체 옵션", ImGuiTableColumnFlags_WidthStretch, 3.0f); // 3 비율 (가장 넓음!)
+		ImGui::TableSetupColumn("아이템 ID", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
+		ImGui::TableSetupColumn("Item Name", ImGuiTableColumnFlags_WidthStretch, 2.0f);       // 2 비율
+		ImGui::TableSetupColumn("Item Description", ImGuiTableColumnFlags_WidthStretch, 1.0f); // 1 비율
+		ImGui::TableSetupColumn("Item Type", ImGuiTableColumnFlags_WidthStretch, 3.0f); // 3 비율 (가장 넓음!)
 
 		// 3. 버튼: 100픽셀 고정
 		ImGui::TableSetupColumn("액션", ImGuiTableColumnFlags_WidthFixed, 100.0f);
 
 		ImGui::TableHeadersRow();
 
-		for (UPetProjectileItemDataAsset* Item : LoadedProjectileItems)
+		for (FItemDataRow* DataRow : AllProjectileItemDataRows)
 		{
-			if (!Item) continue;
-
-			ImGui::PushID(Item);
+			if (!DataRow) continue;
+			ImGui::PushID(DataRow);
 			ImGui::TableNextRow();
 
 			// ----------------------------------------------------
-			// 1. 아이콘 (GC 방지 및 ImGui 렌더링 완벽 대응)
+			// 1. 아이템 ID
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(0);
-
-			if (UTexture2D* IconTex = Item->ItemIcon.LoadSynchronous())
-			{
-				// 🌟 핵심 1: 언리얼 GC가 텍스처를 메모리에서 날리지 못하게 멱살을 잡습니다.
-				CachedIcons.AddUnique(IconTex);
-
-				// 🌟 핵심 2: 기존에 망가진 캐시와 이름이 겹치지 않도록, 고유한 접두사(ImGuiTex_)를 붙여 새롭게 등록합니다.
-				FName TexName = FName(*FString::Printf(TEXT("ImGuiTex_%s"), *IconTex->GetName()));
-				FImGuiTextureHandle TexHandle = FImGuiModule::Get().FindTextureHandle(TexName);
-
-				if (!TexHandle.IsValid())
-				{
-					// 텍스처를 ImGui 모듈에 등록
-					TexHandle = FImGuiModule::Get().RegisterTexture(TexName, IconTex);
-				}
-
-				if (TexHandle.IsValid())
-				{
-					ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-					// 흰색 틴트(1,1,1,1)를 적용하여 원본 색상과 투명도(Alpha)를 유지합니다.
-					ImGui::Image(TexHandle.GetTextureId(), ImVec2(36, 36), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1));
-				}
-			}
-			else
-			{
-				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-				ImGui::TextDisabled(" N/A ");
-			}
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", TCHAR_TO_UTF8(*DataRow->ItemID.ToString()));
 
 			// ----------------------------------------------------
 			// 2. 아이템 이름
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-			ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", TCHAR_TO_UTF8(*Item->ItemName.ToString()));
+			ImGui::TextColored(ImVec4(0.5f, 1.0f, 0.5f, 1.0f), "%s", TCHAR_TO_UTF8(*DataRow->ItemText.Name.ToString()));
 
 			// ----------------------------------------------------
 			// 3. 설명
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(2);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-			ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*Item->ItemDescription.ToString()));
+			ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*DataRow->ItemText.Description.ToString()));
 
 			// ----------------------------------------------------
-			// 4. 시너지 태그
+			// 4. 아이템 타입
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(3);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-			FString TagsStr = Item->SynergyTags.ToStringSimple();
-			if (TagsStr.IsEmpty()) ImGui::TextDisabled("없음");
-			else ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "%s", TCHAR_TO_UTF8(*TagsStr));
+			FString Type = DataRow->ItemType == EItemType::Stat ? "Stat Item" : "Projectile Item";
+			ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*Type));
 
 			// ----------------------------------------------------
-			// 5. 발사체 옵션 상세
+			// 5. 지급 버튼 (높이를 36으로 맞추어 아이콘과 세로 정렬 동기화)
 			// ----------------------------------------------------
 			ImGui::TableSetColumnIndex(4);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-			const FProjectileModifierData& Mod = Item->ProjectileModifier;
-
-			FString PatternName = GetEnumDisplayName<EProjectilePattern>(TEXT("EProjectilePattern"), Mod.Pattern);
-			ImGui::TextColored(ImVec4(0.3f, 0.8f, 1.0f, 1.0f), "패턴: %s", TCHAR_TO_UTF8(*PatternName));
-
-			if (Mod.ProjectileCountAdd > 0) ImGui::Text("개수 추가: +%d", Mod.ProjectileCountAdd);
-			if (Mod.SizeMultiplier != 1.0f) ImGui::Text("크기 배율: x%.2f", Mod.SizeMultiplier);
-			if (Mod.SpeedMultiplier != 1.0f) ImGui::Text("속도 배율: x%.2f", Mod.SpeedMultiplier);
-
-			if (!Mod.OverrideProjectileClass.IsNull())
-			{
-				ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), "[클래스 덮어쓰기 적용됨]");
-			}
-
-			// ----------------------------------------------------
-			// 6. 지급 버튼
-			// ----------------------------------------------------
-			ImGui::TableSetColumnIndex(5);
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
 
 			bool bIsPetValid = SelectedPet.IsValid();
 			if (!bIsPetValid) ImGui::BeginDisabled();
 
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.3f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.3f, 0.4f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.15f, 0.2f, 1.0f));
+			// 🌟 지급 버튼 디자인 개선 (블루/그린 계열)
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.5f, 0.7f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.6f, 0.85f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.4f, 0.6f, 1.0f));
 
 			if (ImGui::Button("지급 (Give)", ImVec2(-FLT_MIN, 36.0f)))
 			{
+
+				UPetProjectileItemDataAsset* ItemAsset = Cast<UPetProjectileItemDataAsset>(DataRow->ItemDataAsset.LoadSynchronous());
+
 				APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 				UPetManagerComponent* PetManager = PlayerChar->FindComponentByClass<UPetManagerComponent>();
 				if (PetManager)
 				{
-					PetManager->GiveItemToPet(SelectedPet.Get(), Item);
-					UE_LOG(LogTemp, Log, TEXT("[Debug] %s 지급 완료"), *Item->ItemName.ToString());
+					PetManager->GiveItemToPet(SelectedPet.Get(), ItemAsset);
+					UE_LOG(LogTemp, Log, TEXT("[Debug] %s 지급 완료"), *ItemAsset->ItemName.ToString());
 				}
 			}
 

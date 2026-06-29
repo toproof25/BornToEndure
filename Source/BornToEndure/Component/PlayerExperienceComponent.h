@@ -18,7 +18,6 @@ class ABaseEnemyCharacter;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerExperienceComponent, Log, All);
 
-
 /**
  * @brief 플레이어의 경험치와 보상을 관리하는 컴포넌트	
  * @datails
@@ -57,14 +56,34 @@ public:
 	UFUNCTION()
 	void OnEnemyKilledHandler(const FEnemyRewardPayload& Payload);
 
-	float CurrentXP = 0.f;;
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnChangeExp, float, NewExp, float, MaxExp);
+	FOnChangeExp OnChangeExpDelegate;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUp, int32, NewLevel);
+	FOnLevelUp OnLevelUpDelegate;
+
+private:
+
+	int32 Level = 1;
+	float CurrentEXP = 0.f;;
 	int32 CurrentGold = 0;
+
+	float MaxExpForLevelUp = 6000.f;
 
 public:
 	
 	// 디버깅 용도
-	float GetCurrentXP() const { return CurrentXP; }
+	UFUNCTION(BlueprintCallable, Category = "Experience")
+	float GetCurrentEXP() const { return CurrentEXP; }
+
+	UFUNCTION(BlueprintCallable, Category = "Experience")
 	int32 GetCurrentGold() const { return CurrentGold; }
+
+	UFUNCTION(BlueprintCallable, Category = "Experience")
+	int32 GetCurrentLevel() const { return Level; }
+
+	UFUNCTION(BlueprintCallable, Category = "Experience")
+	int32 GetMaxExpForLevelUp() const { return MaxExpForLevelUp; }
 
 
 };

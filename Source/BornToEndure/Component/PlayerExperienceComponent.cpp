@@ -13,6 +13,11 @@ UPlayerExperienceComponent::UPlayerExperienceComponent()
 void UPlayerExperienceComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// UI 초기화
+	OnChangeExpDelegate.Broadcast(CurrentEXP, MaxExpForLevelUp);
+	
+	//OnLevelUpDelegate.Broadcast(Level);
 }
 
 void UPlayerExperienceComponent::RegisterEnemyPayload(ABaseEnemyCharacter* Enemy)
@@ -31,21 +36,29 @@ void UPlayerExperienceComponent::RegisterEnemyPayload(ABaseEnemyCharacter* Enemy
 
 void UPlayerExperienceComponent::OnEnemyKilledHandler(const FEnemyRewardPayload& Payload)
 {
-	CurrentXP += Payload.ExpReward;
+	CurrentEXP += Payload.ExpReward;
+	OnChangeExpDelegate.Broadcast(CurrentEXP, MaxExpForLevelUp);
+
 	CurrentGold += Payload.GoldReward;
 
-	UE_LOG(LogPlayerExperienceComponent, Log, TEXT("Enemy killed! Gained %f XP and %d Gold. Total XP: %f, Total Gold: %d"),
-		Payload.ExpReward, Payload.GoldReward, CurrentXP, CurrentGold);
-
-	APawn* OwningPawn = Cast<APawn>(GetOwner());
-	if (OwningPawn)
+	if (CurrentEXP >= MaxExpForLevelUp)
 	{
-		TObjectPtr<ACombatPlayerState> PS = OwningPawn->GetPlayerState<ACombatPlayerState>();
-		if (PS)
-		{
-			// PlayerState로 통계 데이터 전송
-			PS->UpdateDamageStats(Payload.KillerPetId, Payload.PetDamageMap, Payload.TotalDamageReceiced);
-		}
+		Level++;
+		CurrentEXP -= MaxExpForLevelUp; /// 레벨업 시 경험치 초기화
+		if (CurrentEXP < 0.f) CurrentEXP = 0.f; // 음수 방지
+
+		OnLevelUpDelegate.Broadcast(Level);
+		OnChangeExpDelegate.Broadcast(CurrentEXP, MaxExpForLevelUp); /// 레벨업 후 경험치 변화도 UI에 반영
+	}
+
+
+	UE_LOG(LogPlayerExperienceComponent, Log, TEXT("Enemy killed! Gained %f XP and %d Gold. Total XP: %f, Total Gold: %d"),
+		Payload.ExpReward, Payload.GoldReward, CurrentEXP, CurrentGold);
+
+	if (TObjectPtr<ACombatPlayerState> PS = Cast<ACombatPlayerState>(GetOwner()))
+	{
+		// PlayerState로 통계 데이터 전송
+		PS->UpdateDamageStats(Payload.KillerPetId, Payload.PetDamageMap, Payload.TotalDamageReceiced);
 	}
 
 }

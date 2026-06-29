@@ -95,7 +95,7 @@ public:
      * @brief 현재 보유한 Pet List를 반환하는 함수
 	 * @return Player가 소유한 Pet들의 포인터 배열
      */
-    const TArray<TObjectPtr<APetCompanionCharacter>>& GetOwnedPets() const { return PetList; } //UFUNCTION(BlueprintPure, Category = "Pet")
+    const TArray<TObjectPtr<APetCompanionCharacter>>& GetPetList() const { return PetList; } //UFUNCTION(BlueprintPure, Category = "Pet")
 
     /**
      * @brief 현재 활성화 된 Pet을 반환하는 함수
@@ -148,4 +148,5 @@ private:
     APetCompanionCharacter* SelectPetForItem(const UPetItemDataAsset* ItemData) const;
 
     void OnItemDataLoaded(FPrimaryAssetId ItemAssetId);
+
 };
