@@ -6,6 +6,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Component/PlayerExperienceComponent.h"
 #include "Character/Player/PlayerCharacter.h"
+#include "Engine/DataTable.h"
+#include "Data/DataTableRow/EnemyDataRow.h"
+#include "PlayerState/CombatPlayerState.h"
 
 AEnemySpawner::AEnemySpawner()
 {
@@ -36,6 +39,23 @@ void AEnemySpawner::BeginPlay()
         true
     );
 
+    // DataTable 로드
+    TestEnemyDataTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTableRow/DT_EnemyData.DT_EnemyData"));
+
+    if (!TestEnemyDataTable)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("TestEnemyDataTable is not set! Please assign a DataTable in the editor."));
+        return;
+    }
+
+    const FEnemyDataRow* EnemyData = TestEnemyDataTable->FindRow<FEnemyDataRow>(FName("Test_1"), "AEnemySpawner::BeginPlay");
+    if (!EnemyData)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to find row 'Test_1' in TestEnemyDataTable!"));
+        return;
+    }
+
+	CachedEnemyDataMap.FindOrAdd(EnemyData->EnemyID) = *EnemyData;
 }
 
 void AEnemySpawner::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -78,18 +98,31 @@ void AEnemySpawner::SpawnEnemy()
     if (ABaseEnemyCharacter* BaseEnemy = Cast<ABaseEnemyCharacter>(Enemy))
     {
         BaseEnemy->SetOwningSpawner(this);
-		BaseEnemy->SetExpReward(999.99f);
-		BaseEnemy->SetGoldReward(9999);
 
         // 적을 스폰할 때 마다 플레이어를 찾은 후 Delegate 연결하기 (일단 테스트)
-        // 적마다 개별적인 Delegate를 직접 Player와 연결
-        APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-        UPlayerExperienceComponent* PlayerXP = PlayerChar ? PlayerChar->FindComponentByClass<UPlayerExperienceComponent>() : nullptr;
+        // 적마다 개별적인 Delegate를 직접 PlayerState와 연결
+        APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+        if (!PC) return;
+        ACombatPlayerState* PS = PC->GetPlayerState<ACombatPlayerState>();
+        if (!PS) return;
+        UPlayerExperienceComponent* PlayerXP = PS->FindComponentByClass<UPlayerExperienceComponent>();
         if (PlayerXP)
         {
             PlayerXP->RegisterEnemyPayload(BaseEnemy);
-            UE_LOG(LogTemp, Log, TEXT("Registering enemy %s with player XP component"), *BaseEnemy->GetName());
         }
+
+		// DataTable에서 가져온 적에 대한 보상, 스탯 설정을 BaseEnemyCharacter로 전달하여 초기화하는 로직도 추가 예정
+        const FEnemyDataRow* EnemyData = CachedEnemyDataMap.Find(FName("Test_1"));
+        if (EnemyData)
+        {
+			BaseEnemy->InitializeEnemy(*EnemyData);
+			UE_LOG(LogTemp, Log, TEXT("Spawn Enemy: Initializing enemy %s with data from DataTable"), *BaseEnemy->GetName());
+        }
+        else
+        {
+			UE_LOG(LogTemp, Warning, TEXT("Spawn Enemy: No data found for enemy %s in CachedEnemyDataMap"), *BaseEnemy->GetName());
+        }
+
     }
 
     // 위치 회전 초기화

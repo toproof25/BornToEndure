@@ -12,8 +12,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Data/DataTableRow/EnemyDataRow.h"
 #include "EnemySpawner.generated.h"
 
+class UDataTable;
 
 UCLASS()
 class BORNTOENDURE_API AEnemySpawner : public AActor
@@ -23,9 +25,13 @@ class BORNTOENDURE_API AEnemySpawner : public AActor
 public:	
 	AEnemySpawner();
 
+    UPROPERTY(EditAnywhere, Category = "Spawner")
+    TSoftObjectPtr<UDataTable> TestEnemyDataTable;
+
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 
 private: 
     /** @brief 스폰할 적 클래스. 블루프린트에서 설정 */
@@ -53,6 +59,9 @@ private:
     void SpawnEnemy();
     bool GetRandomSpawnLocation(FVector& OutLocation) const;
 
-    /** 현재 활성화된 적 수 추적 (풀 통계 기반) */
+    /** @brief 현재 활성화된 적 수 반환 */
     int32 GetActiveEnemyCount() const;
+
+	TMap<FName, FEnemyDataRow> CachedEnemyDataMap; // 데이터 테이블에서 읽어온 적 데이터 맵
+
 };

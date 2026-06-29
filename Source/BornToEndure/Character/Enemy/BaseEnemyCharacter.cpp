@@ -9,6 +9,7 @@
 #include "AI/Enemy/BaseEnemyAIController.h"
 #include "Data/GameTypes.h"
 #include "Character/Pet/PetCompanionCharacter.h"
+#include "Data/DataTableRow/EnemyDataRow.h"
 
 DEFINE_LOG_CATEGORY(LogBaseEnemyCharacter);
 
@@ -21,6 +22,21 @@ ABaseEnemyCharacter::ABaseEnemyCharacter()
 
     // 이동 속도 초기화
     GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+}
+
+void ABaseEnemyCharacter::InitializeEnemy(const FEnemyDataRow& EnemyData)
+{
+    MaxHealth = EnemyData.Health;
+	CurrentHealth = MaxHealth;
+
+    MoveSpeed = EnemyData.MovementSpeed;
+    GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+    EnemyRewardPayload.ExpReward = EnemyData.RewardExp;
+    EnemyRewardPayload.GoldReward = EnemyData.RewardGold;
+
+    UE_LOG(LogBaseEnemyCharacter, Display, TEXT("ABaseEnemyCharacter::InitializeEnemy : %s | ExpReward: %.1f, GoldReward: %d"),
+        *GetName(), EnemyRewardPayload.ExpReward, EnemyRewardPayload.GoldReward);
 }
 
 void ABaseEnemyCharacter::BeginPlay()

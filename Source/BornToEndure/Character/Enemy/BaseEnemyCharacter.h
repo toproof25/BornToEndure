@@ -6,8 +6,10 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Delegates/Delegate.h"
 #include "Data/GameTypes.h"
+#include "Data/DataTableRow/EnemyDataRow.h"
 
 #include "BaseEnemyCharacter.generated.h"
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseEnemyCharacter, Log, All);
 
@@ -66,6 +68,8 @@ public:
 	void SetExpReward(float Exp) { EnemyRewardPayload.ExpReward = Exp; }
 	void SetGoldReward(int32 Gold) { EnemyRewardPayload.GoldReward = Gold; }
     void ResetRewardPayload() { EnemyRewardPayload.Reset(); }
+
+	void InitializeEnemy(const FEnemyDataRow& EnemyData);
 
 protected:
     virtual void BeginPlay() override;
