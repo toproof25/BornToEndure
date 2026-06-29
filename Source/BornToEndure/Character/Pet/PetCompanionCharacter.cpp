@@ -158,3 +158,7 @@ FName APetCompanionCharacter::GetPetName() const
 	return NameAsFName;
 }
 
+TSoftObjectPtr<UTexture2D> APetCompanionCharacter::GetIcon() const
+{
+	return PetBaseData ? PetBaseData->Icon : nullptr;
+}

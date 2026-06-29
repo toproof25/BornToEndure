@@ -84,6 +84,8 @@ public:
 	UPetCombatComponent* GetCombatComponent() const { return PetCombatComp; }
 	UBehaviorTree* GetBehaviorTree() const;
 
+	TSoftObjectPtr<UTexture2D> GetIcon() const;
+
 	//FText GetPetName() const { return PetBaseData ? PetBaseData->GetPetName() : FText::FromName(NAME_None); }
 
 	/**
