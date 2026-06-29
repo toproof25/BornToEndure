@@ -73,6 +73,11 @@ public:
 	 */
 	void OnSelectedItemWidget(UItemEntryWidget* InSelectedItemWidget);
 
+	/**
+	 * @brief PetWidget에서 각 펫이 선택될 때 호출되는 함수로, 선택된 펫 위젯을 직관적으로 표시하기 위해 사용됨
+	 * @param InSelectedPetWidget 선택된 UPetEntryWidget 포인터
+	 */
+	void OnSelectedPetWidget(UPetEntryWidget* InSelectedPetWidget);
 
 private:
 
@@ -85,4 +90,9 @@ private:
 	 * @brief 현재 선택된 아이템 위젯을 캐싱
 	 */
 	UItemEntryWidget* SelectedItemWidget;
+
+	/**
+	 * @brief 현재 선택된 펫 위젯을 캐싱
+	 */
+	UPetEntryWidget* SelectedPetWidget;
 };

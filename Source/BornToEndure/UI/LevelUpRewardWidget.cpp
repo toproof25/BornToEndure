@@ -60,7 +60,7 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 	{
 		// Pet 위젯 초기화 로직 추가
 		UPetEntryWidget* NewPetEntry = CreateWidget<UPetEntryWidget>(this, PetEntryWidgetClass);
-		NewPetEntry->InitializeWithPetData(Pet);
+		NewPetEntry->InitializeWithPetData(this, Pet);
 		NewPetEntry->OnPetSelectedDelegate.AddDynamic(this, &ULevelUpRewardWidget::HandlePetSelected);
 		PetListBox->AddChild(NewPetEntry);
 	}
@@ -108,6 +108,19 @@ void ULevelUpRewardWidget::OnSelectedItemWidget(UItemEntryWidget* InSelectedItem
 
 	SelectedItemWidget = InSelectedItemWidget;
 	SelectedItemWidget->SetSelectedVisual(true);
+}
+
+void ULevelUpRewardWidget::OnSelectedPetWidget(UPetEntryWidget* InSelectedPetWidget)
+{
+	if (!InSelectedPetWidget) return;
+
+	if (SelectedPetWidget)
+	{
+		SelectedPetWidget->SetSelectedVisual(false);
+	}
+
+	SelectedPetWidget = InSelectedPetWidget;
+	SelectedPetWidget->SetSelectedVisual(true);
 }
 
 
