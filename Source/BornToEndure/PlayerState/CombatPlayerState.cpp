@@ -1,8 +1,14 @@
 
 #include "PlayerState/CombatPlayerState.h"
 #include "Data/GameTypes.h"
+#include "Component/PlayerExperienceComponent.h"
 
 DEFINE_LOG_CATEGORY(LogCombatPlayerState);
+
+ACombatPlayerState::ACombatPlayerState()
+{
+	PlayerExperienceComponent = CreateDefaultSubobject<UPlayerExperienceComponent>(TEXT("PlayerExperienceComponent"));
+}
 
 void ACombatPlayerState::UpdateDamageStats(FName KillerPetName, const FPetDamageMap& PetDamageMap, float TotalDamageReceiced)
 {
