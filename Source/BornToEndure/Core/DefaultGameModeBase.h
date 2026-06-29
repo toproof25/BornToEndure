@@ -14,4 +14,14 @@ class BORNTOENDURE_API ADefaultGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+	ADefaultGameModeBase();
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+
+	// 게임 시작 시 필요한 초기화 작업을 수행하는 함수
+	void InitializeGame();
 };
