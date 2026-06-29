@@ -51,4 +51,6 @@ public:
     {
         return FPrimaryAssetId(FPrimaryAssetType("PetData"), GetFName());
     }
+
+	FText GetPetName() const { return PetName; }
 };

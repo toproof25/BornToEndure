@@ -84,6 +84,8 @@ public:
 	UPetCombatComponent* GetCombatComponent() const { return PetCombatComp; }
 	UBehaviorTree* GetBehaviorTree() const;
 
+	//FText GetPetName() const { return PetBaseData ? PetBaseData->GetPetName() : FText::FromName(NAME_None); }
+
 	/**
 	 * @brief BTService_PetRadar에서 Pet의 공격 범위를 가져가 사용한다
 	 * @return Pet의 공격 범위

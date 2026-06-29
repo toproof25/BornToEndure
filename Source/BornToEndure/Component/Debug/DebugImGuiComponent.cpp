@@ -43,6 +43,9 @@
 #include "Component/EnemyDetectorComponent.h" 
 #include "Character/Enemy/BaseEnemyCharacter.h" 
 
+#include "Engine/DataTable.h"
+#include "Data/DataTableRow/ItemDataRow.h"
+
 namespace ImGuiUtils
 {
 	// Key-Value 테이블 행 출력
@@ -98,6 +101,7 @@ void UDebugImGuiComponent::InitializeComponent()
 	LoadKoreanFontToImGui();
 
 	AActor* Owner = GetOwner();
+	if (!Owner) return;
 
 	// Camera
 	SpringArmComp = Owner->FindComponentByClass<USpringArmComponent>();
@@ -116,7 +120,7 @@ void UDebugImGuiComponent::InitializeComponent()
 	PlayerMovementComponent = Owner->FindComponentByClass<UCharacterMovementComponent>();
 	PetManagerComponent = Owner->FindComponentByClass<UPetManagerComponent>();
 	EnemyDetectorComponent = Owner->FindComponentByClass<UEnemyDetectorComponent>(); 
-	PlayerExperienceComponent = Owner->FindComponentByClass<UPlayerExperienceComponent>();
+	
 }
 
 void UDebugImGuiComponent::BeginPlay()
@@ -128,6 +132,16 @@ void UDebugImGuiComponent::BeginPlay()
 		FImGuiDelegate Delegate = FImGuiDelegate::CreateUObject(this, &UDebugImGuiComponent::DebugDrawPlayerInfo);
 		ImGuiDelegateHandle = FImGuiModule::Get().AddWorldImGuiDelegate(Delegate);
 		UE_LOG(LogTemp, Log, TEXT("ImGui Delegate subscribed!"));
+	}
+
+	APawn* OwningPawn = Cast<APawn>(GetOwner());
+	if (OwningPawn)
+	{
+		ACombatPlayerState* PS = OwningPawn->GetPlayerState<ACombatPlayerState>();
+		if (PS)
+		{
+			PlayerExperienceComponent = PS->FindComponentByClass<UPlayerExperienceComponent>();
+		}
 	}
 }
 
@@ -529,11 +543,16 @@ void UDebugImGuiComponent::DrawExperienceInfo()
 	if (bExpOpen)
 	{
 		if (ImGui::BeginTable("ExpTable", 2, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingStretchProp))
-		{
+		{			
+			// 현재 Level (스카이블루)
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("현재 레벨 (Current Level)");
+			ImGui::TableSetColumnIndex(1); ImGui::TextColored(ImVec4(0.4f, 0.8f, 0.0f, 1.0f), "%d", PlayerExperienceComponent->GetCurrentLevel());
+
 			// 현재 XP (스카이블루)
 			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("현재 경험치 (Current XP)");
-			ImGui::TableSetColumnIndex(1); ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%.1f", PlayerExperienceComponent->GetCurrentXP());
+			ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("현재 경험치 (Current EXP)");
+			ImGui::TableSetColumnIndex(1); ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%.1f", PlayerExperienceComponent->GetCurrentEXP());
 
 			// 현재 골드 (골드)
 			ImGui::TableNextRow();
@@ -804,7 +823,7 @@ void UDebugImGuiComponent::DrawPetInfo()
 						ImGui::TableSetColumnIndex(0);
 						FString DisplayName = Pair.Key.ToString();
 						// PetManager를 통해 실제 존재하는 펫의 가독성 좋은 이름을 찾으려는 시도
-						for (auto& PetPtr : PetManagerComponent->GetOwnedPets())
+						for (auto& PetPtr : PetManagerComponent->GetPetList())
 						{
 							if (PetPtr && PetPtr->GetFName() == Pair.Key)
 							{
@@ -836,7 +855,7 @@ void UDebugImGuiComponent::DrawPetInfo()
 		ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "[경고] 플레이어 상태에서 전투 통계 데이터를 찾을 수 없습니다.");
 	}
 
-	const TArray<TObjectPtr<APetCompanionCharacter>>& PetList = PetManagerComponent->GetOwnedPets();
+	const TArray<TObjectPtr<APetCompanionCharacter>>& PetList = PetManagerComponent->GetPetList();
 
 	// ---------------------------------------------------------
 	// [상단 대시보드 요약]
