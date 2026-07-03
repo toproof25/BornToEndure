@@ -1,10 +1,10 @@
-/**
+ï»¿/**
 * @file CombatPlayerState.h
 * @data 2025-04-28
 * @author toproof
-* @brief ÇÃ·¹ÀÌ¾î°¡ ÀüÅõ¸¦ ÇÏ¸ç Ã³Ä¡ÇÑ Àû°ú µ¥¹ÌÁö Åë°è¸¦ Áı°èÇÏ±â À§ÇÑ PlayerState Å¬·¡½º
-* - PlayerÀÇ ÀüÅõ Áı°è ¹× Åë°è¸¦ °ü¸®
-* - °æÇèÄ¡, ÀçÈ­ °ü¸®
+* @brief í”Œë ˆì´ì–´ê°€ ì „íˆ¬ë¥¼ í•˜ë©° ì²˜ì¹˜í•œ ì ê³¼ ë°ë¯¸ì§€ í†µê³„ë¥¼ ì§‘ê³„í•˜ê¸° ìœ„í•œ PlayerState í´ë˜ìŠ¤
+* - Playerì˜ ì „íˆ¬ ì§‘ê³„ ë° í†µê³„ë¥¼ ê´€ë¦¬
+* - ê²½í—˜ì¹˜, ì¬í™” ê´€ë¦¬
 */
 
 #pragma once
@@ -19,7 +19,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogCombatPlayerState, Log, All);
 class UPlayerExperienceComponent;
 
 /**
- * @brief ÀüÅõ Áß ¹ß»ıÇÏ´Â ¸ğµç µ¥¹ÌÁö Åë°è¸¦ ±â·ÏÇÏ´Â PlayerState Å¬·¡½º
+ * @brief ì „íˆ¬ ì¤‘ ë°œìƒí•˜ëŠ” ëª¨ë“  ë°ë¯¸ì§€ í†µê³„ë¥¼ ê¸°ë¡í•˜ëŠ” PlayerState í´ë˜ìŠ¤
  */
 UCLASS()
 class BORNTOENDURE_API ACombatPlayerState : public APlayerState
@@ -30,21 +30,21 @@ public:
 	ACombatPlayerState();
 
 	/**
-	 * @brief Petº°·Î Àû¿¡°Ô ÁØ ¸ğµç µ¥¹ÌÁö¸¦ ÀúÀåÇÏ´Â TMap
-	 * @Key : PetÀÇ ÀÌ¸§
-	 * @Value : ÇØ´ç PetÀÌ Àû¿¡°Ô ÁØ ÃÑ µ¥¹ÌÁö
+	 * @brief Petë³„ë¡œ ì ì—ê²Œ ì¤€ ëª¨ë“  ë°ë¯¸ì§€ë¥¼ ì €ì¥í•˜ëŠ” TMap
+	 * @Key : Petì˜ ì´ë¦„
+	 * @Value : í•´ë‹¹ Petì´ ì ì—ê²Œ ì¤€ ì´ ë°ë¯¸ì§€
 	 * @todo
-	 * - ÃßÈÄ PetÀÌ¸§ÀÌ ¾Æ´Ñ PetÀÇ °íÀ¯ ID·Î º¯°æÇÏ´Â °ÍÀ» °í·ÁÇÒ ¼ö ÀÖÀ½ (FGuid ¶Ç´Â int32)
+	 * - ì¶”í›„ Petì´ë¦„ì´ ì•„ë‹Œ Petì˜ ê³ ìœ  IDë¡œ ë³€ê²½í•˜ëŠ” ê²ƒì„ ê³ ë ¤í•  ìˆ˜ ìˆìŒ (FGuid ë˜ëŠ” int32)
 	 */
 	TMap<FName, float> PetDamageStats;
 
 
 
 	/**
-	 * @brief µ¥¹ÌÁö Åë°è¸¦ ¾÷µ¥ÀÌÆ®ÇÏ´Â ÇÔ¼ö
-	 * @param KillerPetName ÀûÀ» Ã³Ä¡ÇÑ PetÀÇ ÀÌ¸§
-	 * @param PetDamageMap Petº°·Î Àû¿¡°Ô ÁØ µ¥¹ÌÁö¸¦ ´ãÀº TMap
-	 * @param TotalDamageReceiced PetÀÌ Àû¿¡°Ô ÁØ ÃÑ µ¥¹ÌÁö (PetDamageMapÀÇ ¸ğµç ValueÀÇ ÇÕ°ú °°À½)
+	 * @brief ë°ë¯¸ì§€ í†µê³„ë¥¼ ì—…ë°ì´íŠ¸í•˜ëŠ” í•¨ìˆ˜
+	 * @param KillerPetName ì ì„ ì²˜ì¹˜í•œ Petì˜ ì´ë¦„
+	 * @param PetDamageMap Petë³„ë¡œ ì ì—ê²Œ ì¤€ ë°ë¯¸ì§€ë¥¼ ë‹´ì€ TMap
+	 * @param TotalDamageReceiced Petì´ ì ì—ê²Œ ì¤€ ì´ ë°ë¯¸ì§€ (PetDamageMapì˜ ëª¨ë“  Valueì˜ í•©ê³¼ ê°™ìŒ)
 	 */
 	void UpdateDamageStats(FName KillerPetName, const FPetDamageMap& PetDamageMap, float TotalDamageReceiced);
 
@@ -57,6 +57,6 @@ public:
 
 	UPlayerExperienceComponent* GetPlayerExperienceComponent() const { return PlayerExperienceComponent; }
 
-	// µğ¹ö±×¿ëÀ¸·Î ImGui¿¡¼­ °¡Á®°¡ º¼ ¼ö ÀÖµµ·Ï Getter ÇÔ¼ö Ãß°¡
+	// ë””ë²„ê·¸ìš©ìœ¼ë¡œ ImGuiì—ì„œ ê°€ì ¸ê°€ ë³¼ ìˆ˜ ìˆë„ë¡ Getter í•¨ìˆ˜ ì¶”ê°€
 	const TMap<FName, float>& GetPetDamageStats() const { return PetDamageStats; }
 };

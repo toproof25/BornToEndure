@@ -1,15 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 
-// Enhanced Input °ü·Ã Çì´õ Æ÷ÇÔ
+// Enhanced Input ê´€ë ¨ í—¤ë” í¬í•¨
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 
-// Camera °ü·Ã Çì´õ Æ÷ÇÔ
+// Camera ê´€ë ¨ í—¤ë” í¬í•¨
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -20,7 +20,7 @@
 class UInputAction;
 class UInputComponent;
 
-// °¢Á¾ Ä³¸¯ÅÍ °ü·Ã ¾×ÅÍ ÄÄÆ÷³ÍÆ® Àü¹æ ¼±¾ğ
+// ê°ì¢… ìºë¦­í„° ê´€ë ¨ ì•¡í„° ì»´í¬ë„ŒíŠ¸ ì „ë°© ì„ ì–¸
 class UStatComponent;
 class UInteractionComponent;
 class ABaseWeapon;
@@ -54,36 +54,36 @@ public:
 
 protected:
 
-	/** * @brief Ä«¸Ş¶ó¸¦ µÚ¿¡ À§Ä¡½ÃÅ°´Â Spring Arm ÄÄÆ÷³ÍÆ®. Ä«¸Ş¶ó°¡ Ä³¸¯ÅÍ¸¦ µû¶ó ¿òÁ÷ÀÌµµ·Ï ¼³Á¤ */
+	/** * @brief ì¹´ë©”ë¼ë¥¼ ë’¤ì— ìœ„ì¹˜ì‹œí‚¤ëŠ” Spring Arm ì»´í¬ë„ŒíŠ¸. ì¹´ë©”ë¼ê°€ ìºë¦­í„°ë¥¼ ë”°ë¼ ì›€ì§ì´ë„ë¡ ì„¤ì • */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<USpringArmComponent> SpringArmComp;
 	
-	/** * @brief Ä«¸Ş¶ó¸¦ °¡¸®Å°´Â ÄÄÆ÷³ÍÆ® */
+	/** * @brief ì¹´ë©”ë¼ë¥¼ ê°€ë¦¬í‚¤ëŠ” ì»´í¬ë„ŒíŠ¸ */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	TObjectPtr<UCameraComponent> CameraComp;
 
 
-	/** * @brief WASDÀÇ »óÇÏÁÂ¿ì ÀÌµ¿À» Ã³¸®) */
+	/** * @brief WASDì˜ ìƒí•˜ì¢Œìš° ì´ë™ì„ ì²˜ë¦¬) */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> MoveAction;
 
-	/** * @brief ShiftÀÇ ´Ş¸®±â¸¦ Ã³¸®) */
+	/** * @brief Shiftì˜ ë‹¬ë¦¬ê¸°ë¥¼ ì²˜ë¦¬) */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> SprintAction;
 
-	/** * @brief Mouse XY È¸Àü¿¡ Ä«¸Ş¶ó Yaw, Pitch È¸ÀüÀ» Ã³¸® */
+	/** * @brief Mouse XY íšŒì „ì— ì¹´ë©”ë¼ Yaw, Pitch íšŒì „ì„ ì²˜ë¦¬ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> LookUpAction;
 
-	/** * @brief Space bar¸¦ ÀÌ¿ëÇÑ Jump Ã³¸®) */
+	/** * @brief Space barë¥¼ ì´ìš©í•œ Jump ì²˜ë¦¬) */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> JumpAction;
 
-	/** * @brief F¸¦ ÀÌ¿ëÇÑ »óÈ£ÀÛ¿ë Ã³¸® */
+	/** * @brief Fë¥¼ ì´ìš©í•œ ìƒí˜¸ì‘ìš© ì²˜ë¦¬ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> InteractionAction;
 
-	/** * @brief ¸¶¿ì½º ÁÂÅ¬¸¯À» ÀÌ¿ëÇÑ »óÈ£ÀÛ¿ë Ã³¸® */
+	/** * @brief ë§ˆìš°ìŠ¤ ì¢Œí´ë¦­ì„ ì´ìš©í•œ ìƒí˜¸ì‘ìš© ì²˜ë¦¬ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> ClickLeftAction;
 

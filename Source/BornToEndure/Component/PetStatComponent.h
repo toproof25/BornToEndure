@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -8,13 +8,13 @@
 #include "PetStatComponent.generated.h"
 
 /**
- * @brief PetÀÇ ¸ğµç ½ºÅÈÀ» °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ®
+ * @brief Petì˜ ëª¨ë“  ìŠ¤íƒ¯ì„ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
  * @details
- * - ±âº» ½ºÅÈ ÃÊ±âÈ­ (PetCompanionCharacter¿¡¼­ ÃÊ±âÈ­ ½Ã PetBaseDataAsset¿¡¼­ StatÀ» ³Ñ°ÜÁÜ)
- * - Stat Áõ°¨ ¾ÆÀÌÅÛ/½Ã³ÊÁö modifier Ãß°¡/Á¦°Å
- * - ÃÖÁ¾ ½ºÅÈ °è»ê ¹× Ä³½Ì
- * - ½ºÅÈ º¯°æ ½Ã µ¨¸®°ÔÀÌÆ®·Î ¿ÜºÎ ¾Ë¸²
- * - IPetStatProviderInterface ÀÎÅÍÆäÀÌ½º¸¦ »ó¼Ó¹Ş¾Æ ¿À¹ö¶óÀÌµåÇÔ. ¿ÜºÎ ÄÄÆ÷³ÍÆ®¿Í ÀÇÁ¸¼º°ú °áÇÕµµ¸¦ ³·Ãß±â À§ÇÔ
+ * - ê¸°ë³¸ ìŠ¤íƒ¯ ì´ˆê¸°í™” (PetCompanionCharacterì—ì„œ ì´ˆê¸°í™” ì‹œ PetBaseDataAssetì—ì„œ Statì„ ë„˜ê²¨ì¤Œ)
+ * - Stat ì¦ê° ì•„ì´í…œ/ì‹œë„ˆì§€ modifier ì¶”ê°€/ì œê±°
+ * - ìµœì¢… ìŠ¤íƒ¯ ê³„ì‚° ë° ìºì‹±
+ * - ìŠ¤íƒ¯ ë³€ê²½ ì‹œ ë¸ë¦¬ê²Œì´íŠ¸ë¡œ ì™¸ë¶€ ì•Œë¦¼
+ * - IPetStatProviderInterface ì¸í„°í˜ì´ìŠ¤ë¥¼ ìƒì†ë°›ì•„ ì˜¤ë²„ë¼ì´ë“œí•¨. ì™¸ë¶€ ì»´í¬ë„ŒíŠ¸ì™€ ì˜ì¡´ì„±ê³¼ ê²°í•©ë„ë¥¼ ë‚®ì¶”ê¸° ìœ„í•¨
  */
 UCLASS(ClassGroup = (Pet), meta = (BlueprintSpawnableComponent))
 class BORNTOENDURE_API UPetStatComponent : public UActorComponent, public IPetStatProviderInterface
@@ -25,42 +25,42 @@ public:
     UPetStatComponent();
 
     /**
-     * @brief IPetStatProviderInterface ÇÔ¼ö ¿À¹ö¶óÀÌµå ±¸ÇöÀ¸·Î StatType¿¡ ´ëÇÑ ±âº» ½ºÅÈ+¾ÆÀÌÅÛ ½ºÅÈÀ» °è»êÇÏ¿© ÃÖÁ¾ ½ºÅÈ ¹İÈ¯
-	 * @param StatType EPetStatType Å¸ÀÔÀÇ ½ºÅÈ Á¾·ù (Attack, Defense, Speed µî)
-     * @return PetÀÇ ±âº» ½ºÅÈ + ¾ÆÀÌÅÛ ½ºÅÈÀÌ ¸ğµÎ Àû¿ëµÈ ÃÖÁ¾ ½ºÅÈ °ª
+     * @brief IPetStatProviderInterface í•¨ìˆ˜ ì˜¤ë²„ë¼ì´ë“œ êµ¬í˜„ìœ¼ë¡œ StatTypeì— ëŒ€í•œ ê¸°ë³¸ ìŠ¤íƒ¯+ì•„ì´í…œ ìŠ¤íƒ¯ì„ ê³„ì‚°í•˜ì—¬ ìµœì¢… ìŠ¤íƒ¯ ë°˜í™˜
+	 * @param StatType EPetStatType íƒ€ì…ì˜ ìŠ¤íƒ¯ ì¢…ë¥˜ (Attack, Defense, Speed ë“±)
+     * @return Petì˜ ê¸°ë³¸ ìŠ¤íƒ¯ + ì•„ì´í…œ ìŠ¤íƒ¯ì´ ëª¨ë‘ ì ìš©ëœ ìµœì¢… ìŠ¤íƒ¯ ê°’
      */
     virtual float GetFinalStat(EPetStatType StatType) const override;
 
     /**
-     * @brief ÃÊ±â ±âº» ½ºÅÈÀ» ÃÊ±âÈ­ ÇÏ´Â ÇÔ¼ö
-     * @param ÃÊ±âÈ­ÇÒ ±âº» ½ºÅÈÀÌ ÀúÀåµÈ FPetBaseStatSheet ±¸Á¶Ã¼
+     * @brief ì´ˆê¸° ê¸°ë³¸ ìŠ¤íƒ¯ì„ ì´ˆê¸°í™” í•˜ëŠ” í•¨ìˆ˜
+     * @param ì´ˆê¸°í™”í•  ê¸°ë³¸ ìŠ¤íƒ¯ì´ ì €ì¥ëœ FPetBaseStatSheet êµ¬ì¡°ì²´
 	 * @details
-     * - APetCompanionCharacter::BeginPlay¿¡¼­ DataAssetÀÇ BaseStats¸¦ ÁÖÀÔÇÏ¿© 1È¸ ÃÊ±âÈ­
+     * - APetCompanionCharacter::BeginPlayì—ì„œ DataAssetì˜ BaseStatsë¥¼ ì£¼ì…í•˜ì—¬ 1íšŒ ì´ˆê¸°í™”
      */
     void InitializeBaseStats(const FPetBaseStatSheet& BaseStatSheet);
 
     /**
-     * @brief Stat Modifier¸¦ Ãß°¡ÇÏ°í ÇØ´ç ½ºÅÈÀ» Àç°è»ê ÈÄ ÃÖÁ¾ ½ºÅÈ Ä³½Ì
-	 * @param Modifier StatModifier ±¸Á¶Ã¼·Î, ¾î¶² ½ºÅÈ¿¡ ¾î¶² ¹æ½ÄÀ¸·Î ¾ó¸¶¸¸Å­ÀÇ Áõ°¨ÇÒ Áö Á¤ÀÇÇÔ (AttackPower +10% µî)
+     * @brief Stat Modifierë¥¼ ì¶”ê°€í•˜ê³  í•´ë‹¹ ìŠ¤íƒ¯ì„ ì¬ê³„ì‚° í›„ ìµœì¢… ìŠ¤íƒ¯ ìºì‹±
+	 * @param Modifier StatModifier êµ¬ì¡°ì²´ë¡œ, ì–´ë–¤ ìŠ¤íƒ¯ì— ì–´ë–¤ ë°©ì‹ìœ¼ë¡œ ì–¼ë§ˆë§Œí¼ì˜ ì¦ê°í•  ì§€ ì •ì˜í•¨ (AttackPower +10% ë“±)
      * @details
-     * - UPetStatItemDataAsset::ApplyToComponent¿¡¼­ ¾ÆÀÌÅÛÀÌ Ãß°¡µÉ ¶§ È£ÃâµÈ´Ù
+     * - UPetStatItemDataAsset::ApplyToComponentì—ì„œ ì•„ì´í…œì´ ì¶”ê°€ë  ë•Œ í˜¸ì¶œëœë‹¤
      */
     void AddModifier(const FStatModifier& Modifier);
 
     /**
-     * @brief SourceId¿¡ ÇØ´çÇÏ´Â Modifier¸¦ ¸ğµÎ Á¦°ÅÇÏ°í Àç°è»ê ÈÄ ÃÖÁ¾ ½ºÅÈ Ä³½Ì
-     * @param SourceId Á¦°ÅÇÏ°íÀÚ ÇÏ´Â Stat ItemÀÇ °íÀ¯ ID
+     * @brief SourceIdì— í•´ë‹¹í•˜ëŠ” Modifierë¥¼ ëª¨ë‘ ì œê±°í•˜ê³  ì¬ê³„ì‚° í›„ ìµœì¢… ìŠ¤íƒ¯ ìºì‹±
+     * @param SourceId ì œê±°í•˜ê³ ì í•˜ëŠ” Stat Itemì˜ ê³ ìœ  ID
      */
     void RemoveModifiersBySource(const FGuid& SourceId);
 
     /**
-     * @brief ½ºÅÈÀÌ º¯°æµÉ ¶§ ¸¶´Ù ¹æ¼ÛÇÏ´Â Delegate
-     * @param Delegate Å¸ÀÔ ÇÔ¼ö
-     * @param ¹ø°æµÈ Stat¿¡ ´ëÇÑ EPetStatType
-     * @param ÃÖÁ¾ º¯°æµÈ Stat °ª
+     * @brief ìŠ¤íƒ¯ì´ ë³€ê²½ë  ë•Œ ë§ˆë‹¤ ë°©ì†¡í•˜ëŠ” Delegate
+     * @param Delegate íƒ€ì… í•¨ìˆ˜
+     * @param ë²ˆê²½ëœ Statì— ëŒ€í•œ EPetStatType
+     * @param ìµœì¢… ë³€ê²½ëœ Stat ê°’
      * @details
-     * - PetCombatComponent¿¡¼­´Â ÇØ´ç Delegate¸¦ ±¸µ¶ÇÑ ÈÄ, °ø°İ ¼Óµµ°¡ ¹Ù²ğ ¶§ °ø°İ Timer¸¦ Àç¼³Á¤
-     * - ÃßÈÄ UI µî¿¡¼­ »ç¿ëÇÒ ¼ö ÀÖµµ·Ï ±¸Çö
+     * - PetCombatComponentì—ì„œëŠ” í•´ë‹¹ Delegateë¥¼ êµ¬ë…í•œ í›„, ê³µê²© ì†ë„ê°€ ë°”ë€” ë•Œ ê³µê²© Timerë¥¼ ì¬ì„¤ì •
+     * - ì¶”í›„ UI ë“±ì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ êµ¬í˜„
      */
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStatChanged, EPetStatType, float /*NewValue*/);
     FOnStatChanged OnStatChanged;
@@ -74,23 +74,23 @@ private:
     TMap<EPetStatType, float> BaseStats;
 
     /**
-     * @brief ÇöÀç Àû¿ëÀÌ µÇ´Â ¸ğµç Stat Áõ°¨ ¾ÆÀÌÅÛ ¼öÄ¡ ¸®½ºÆ®
+     * @brief í˜„ì¬ ì ìš©ì´ ë˜ëŠ” ëª¨ë“  Stat ì¦ê° ì•„ì´í…œ ìˆ˜ì¹˜ ë¦¬ìŠ¤íŠ¸
      */
     TArray<FStatModifier> ActiveModifiers;
 
     /**
-     * @brief ÃÖÁ¾ Stat °è»ê°ªÀ» Ä³½ÌÇØµÎ´Â ¸â¹ö º¯¼ö
+     * @brief ìµœì¢… Stat ê³„ì‚°ê°’ì„ ìºì‹±í•´ë‘ëŠ” ë©¤ë²„ ë³€ìˆ˜
      * @details
-     * - mutable: const ÇÔ¼öÀÎ GetFinalStat¿¡¼­µµ Stat Ä³½Ã¸¦ ¾÷µ¥ÀÌÆ®ÇÒ ¼ö ÀÖµµ·Ï Àû¿ë
+     * - mutable: const í•¨ìˆ˜ì¸ GetFinalStatì—ì„œë„ Stat ìºì‹œë¥¼ ì—…ë°ì´íŠ¸í•  ìˆ˜ ìˆë„ë¡ ì ìš©
      */
     mutable TMap<EPetStatType, float> CachedFinalStats;
     mutable bool bCacheDirty = true;
 
     /**
-     * @brief Æ¯Á¤ Stat¿¡ ´ëÇÑ ÃÖÁ¾°ªÀ» Àç°è»êÇÏ¿© Ä³½ÌÇÏ´Â ÇÔ¼ö
-	 * @param StatType °è»êÇÏ°íÀÚ ÇÏ´Â Stat¿¡ ´ëÇÑ EPetStatType
+     * @brief íŠ¹ì • Statì— ëŒ€í•œ ìµœì¢…ê°’ì„ ì¬ê³„ì‚°í•˜ì—¬ ìºì‹±í•˜ëŠ” í•¨ìˆ˜
+	 * @param StatType ê³„ì‚°í•˜ê³ ì í•˜ëŠ” Statì— ëŒ€í•œ EPetStatType
      * @details
-     * - CachedFinalStats¿¡¼­ ÇØ´ç StatTypeÀ» Á¦°ÅÇÑ ÈÄ Àç¿¬»êÇÏ°í, GetFinalStat¿¡¼­ ´Ù½Ã Ä³½ÌÀÌ µÈ´Ù
+     * - CachedFinalStatsì—ì„œ í•´ë‹¹ StatTypeì„ ì œê±°í•œ í›„ ì¬ì—°ì‚°í•˜ê³ , GetFinalStatì—ì„œ ë‹¤ì‹œ ìºì‹±ì´ ëœë‹¤
      */
     void RecalculateStat(EPetStatType StatType);
     void InvalidateCache();

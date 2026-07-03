@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -26,7 +26,7 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	/** * @brief Input Mapping Context¸¦ ÆíÁı±â¿¡¼­ ÇÒ´ç °¡´ÉÇÏµµ·Ï ¼±¾ğ */
+	/** * @brief Input Mapping Contextë¥¼ í¸ì§‘ê¸°ì—ì„œ í• ë‹¹ ê°€ëŠ¥í•˜ë„ë¡ ì„ ì–¸ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 

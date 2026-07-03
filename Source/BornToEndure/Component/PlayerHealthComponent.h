@@ -1,11 +1,11 @@
-/**
+ï»¿/**
 * @file PlayerHealthComponent.h
 * @data 2026-06-29
 * @author toproof
-* @brief ÇÃ·¹ÀÌ¾îÀÇ Ã¼·Â °ü¸®¸¦ À§ÇÑ ÄÄÆ÷³ÍÆ® Å¬·¡½º
-* - ÇÃ·¹ÀÌ¾îÀÇ Ã¼·Â °ü¸®
-* - Ã¼·Â È¸º¹ ¹× µ¥¹ÌÁö Ã³¸®
-* - »ç¸Á ½Ã Delegate Ã³¸®
+* @brief í”Œë ˆì´ì–´ì˜ ì²´ë ¥ ê´€ë¦¬ë¥¼ ìœ„í•œ ì»´í¬ë„ŒíŠ¸ í´ë˜ìŠ¤
+* - í”Œë ˆì´ì–´ì˜ ì²´ë ¥ ê´€ë¦¬
+* - ì²´ë ¥ íšŒë³µ ë° ë°ë¯¸ì§€ ì²˜ë¦¬
+* - ì‚¬ë§ ì‹œ Delegate ì²˜ë¦¬
 */
 
 #pragma once
@@ -26,12 +26,12 @@ public:
 	UPlayerHealthComponent();
 
 	/**
-	 * @brief PlayerCharacter¿¡¼­ TakeDamage¸¦ ½ÇÁúÀûÀ¸·Î Ã³¸®ÇÏ´Â ÇÔ¼ö·Î À§ÀÓÀÌ µÇ¾î È£ÃâÀÌ µÈ´Ù
-	 * @param DamageAmount µ¥¹ÌÁö ¼öÄ¡
-	 * @param DamageEvent µ¥¹ÌÁö ÀÌº¥Æ® ±¸Á¶Ã¼
-	 * @param EventInstigator °ø°İÀÚ ÄÁÆ®·Ñ·¯
-	 * @param DamageCauser °ø°İÀÚ ¾×ÅÍ
-	 * @return ½ÇÁúÀûÀ¸·Î ¹ŞÀº µ¥¹ÌÁö (ÃÖÁ¾ µ¥¹ÌÁö)
+	 * @brief PlayerCharacterì—ì„œ TakeDamageë¥¼ ì‹¤ì§ˆì ìœ¼ë¡œ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜ë¡œ ìœ„ì„ì´ ë˜ì–´ í˜¸ì¶œì´ ëœë‹¤
+	 * @param DamageAmount ë°ë¯¸ì§€ ìˆ˜ì¹˜
+	 * @param DamageEvent ë°ë¯¸ì§€ ì´ë²¤íŠ¸ êµ¬ì¡°ì²´
+	 * @param EventInstigator ê³µê²©ì ì»¨íŠ¸ë¡¤ëŸ¬
+	 * @param DamageCauser ê³µê²©ì ì•¡í„°
+	 * @return ì‹¤ì§ˆì ìœ¼ë¡œ ë°›ì€ ë°ë¯¸ì§€ (ìµœì¢… ë°ë¯¸ì§€)
 	 */
 	float HealthTakeDamage(
 		float DamageAmount,

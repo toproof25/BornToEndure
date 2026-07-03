@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,22 +24,22 @@ protected:
 public:
 
 	/**
-	 * @brief µû¶ó´Ù´Ò Player PawnÀ» ¼³Á¤ÇÏ´Â ÇÔ¼ö
-	 * @param NewOwnerPawn »õ·Î ¼³Á¤ÇÒ Player Pawn
+	 * @brief ë”°ë¼ë‹¤ë‹ Player Pawnì„ ì„¤ì •í•˜ëŠ” í•¨ìˆ˜
+	 * @param NewOwnerPawn ìƒˆë¡œ ì„¤ì •í•  Player Pawn
 	 */
 	void SetPlayerTarget(APawn* NewOwnerPawn);
 
 	/**
-	 * @brief Behavior Tree AssetÀ» ¼³Á¤ ÇÔ¼ö
-	 * @param NewBehaviorTree ¼³Á¤ÇÒ Behavior Tree Asset
+	 * @brief Behavior Tree Assetì„ ì„¤ì • í•¨ìˆ˜
+	 * @param NewBehaviorTree ì„¤ì •í•  Behavior Tree Asset
 	 */
 	void SetAndRunBehaviorTree(UBehaviorTree* NewBehaviorTree);
 
 private:
 	
 	/**
-	 * @brief AI Çàµ¿ Æ®¸® Behavior Tree Asset
-	 * @note ÇöÀç´Â DataAsset¿¡¼­ ¼³Á¤ÇÏ°í, PetCompanionCharacter¿¡¼­ Á÷Á¢ ¼³Á¤ÇÏ°Ô µÊ
+	 * @brief AI í–‰ë™ íŠ¸ë¦¬ Behavior Tree Asset
+	 * @note í˜„ì¬ëŠ” DataAssetì—ì„œ ì„¤ì •í•˜ê³ , PetCompanionCharacterì—ì„œ ì§ì ‘ ì„¤ì •í•˜ê²Œ ë¨
 	 */
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset;

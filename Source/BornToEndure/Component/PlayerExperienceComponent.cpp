@@ -1,4 +1,4 @@
-#include "Component/PlayerExperienceComponent.h"
+ï»¿#include "Component/PlayerExperienceComponent.h"
 #include "Character/Enemy/BaseEnemyCharacter.h"
 #include "Data/GameTypes.h"
 #include "PlayerState/CombatPlayerState.h"
@@ -14,7 +14,7 @@ void UPlayerExperienceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// UI ÃÊ±âÈ­
+	// UI ì´ˆê¸°í™”
 	OnChangeExpDelegate.Broadcast(CurrentEXP, MaxExpForLevelUp);
 	
 	//OnLevelUpDelegate.Broadcast(Level);
@@ -28,7 +28,7 @@ void UPlayerExperienceComponent::RegisterEnemyPayload(ABaseEnemyCharacter* Enemy
 		return;
 	}
 
-	// Áö¼ÓÀûÀ¸·Î ±¸µ¶°ú Ãë¼Ò°¡ ¹İº¹µÉ ¶§´Â Áßº¹ ¹ÙÀÎµù ¹æÁö¸¦ À§ÇØ Á¦°Å ÈÄ Ãß°¡ÇÏ´Â°Ô ¾ÈÀüÇÏ´Ù
+	// ì§€ì†ì ìœ¼ë¡œ êµ¬ë…ê³¼ ì·¨ì†Œê°€ ë°˜ë³µë  ë•ŒëŠ” ì¤‘ë³µ ë°”ì¸ë”© ë°©ì§€ë¥¼ ìœ„í•´ ì œê±° í›„ ì¶”ê°€í•˜ëŠ”ê²Œ ì•ˆì „í•˜ë‹¤
 	Enemy->OnEnemyKilled.RemoveDynamic(this, &UPlayerExperienceComponent::OnEnemyKilledHandler); 
 	Enemy->OnEnemyKilled.AddDynamic(this, &UPlayerExperienceComponent::OnEnemyKilledHandler);
 	UE_LOG(LogPlayerExperienceComponent, Log, TEXT("Registered enemy payload: %s"), *Enemy->GetName());
@@ -44,11 +44,11 @@ void UPlayerExperienceComponent::OnEnemyKilledHandler(const FEnemyRewardPayload&
 	if (CurrentEXP >= MaxExpForLevelUp)
 	{
 		Level++;
-		CurrentEXP -= MaxExpForLevelUp; /// ·¹º§¾÷ ½Ã °æÇèÄ¡ ÃÊ±âÈ­
-		if (CurrentEXP < 0.f) CurrentEXP = 0.f; // À½¼ö ¹æÁö
+		CurrentEXP -= MaxExpForLevelUp; /// ë ˆë²¨ì—… ì‹œ ê²½í—˜ì¹˜ ì´ˆê¸°í™”
+		if (CurrentEXP < 0.f) CurrentEXP = 0.f; // ìŒìˆ˜ ë°©ì§€
 
 		OnLevelUpDelegate.Broadcast(Level);
-		OnChangeExpDelegate.Broadcast(CurrentEXP, MaxExpForLevelUp); /// ·¹º§¾÷ ÈÄ °æÇèÄ¡ º¯È­µµ UI¿¡ ¹İ¿µ
+		OnChangeExpDelegate.Broadcast(CurrentEXP, MaxExpForLevelUp); /// ë ˆë²¨ì—… í›„ ê²½í—˜ì¹˜ ë³€í™”ë„ UIì— ë°˜ì˜
 	}
 
 
@@ -57,7 +57,7 @@ void UPlayerExperienceComponent::OnEnemyKilledHandler(const FEnemyRewardPayload&
 
 	if (TObjectPtr<ACombatPlayerState> PS = Cast<ACombatPlayerState>(GetOwner()))
 	{
-		// PlayerState·Î Åë°è µ¥ÀÌÅÍ Àü¼Û
+		// PlayerStateë¡œ í†µê³„ ë°ì´í„° ì „ì†¡
 		PS->UpdateDamageStats(Payload.KillerPetId, Payload.PetDamageMap, Payload.TotalDamageReceiced);
 	}
 

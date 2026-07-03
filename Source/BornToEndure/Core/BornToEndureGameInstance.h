@@ -1,10 +1,10 @@
-/**
+ï»¿/**
 * @file ItemPoolSubsystem.h
 * @date 2026-06-06
 * @modified 2026-06-06
 * @author toproof (kmnlmn123@gmail.com)
-* @brief BornToEndureGameInstance.h °ÔÀÓ ÀÎ½ºÅÏ½º Å¬·¡½º, °ÔÀÓ Àü¹İÀûÀÎ »óÅÂ¿Í ¼­ºê½Ã½ºÅÛ °ü¸®
-* - ItemPoolSubsystem ÃÊ±âÈ­ ¹× °ü¸®¿¡ È°¿ë (¾ÆÀÌÅÛ DataTableÀ» Àü´ŞÇÏ±â À§ÇØ Ã³À½ »ı¼ºµÈ Å¬·¡½º)
+* @brief BornToEndureGameInstance.h ê²Œì„ ì¸ìŠ¤í„´ìŠ¤ í´ë˜ìŠ¤, ê²Œì„ ì „ë°˜ì ì¸ ìƒíƒœì™€ ì„œë¸Œì‹œìŠ¤í…œ ê´€ë¦¬
+* - ItemPoolSubsystem ì´ˆê¸°í™” ë° ê´€ë¦¬ì— í™œìš© (ì•„ì´í…œ DataTableì„ ì „ë‹¬í•˜ê¸° ìœ„í•´ ì²˜ìŒ ìƒì„±ëœ í´ë˜ìŠ¤)
 */
 #pragma once
 

@@ -1,4 +1,4 @@
-#include "Item/Projectile/BaseProjectile.h"
+ï»¿#include "Item/Projectile/BaseProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/World.h"
@@ -17,7 +17,7 @@ ABaseProjectile::ABaseProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// °¢ ÇÊ¿ä ÄÄÆ÷³ÍÆ®¸¦ »ı¼º
+	// ê° í•„ìš” ì»´í¬ë„ŒíŠ¸ë¥¼ ìƒì„±
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
 	check(ProjectileMesh != nullptr);
 
@@ -36,21 +36,21 @@ ABaseProjectile::ABaseProjectile()
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	check(SphereComp != nullptr);
 
-	// ¹ß»çÃ¼ Mesh, Niagara, Audio¸¦ Äİ¸®Á¯ ÀÚ½ÄÀ¸·Î ¼³Á¤
+	// ë°œì‚¬ì²´ Mesh, Niagara, Audioë¥¼ ì½œë¦¬ì ¼ ìì‹ìœ¼ë¡œ ì„¤ì •
 	ProjectileMesh->SetupAttachment(SphereComp);
 	NiagaraComp->SetupAttachment(SphereComp);
 	AudioComp->SetupAttachment(SphereComp);
 
-	// Äİ¸®Á¯ ÃÊ±â Å©±â ¼³Á¤ ¹× Ãæµ¹ Ã¤³Î ¼³Á¤
+	// ì½œë¦¬ì ¼ ì´ˆê¸° í¬ê¸° ì„¤ì • ë° ì¶©ëŒ ì±„ë„ ì„¤ì •
 	SphereComp->InitSphereRadius(5.0f);
 
-	// ·çÆ® ÄÄÆ÷³ÍÆ®¸¦ Äİ¸®Á¯ ÄÄÆ÷³ÍÆ®·Î ¼³Á¤
+	// ë£¨íŠ¸ ì»´í¬ë„ŒíŠ¸ë¥¼ ì½œë¦¬ì ¼ ì»´í¬ë„ŒíŠ¸ë¡œ ì„¤ì •
 	RootComponent = SphereComp;
 
-	// ÀÌµ¿, Ãæµ¹ ¿¬»êÀ» ShpereComp¿¡ Àû¿ëÇÏµµ·Ï ¼³Á¤
+	// ì´ë™, ì¶©ëŒ ì—°ì‚°ì„ ShpereCompì— ì ìš©í•˜ë„ë¡ ì„¤ì •
 	ProjectileMovementComp->UpdatedComponent = SphereComp;
 
-	// ¹ß»çÃ¼ ÃÊ±â ¼³Á¤
+	// ë°œì‚¬ì²´ ì´ˆê¸° ì„¤ì •
 	ProjectileMovementComp->InitialSpeed = 3000.f;
 	ProjectileMovementComp->MaxSpeed = 3000.f;
 	ProjectileMovementComp->bRotationFollowsVelocity = true;
@@ -88,7 +88,7 @@ void ABaseProjectile::BeginPlay()
 		SphereComp->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnProjectileHit);
 	}
 
-	// »ç¿ëÇÏ´Â Asset Preload
+	// ì‚¬ìš©í•˜ëŠ” Asset Preload
 	FPrimaryAssetType SoundAssetType(FName(TEXT("SoundDataAsset")));
 	FPrimaryAssetType NiagaraAssetType(FName(TEXT("NiagaraDataAsset")));
 
@@ -104,7 +104,7 @@ void ABaseProjectile::BeginPlay()
 
 void ABaseProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// Å¸ÀÌ¸Ó ÃÊ±âÈ­
+	// íƒ€ì´ë¨¸ ì´ˆê¸°í™”
 	GetWorld()->GetTimerManager().ClearTimer(LifeSpanTimerHandle);
 
 	UWorld* world = GetWorld();
@@ -112,7 +112,7 @@ void ABaseProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
 	check(EffectSubsystem);
 
-	// »ç¿ëÇÏ´Â Asset Unload
+	// ì‚¬ìš©í•˜ëŠ” Asset Unload
 	FPrimaryAssetType SoundAssetType(FName(TEXT("SoundDataAsset")));
 	FPrimaryAssetType NiagaraAssetType(FName(TEXT("NiagaraDataAsset")));
 
@@ -130,7 +130,7 @@ void ABaseProjectile::ActivateActor_Implementation()
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 
-	// ProjectileLifespan ½Ã°£ µÚ ÀÚµ¿ ¹İÈ¯ Å¸ÀÌ¸Ó
+	// ProjectileLifespan ì‹œê°„ ë’¤ ìë™ ë°˜í™˜ íƒ€ì´ë¨¸
 	if (TimerDelegate.IsBound())
 	{
 		GetWorld()->GetTimerManager().SetTimer(
@@ -170,21 +170,21 @@ void ABaseProjectile::ActivateActor_Implementation()
 
 void ABaseProjectile::DeactivateActor_Implementation()
 {
-	// ¸ğ½À°ú Äİ¸®Á¯ ²ô±â
+	// ëª¨ìŠµê³¼ ì½œë¦¬ì ¼ ë„ê¸°
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
-	// À§Ä¡ ÃÊ±âÈ­
+	// ìœ„ì¹˜ ì´ˆê¸°í™”
 	SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator, false, nullptr, ETeleportType::TeleportPhysics);
 
-	// ¹ß»çÃ¼ ¸ØÃã, Tick ºñÈ°¼ºÈ­
+	// ë°œì‚¬ì²´ ë©ˆì¶¤, Tick ë¹„í™œì„±í™”
 	if (ProjectileMovementComp)
 	{
 		ProjectileMovementComp->StopMovementImmediately();
 		ProjectileMovementComp->Deactivate();
 	}
 
-	// Ãæµ¹ ²ô±â
+	// ì¶©ëŒ ë„ê¸°
 	if (SphereComp)
 	{
 		SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -221,7 +221,7 @@ void ABaseProjectile::OnProjectileHit(
 
 	UE_LOG(LogBaseProjectile, Display, TEXT("OnProjectileHit called. OtherActor: %s"), OtherActor ? *OtherActor->GetName() : TEXT("nullptr"));
 
-	// ºÎ¸ğ Å¬·¡½º¿¡¼­ »ç¿ëÇÑ ¹ß»çÃ¼¸¦ Ç®·Î ¹İÈ¯
+	// ë¶€ëª¨ í´ë˜ìŠ¤ì—ì„œ ì‚¬ìš©í•œ ë°œì‚¬ì²´ë¥¼ í’€ë¡œ ë°˜í™˜
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
 		if (HitSoundId.IsValid())
@@ -233,7 +233,7 @@ void ABaseProjectile::OnProjectileHit(
 			OnProjectileHitNiagara.ExecuteIfBound(HitNiagaraId.PrimaryAssetName, GetActorLocation());
 		}
 
-		// Å¸ÀÌ¸Ó ÃÊ±âÈ­ ÈÄ ¹İÈ¯
+		// íƒ€ì´ë¨¸ ì´ˆê¸°í™” í›„ ë°˜í™˜
 		GetWorld()->GetTimerManager().ClearTimer(LifeSpanTimerHandle);
 		UWorld* world = GetWorld();
 		if (world == nullptr) return;

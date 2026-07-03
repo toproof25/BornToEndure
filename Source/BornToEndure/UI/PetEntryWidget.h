@@ -1,10 +1,10 @@
-/**
+ï»¿/**
 * @file PetEntryWidget.h
 * @date 2026-06-16
 * @modified 2026-06-16
 * @author toproof (kmnlmn123@gmail.com)
-* @brief PetEntryWidget.h ·¹º§¾÷ º¸»ó Ã¢¿¡¼­ °¢ PetÀ» ³ªÅ¸³»´Â À§Á¬ Å¬·¡½º
-* - PetÀÇ ÀÌ¸§°ú ¼±ÅÃ ¹öÆ°À» Æ÷ÇÔ
+* @brief PetEntryWidget.h ë ˆë²¨ì—… ë³´ìƒ ì°½ì—ì„œ ê° Petì„ ë‚˜íƒ€ë‚´ëŠ” ìœ„ì ¯ í´ë˜ìŠ¤
+* - Petì˜ ì´ë¦„ê³¼ ì„ íƒ ë²„íŠ¼ì„ í¬í•¨
 */
 
 #pragma once
@@ -52,32 +52,32 @@ public:
 	void OnPetSelectButtonClicked();
 
 	/**
-	 * @brief ¼±ÅÃµÈ ¾ÆÀÌÅÛ UI¸¦ ½Ã°¢ÀûÀ¸·Î Ç¥½ÃÇÏ±â À§ÇÑ ÇÔ¼ö·Î, bool °ª¿¡ µû¶ó BorderÀÇ »óÅÂ°¡ º¯°æµÊ
-	 * @param bSelected ¼±ÅÃ À¯¹«¸¦ true/false·Î Àü´Ş
+	 * @brief ì„ íƒëœ ì•„ì´í…œ UIë¥¼ ì‹œê°ì ìœ¼ë¡œ í‘œì‹œí•˜ê¸° ìœ„í•œ í•¨ìˆ˜ë¡œ, bool ê°’ì— ë”°ë¼ Borderì˜ ìƒíƒœê°€ ë³€ê²½ë¨
+	 * @param bSelected ì„ íƒ ìœ ë¬´ë¥¼ true/falseë¡œ ì „ë‹¬
 	 */
 	void SetSelectedVisual(bool bSelected);
 
 protected:
 
 	/**
-	 * @brief ÀÌ¹ÌÁö¸¦ ºñµ¿±â ·Îµå ÈÄ GC¸¦ ¹æÁöÇÏ±â À§ÇÑ Ä³½Ì º¯¼ö
+	 * @brief ì´ë¯¸ì§€ë¥¼ ë¹„ë™ê¸° ë¡œë“œ í›„ GCë¥¼ ë°©ì§€í•˜ê¸° ìœ„í•œ ìºì‹± ë³€ìˆ˜
 	 */
 	TSharedPtr<FStreamableHandle> TextureLoadingHandle;
 
 	/**
-	 * @brief ÀÌ¹ÌÁö ·Îµå ÈÄ È£ÃâµÇ´Â Äİ¹é ÇÔ¼ö
-	 * @param LoadedIcons ¸Ş¸ğ¸®¿¡ ·Îµå°¡ ¿Ï·áµÈ ÀÌ¹ÌÁöÀÇ °æ·Î (TSoftObjectPtr<UTexture2D>)
+	 * @brief ì´ë¯¸ì§€ ë¡œë“œ í›„ í˜¸ì¶œë˜ëŠ” ì½œë°± í•¨ìˆ˜
+	 * @param LoadedIcons ë©”ëª¨ë¦¬ì— ë¡œë“œê°€ ì™„ë£Œëœ ì´ë¯¸ì§€ì˜ ê²½ë¡œ (TSoftObjectPtr<UTexture2D>)
 	 */
 	void OnIconsLoaded(TSoftObjectPtr<UTexture2D> LoadedIcons);
 
 private:
 	/**
-	 * @brief ¼±ÅÃµÈ ¾ÆÀÌÅÛÀÇ ½Ã°¢Àû È¿°ú¸¦ ³ªÅ¸³»´Â º¯¼ö
+	 * @brief ì„ íƒëœ ì•„ì´í…œì˜ ì‹œê°ì  íš¨ê³¼ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë³€ìˆ˜
 	 */
 	bool bIsSelected = false;
 
 	/**
-	 * @brief ºÎ¸ğ WidtetÀ» ÂüÁ¶ÇÏ±â À§ÇÑ º¯¼ö
+	 * @brief ë¶€ëª¨ Widtetì„ ì°¸ì¡°í•˜ê¸° ìœ„í•œ ë³€ìˆ˜
 	 */
 	ULevelUpRewardWidget* ParentWidget;
 };

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+О╩©// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,10 +17,10 @@ class UAudioComponent;
 struct FTimerHandle;
 struct FPetAttackInfo;
 
-// ╥н╠в ╨п╥Ы д©╫╨ер
+// К║°Й╥╦ К╤└К╔≤ Л╩╓Л┼╓М┘─
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseProjectile, Log, All);
 
-// Delegate ╪╠╬П
+// Delegate Л└═Л√╦
 DECLARE_DELEGATE_TwoParams(FOnProjectileHitSound, FName, FVector);
 DECLARE_DELEGATE_TwoParams(FOnProjectileHitNiagara, FName, FVector);
 
@@ -59,7 +59,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TObjectPtr<AActor> TargetActor;
 
-	// ╩Щ╦М ╟Э╦╝
+	// Л┐²К╙┘ Й╢─К╕╛
 	FTimerHandle LifeSpanTimerHandle;
 	FTimerDelegate TimerDelegate;
 

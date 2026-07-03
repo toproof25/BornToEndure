@@ -1,20 +1,20 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Character/Player/PlayerCharacter.h"
 #include "GameFramework/Character.h"
 
-// Enhanced Input °ü·Ã Çì´õ Æ÷ÇÔ
+// Enhanced Input ê´€ë ¨ í—¤ë” í¬í•¨
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 
-// °¢Á¾ Ä³¸¯ÅÍ °ü·Ã ¾×ÅÍ ÄÄÆ÷³ÍÆ®
+// ê°ì¢… ìºë¦­í„° ê´€ë ¨ ì•¡í„° ì»´í¬ë„ŒíŠ¸
 #include "Component/StatComponent.h"
 #include "Component/InteractionComponent.h"
 #include "Item/Weapon/BaseWeapon.h"
 #include "Component/PetManagerComponent.h"
 #include "Component/PlayerHealthComponent.h"
 
-// Camera °ü·Ã Çì´õ Æ÷ÇÔ
+// Camera ê´€ë ¨ í—¤ë” í¬í•¨
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -24,28 +24,28 @@ APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// USpringArmComponent, UCameraComponent¸¦ »ı¼º
+	// USpringArmComponent, UCameraComponentë¥¼ ìƒì„±
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 
-	// Ä«¸Ş¶ó À§Ä¡¸¦ ¼³Á¤
+	// ì¹´ë©”ë¼ ìœ„ì¹˜ë¥¼ ì„¤ì •
 	GetMesh()->SetRelativeLocationAndRotation(
 		FVector(0.0f, 0.0f, -90.0f), 
 		FQuat(FRotator(0.0f, -90.0f, 0.0f))
 	);
 
-	// ÇöÀç ¸Å½¬¿¡ ÀÚ½ÄÀ¸·Î ºÙ¿© °íÁ¤ 
+	// í˜„ì¬ ë§¤ì‰¬ì— ìì‹ìœ¼ë¡œ ë¶™ì—¬ ê³ ì • 
 	SpringArmComp->SetupAttachment(RootComponent);
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);\
 
-	// Spring ArmÀÌ Ä³¸¯ÅÍ È¸ÀüÀ» µû¶ó°¡µµ·Ï ¼³Á¤
+	// Spring Armì´ ìºë¦­í„° íšŒì „ì„ ë”°ë¼ê°€ë„ë¡ ì„¤ì •
 	SpringArmComp->bUsePawnControlRotation = true;
 
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bIgnoreBaseRotation = false;
 
-	// ÄÁÆ®·Ñ·¯°¡ ¿øÇÏ´Â È¸ÀüÀ» »ç¿ëÇÏµµ·Ï È°¼ºÈ­
+	// ì»¨íŠ¸ë¡¤ëŸ¬ê°€ ì›í•˜ëŠ” íšŒì „ì„ ì‚¬ìš©í•˜ë„ë¡ í™œì„±í™”
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
 	PetManagerComp = CreateDefaultSubobject<UPetManagerComponent>(TEXT("PetManagerComp"));
@@ -77,7 +77,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// PlayerInputComponent¸¦ Enhanced InputÀ» »ç¿ëÇÏ±â À§ÇØ UEnhancedInputComponent·Î Ä³½ºÆÃ
+	// PlayerInputComponentë¥¼ Enhanced Inputì„ ì‚¬ìš©í•˜ê¸° ìœ„í•´ UEnhancedInputComponentë¡œ ìºìŠ¤íŒ…
 	if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Moving);
@@ -107,21 +107,21 @@ void APlayerCharacter::Moving(const FInputActionValue& Value)
 {
 	if (Controller == nullptr) return;
 
-	// ÀÔ·ÂµÈ Axixs 2D°ªÀ» º¤ÅÍ¸¦ 2D º¤ÅÍ·Î ÃßÃâ
+	// ì…ë ¥ëœ Axixs 2Dê°’ì„ ë²¡í„°ë¥¼ 2D ë²¡í„°ë¡œ ì¶”ì¶œ
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	//UE_LOG(LogTemp, Log, TEXT("Move Action Triggered with Value: %s"), *MovementVector.ToString());
 
-	// ÄÁÆ®·Ñ·¯ È¸Àü¿¡¼­ Yaw(¼öÆò¸é)¸¸ ÃßÃâ
+	// ì»¨íŠ¸ë¡¤ëŸ¬ íšŒì „ì—ì„œ Yaw(ìˆ˜í‰ë©´)ë§Œ ì¶”ì¶œ
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-	// Àü¹æ ¹æÇâ°ú ¿À¸¥ÂÊ ¹æÇâ º¤ÅÍ ±¸ÇÏ±â
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);  // X ÃàÀÌ ¾ÕÀ¸·Î
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);    // Y ÃàÀÌ ¿À¸¥ÂÊ
+	// ì „ë°© ë°©í–¥ê³¼ ì˜¤ë¥¸ìª½ ë°©í–¥ ë²¡í„° êµ¬í•˜ê¸°
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);  // X ì¶•ì´ ì•ìœ¼ë¡œ
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);    // Y ì¶•ì´ ì˜¤ë¥¸ìª½
 
-	// AddMovementInputÀ¸·Î ÀÌµ¿ ÀÔ·ÂÀ» °ÔÀÓÇÃ·¹ÀÌ ½Ã½ºÅÛ¿¡ Àü´Ş
-	AddMovementInput(ForwardDirection, MovementVector.Y);  // Y´Â ¾ÕµÚ
-	AddMovementInput(RightDirection, MovementVector.X);    // X´Â ÁÂ¿ì
+	// AddMovementInputìœ¼ë¡œ ì´ë™ ì…ë ¥ì„ ê²Œì„í”Œë ˆì´ ì‹œìŠ¤í…œì— ì „ë‹¬
+	AddMovementInput(ForwardDirection, MovementVector.Y);  // YëŠ” ì•ë’¤
+	AddMovementInput(RightDirection, MovementVector.X);    // XëŠ” ì¢Œìš°
 }
 
 void APlayerCharacter::Sprint(const FInputActionValue& Value)
@@ -166,10 +166,10 @@ void APlayerCharacter::TurnAndLookUp(const FInputActionValue& Value)
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 	//UE_LOG(LogTemp, Warning, TEXT("Look Vector: X=%.3f, Y=%.3f"), LookAxisVector.X, LookAxisVector.Y);
 
-	// ¸¶¿ì½º XÃà ÁÂ¿ì È¸Àü (Yaw)
+	// ë§ˆìš°ìŠ¤ Xì¶• ì¢Œìš° íšŒì „ (Yaw)
 	AddControllerYawInput(LookAxisVector.X);
 
-	// ¸¶¿ì½º YÃà »óÇÏ È¸Àü (Pitch) 
+	// ë§ˆìš°ìŠ¤ Yì¶• ìƒí•˜ íšŒì „ (Pitch) 
 	AddControllerPitchInput(LookAxisVector.Y);
 }
 

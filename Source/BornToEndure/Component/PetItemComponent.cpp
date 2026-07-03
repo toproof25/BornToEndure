@@ -1,4 +1,4 @@
-#include "Component/PetItemComponent.h"
+ï»¿#include "Component/PetItemComponent.h"
 #include "Component/PetStatComponent.h"
 #include "Data/PetItemDataAsset.h"
 #include "Data/PetSynergyDataAsset.h"
@@ -22,7 +22,7 @@ void UPetItemComponent::AddItem(UPetItemDataAsset* ItemData)
 {
     if (!ItemData) return;
 
-    // 1. ¾ÆÀÌÅÛ ÀÎ½ºÅÏ½º »ı¼º
+    // 1. ì•„ì´í…œ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±
     FPetItemInstance NewInstance;
     NewInstance.InstanceId = FGuid::NewGuid();
     NewInstance.LoadedData = ItemData;
@@ -30,15 +30,15 @@ void UPetItemComponent::AddItem(UPetItemDataAsset* ItemData)
 
     OwnedItems.Add(NewInstance);
 
-    // 2. ¾ÆÀÌÅÛ DataAsset¿¡°Ô Àû¿ëÀ» À§ÀÓ (Visitor ÆĞÅÏ)
-        // StatItemData¶ó¸é ¡æ StatComponent¿¡ modifier¸¦ Ãß°¡
-        // ProjectileItemData¶ó¸é ¡æ ItemComponentÀÇ ProjectileModifier¿¡ Ãß°¡
+    // 2. ì•„ì´í…œ DataAssetì—ê²Œ ì ìš©ì„ ìœ„ì„ (Visitor íŒ¨í„´)
+        // StatItemDataë¼ë©´ â†’ StatComponentì— modifierë¥¼ ì¶”ê°€
+        // ProjectileItemDataë¼ë©´ â†’ ItemComponentì˜ ProjectileModifierì— ì¶”ê°€
     ItemData->ApplyToComponent(this);
 
-    // 3. ½Ã³ÊÁö Àç°Ë»ç
+    // 3. ì‹œë„ˆì§€ ì¬ê²€ì‚¬
     CheckAndUpdateSynergies();
 
-    // 4. ¿ÜºÎ¿¡ ¹æ¼Û
+    // 4. ì™¸ë¶€ì— ë°©ì†¡
     OnItemAdded.Broadcast(ItemData);
 
     UE_LOG(LogTemp, Log, TEXT("[PetItemComponent] Item added: %s (InstanceId: %s)"),
@@ -47,7 +47,7 @@ void UPetItemComponent::AddItem(UPetItemDataAsset* ItemData)
 
 void UPetItemComponent::RemoveItem(const FGuid& InstanceId)
 {
-    // 1.¼ÒÀ¯ÇÑ ¾ÆÀÌÅÛ¿¡¼­ FGuid°¡ ÀÏÄ¡ÇÏ´Â ¾ÆÀÌÅÛÀÇ Index¸¦ Ã£´Â´Ù
+    // 1.ì†Œìœ í•œ ì•„ì´í…œì—ì„œ FGuidê°€ ì¼ì¹˜í•˜ëŠ” ì•„ì´í…œì˜ Indexë¥¼ ì°¾ëŠ”ë‹¤
     const int32 Index = OwnedItems.IndexOfByPredicate([&InstanceId](const FPetItemInstance& Inst)
         {
             return Inst.InstanceId == InstanceId;
@@ -59,18 +59,18 @@ void UPetItemComponent::RemoveItem(const FGuid& InstanceId)
         return;
     }
 
-    // 2.Ã£Àº Index¸¦ ±â¹İÀ¸·Î DataAssetÀ» °¡Á®¿Â´Ù
+    // 2.ì°¾ì€ Indexë¥¼ ê¸°ë°˜ìœ¼ë¡œ DataAssetì„ ê°€ì ¸ì˜¨ë‹¤
     UPetItemDataAsset* ItemData = OwnedItems[Index].LoadedData;
     if (ItemData)
     {
-		// 3.FGuid¸¦ ±â¹İÀ¸·Î ¾ÆÀÌÅÛÀ» °¢ Component¿¡¼­ Á¦°ÅÇÑ´Ù
+		// 3.FGuidë¥¼ ê¸°ë°˜ìœ¼ë¡œ ì•„ì´í…œì„ ê° Componentì—ì„œ ì œê±°í•œë‹¤
         ItemData->RemoveFromComponent(this, InstanceId);
     }
 
-    // 4.ÃÖÁ¾ÀûÀ¸·Î ¼ÒÀ¯ÇÑ ¾ÆÀÌÅÛ¿¡¼­ Á¦°ÅÇÒ ¾ÆÀÌÅÛ¿¡ ÇØ´çÇÏ´Â Index¸¦ Á¦°ÅÇÑ´Ù
+    // 4.ìµœì¢…ì ìœ¼ë¡œ ì†Œìœ í•œ ì•„ì´í…œì—ì„œ ì œê±°í•  ì•„ì´í…œì— í•´ë‹¹í•˜ëŠ” Indexë¥¼ ì œê±°í•œë‹¤
     OwnedItems.RemoveAtSwap(Index);
 
-    // 5.½Ã³ÊÁö¸¦ Àç°è»êÇÑ ÈÄ ¿ÜºÎ¿¡ ¹æ¼ÛÇÑ´Ù
+    // 5.ì‹œë„ˆì§€ë¥¼ ì¬ê³„ì‚°í•œ í›„ ì™¸ë¶€ì— ë°©ì†¡í•œë‹¤
     CheckAndUpdateSynergies();
     OnItemRemoved.Broadcast(InstanceId);
 }
@@ -80,7 +80,7 @@ void UPetItemComponent::AddProjectileModifier(const FProjectileModifierData& Mod
 {
     ProjectileModifiers.Add(InstanceId, Modifier);
     
-    // »õ·Î¿î ¹ß»çÃ¼ ¿ÀºêÁ§Æ® Ç®¸µ
+    // ìƒˆë¡œìš´ ë°œì‚¬ì²´ ì˜¤ë¸Œì íŠ¸ í’€ë§
     UWorld* World = GetWorld();
     if(!World) return;
     UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
@@ -94,7 +94,7 @@ void UPetItemComponent::AddProjectileModifier(const FProjectileModifierData& Mod
 void UPetItemComponent::RemoveProjectileModifier(const FGuid& InstanceId)
 {
 
-    // »õ·Î¿î ¹ß»çÃ¼ ¿ÀºêÁ§Æ® Ç®¸µ¿¡¼­ Á¦°Å
+    // ìƒˆë¡œìš´ ë°œì‚¬ì²´ ì˜¤ë¸Œì íŠ¸ í’€ë§ì—ì„œ ì œê±°
     UWorld* World = GetWorld();
     if (!World) return;
     UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
@@ -112,25 +112,25 @@ void UPetItemComponent::RemoveProjectileModifier(const FGuid& InstanceId)
 
 FProjectileModifierData UPetItemComponent::GetAggregatedProjectileModifier() const
 {
-    // 1.±âº» ¹ß»çÃ¼¸¦ ¹ÙÅÁÀ¸·Î °á°ú ¹ß»çÃ¼¸¦ ¸¸µç´Ù
+    // 1.ê¸°ë³¸ ë°œì‚¬ì²´ë¥¼ ë°”íƒ•ìœ¼ë¡œ ê²°ê³¼ ë°œì‚¬ì²´ë¥¼ ë§Œë“ ë‹¤
     FProjectileModifierData Result;
-    Result.ProjectileCountAdd = 1; // ±âº» 1¹ß¿¡¼­ ½ÃÀÛ
+    Result.ProjectileCountAdd = 1; // ê¸°ë³¸ 1ë°œì—ì„œ ì‹œì‘
 
-    // 2.ProjectileModifiersÀÇ ¸ğµç ¿ä¼Ò¸¦ ¼øÈ¸
+    // 2.ProjectileModifiersì˜ ëª¨ë“  ìš”ì†Œë¥¼ ìˆœíšŒ
     for (const auto& [Id, Modifier] : ProjectileModifiers)
     {
-        // ¹ß»çÃ¼ Å¬·¡½º ±³Ã¼: ¸¶Áö¸·¿¡ Ãß°¡µÈ °ÍÀ¸·Î µ¤¾î¾´´Ù
+        // ë°œì‚¬ì²´ í´ë˜ìŠ¤ êµì²´: ë§ˆì§€ë§‰ì— ì¶”ê°€ëœ ê²ƒìœ¼ë¡œ ë®ì–´ì“´ë‹¤
         if (!Modifier.OverrideProjectileClass.IsNull())
         {
             Result.OverrideProjectileClass = Modifier.OverrideProjectileClass;
         }
 
-        // Ãß°¡ ¹ß»ç, Å©±â, ½ºÇÇµå µî ¿¬»ê
+        // ì¶”ê°€ ë°œì‚¬, í¬ê¸°, ìŠ¤í”¼ë“œ ë“± ì—°ì‚°
         Result.ProjectileCountAdd += Modifier.ProjectileCountAdd;
         Result.SizeMultiplier *= Modifier.SizeMultiplier;
         Result.SpeedMultiplier *= Modifier.SpeedMultiplier;
 
-        // ÆĞÅÏ: °¡Àå ¸¶Áö¸·(¿ì¼±¼øÀ§ ³ôÀº) °ÍÀÌ Àû¿ë
+        // íŒ¨í„´: ê°€ì¥ ë§ˆì§€ë§‰(ìš°ì„ ìˆœìœ„ ë†’ì€) ê²ƒì´ ì ìš©
         if (Modifier.Pattern != EProjectilePattern::Single)
         {
             Result.Pattern = Modifier.Pattern;
@@ -142,7 +142,7 @@ FProjectileModifierData UPetItemComponent::GetAggregatedProjectileModifier() con
 
 FGameplayTag UPetItemComponent::GetDominantElementTag() const
 {
-    // ÇöÀç ¼ÒÀ¯ÇÑ ¸ğµç ¾ÆÀÌÅÛÀÇ ½Ã³ÊÁö ÅÂ±×¸¦ Áı°è
+    // í˜„ì¬ ì†Œìœ í•œ ëª¨ë“  ì•„ì´í…œì˜ ì‹œë„ˆì§€ íƒœê·¸ë¥¼ ì§‘ê³„
     TMap<FGameplayTag, int32> TagCounts;
     for (const FPetItemInstance& Instance : OwnedItems)
     {
@@ -153,7 +153,7 @@ FGameplayTag UPetItemComponent::GetDominantElementTag() const
         }
     }
 
-    // Áı°èÇÑ ½Ã³ÊÁö ÅÂ±× Áß °¡Àå ºóµµ°¡ ³ôÀº ÅÂ±×¸¦ ¹İÈ¯
+    // ì§‘ê³„í•œ ì‹œë„ˆì§€ íƒœê·¸ ì¤‘ ê°€ì¥ ë¹ˆë„ê°€ ë†’ì€ íƒœê·¸ë¥¼ ë°˜í™˜
     FGameplayTag DominantTag;
     int32 MaxCount = 0;
     for (const auto& [Tag, Count] : TagCounts)
@@ -172,7 +172,7 @@ void UPetItemComponent::CheckAndUpdateSynergies()
 {
     if (AllSynergyData.IsEmpty()) return;
 
-    // ÇöÀç ¾ÆÀÌÅÛÀÇ ¸ğµç ÅÂ±× Áı°è
+    // í˜„ì¬ ì•„ì´í…œì˜ ëª¨ë“  íƒœê·¸ ì§‘ê³„
     TMap<FGameplayTag, int32> CurrentTagCounts;
     for (const FPetItemInstance& Instance : OwnedItems)
     {
@@ -183,12 +183,12 @@ void UPetItemComponent::CheckAndUpdateSynergies()
         }
     }
 
-    // StatComponent¸¦ Æ÷ÀÎÅÍ º¯¼ö·Î ÀÓ½Ã·Î °¡Á®¿È
+    // StatComponentë¥¼ í¬ì¸í„° ë³€ìˆ˜ë¡œ ì„ì‹œë¡œ ê°€ì ¸ì˜´
     APetCompanionCharacter* PetChar = Cast<APetCompanionCharacter>(GetOwner());
     UPetStatComponent* StatComp = PetChar ? PetChar->GetStatComponent() : nullptr;
 
-    // ÃÊ±â¿¡ °ÔÀÓ¿¡ Á¸ÀçÇÏ´Â ¸ğµç ½Ã³ÊÁö µ¥ÀÌÅÍ¸¦ ¹Ì¸® ·ÎµåÇÑ `AllSynergyData`À» ¼øÈ¸
-    // ÇöÀç Áı°èÇÑ ÅÂ±×¿¡¼­ ½Ã³ÊÁö Á¶°ÇÀÌ ¸¸Á·ÇÏ´Â ½Ã³ÊÁö¸¦ Àû¿ëÇÏ´Â ¹æ½Ä
+    // ì´ˆê¸°ì— ê²Œì„ì— ì¡´ì¬í•˜ëŠ” ëª¨ë“  ì‹œë„ˆì§€ ë°ì´í„°ë¥¼ ë¯¸ë¦¬ ë¡œë“œí•œ `AllSynergyData`ì„ ìˆœíšŒ
+    // í˜„ì¬ ì§‘ê³„í•œ íƒœê·¸ì—ì„œ ì‹œë„ˆì§€ ì¡°ê±´ì´ ë§Œì¡±í•˜ëŠ” ì‹œë„ˆì§€ë¥¼ ì ìš©í•˜ëŠ” ë°©ì‹
     for (UPetSynergyDataAsset* SynergyData : AllSynergyData)
     {
         if (!SynergyData) continue;
@@ -196,14 +196,14 @@ void UPetItemComponent::CheckAndUpdateSynergies()
         const bool bShouldBeActive = IsSynergyConditionMet(SynergyData, CurrentTagCounts);
         const bool bCurrentlyActive = ActiveSynergies.Contains(SynergyData);
 
-		// È°¼ºÈ­ °¡´ÉÇÑ ½Ã³ÊÁö´Â Á¸ÀçÇÏ¸é¼­ ÇöÀç È°¼ºÈ­ »óÅÂ°¡ ¾Æ´Ñ °æ¿ì -> È°¼ºÈ­
+		// í™œì„±í™” ê°€ëŠ¥í•œ ì‹œë„ˆì§€ëŠ” ì¡´ì¬í•˜ë©´ì„œ í˜„ì¬ í™œì„±í™” ìƒíƒœê°€ ì•„ë‹Œ ê²½ìš° -> í™œì„±í™”
         if (bShouldBeActive && !bCurrentlyActive)
         {
-            // ½Ã³ÊÁö¸¦ È°¼ºÈ­ÇÏ±â À§ÇØ Add
+            // ì‹œë„ˆì§€ë¥¼ í™œì„±í™”í•˜ê¸° ìœ„í•´ Add
             ActiveSynergies.Add(SynergyData);
             if (StatComp)
             {
-                // StatComponent¿¡ ½Ã³ÊÁö Stat º¯È­ Àû¿ë
+                // StatComponentì— ì‹œë„ˆì§€ Stat ë³€í™” ì ìš©
                 for (FStatModifier Bonus : SynergyData->StatBonuses)
                 {
                     Bonus.SourceId = FGuid::NewGuid();
@@ -215,14 +215,14 @@ void UPetItemComponent::CheckAndUpdateSynergies()
                 *SynergyData->SynergyName.ToString());
         }
 
-		// È°¼ºÈ­ °¡´ÉÇÑ ½Ã³ÊÁö°¡ ¾øÀ¸¸é¼­ ÇöÀç È°¼ºÈ­µÈ ½Ã³ÊÁö°¡ Á¸ÀçÇÏ´Â °æ¿ì -> ºñÈ°¼ºÈ­
+		// í™œì„±í™” ê°€ëŠ¥í•œ ì‹œë„ˆì§€ê°€ ì—†ìœ¼ë©´ì„œ í˜„ì¬ í™œì„±í™”ëœ ì‹œë„ˆì§€ê°€ ì¡´ì¬í•˜ëŠ” ê²½ìš° -> ë¹„í™œì„±í™”
         else if (!bShouldBeActive && bCurrentlyActive)
         {
-            // ½Ã³ÊÁö ºñÈ°¼ºÈ­
+            // ì‹œë„ˆì§€ ë¹„í™œì„±í™”
             ActiveSynergies.Remove(SynergyData);
 
-            // ½Ã³ÊÁö modifier Á¦°Å´Â º°µµ SourceId ÃßÀû ·ÎÁ÷ ÇÊ¿ä
-            // (½ÉÈ­ ±¸Çö ´Ü°è¿¡¼­ ¿Ï¼º)
+            // ì‹œë„ˆì§€ modifier ì œê±°ëŠ” ë³„ë„ SourceId ì¶”ì  ë¡œì§ í•„ìš”
+            // (ì‹¬í™” êµ¬í˜„ ë‹¨ê³„ì—ì„œ ì™„ì„±)
             OnSynergyChanged.Broadcast(SynergyData, false);
         }
     }
@@ -232,15 +232,15 @@ bool UPetItemComponent::IsSynergyConditionMet(
     const UPetSynergyDataAsset* SynergyData,
     const TMap<FGameplayTag, int32>& CurrentTagCounts) const
 {
-    // ½Ã³ÊÁö µ¥ÀÌÅÍ ÀÚÃ¼°¡ ¾ø°Å³ª Á¶°ÇÀÌ ¸¸Á·ÇÏ´Â°Ô ¾ø´Ù¸é false
-    // È°¼ºÈ­ °¡´ÉÇÑ ½Ã³ÊÁö°¡ 1°³¶óµµ Á¸ÀçÇÑ´Ù¸é true
+    // ì‹œë„ˆì§€ ë°ì´í„° ìì²´ê°€ ì—†ê±°ë‚˜ ì¡°ê±´ì´ ë§Œì¡±í•˜ëŠ”ê²Œ ì—†ë‹¤ë©´ false
+    // í™œì„±í™” ê°€ëŠ¥í•œ ì‹œë„ˆì§€ê°€ 1ê°œë¼ë„ ì¡´ì¬í•œë‹¤ë©´ true
 
     for (const auto& [RequiredTag, RequiredCount] : SynergyData->RequiredTagCounts)
     {
         const int32 CurrentCount = CurrentTagCounts.FindRef(RequiredTag);
         if (CurrentCount < RequiredCount)
         {
-            return false; // ÇÏ³ª¶óµµ Á¶°Ç ¹Ì´ŞÀÌ¸é ½Ã³ÊÁö ºÒ¼º¸³
+            return false; // í•˜ë‚˜ë¼ë„ ì¡°ê±´ ë¯¸ë‹¬ì´ë©´ ì‹œë„ˆì§€ ë¶ˆì„±ë¦½
         }
     }
     return !SynergyData->RequiredTagCounts.IsEmpty();
@@ -248,7 +248,7 @@ bool UPetItemComponent::IsSynergyConditionMet(
 
 void UPetItemComponent::LoadSynergyDataAsync()
 {
-    // AssetManager¸¦ ÅëÇØ "PetSynergy" Ä«Å×°í¸®ÀÇ ¸ğµç ¿¡¼ÂÀ» ºñµ¿±â ·Îµå
+    // AssetManagerë¥¼ í†µí•´ "PetSynergy" ì¹´í…Œê³ ë¦¬ì˜ ëª¨ë“  ì—ì…‹ì„ ë¹„ë™ê¸° ë¡œë“œ
     UAssetManager& AM = UAssetManager::Get();
 
     TArray<FPrimaryAssetId> SynergyIds;

@@ -1,4 +1,4 @@
-
+ï»¿
 #include "Item/ItemPickupTestActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Component/PetManagerComponent.h"
@@ -89,7 +89,7 @@ void AItemPickupTestActor::GetItem()
 		{
 			if (ItemData)
 			{
-				// ÀÌ¹Ì ·ÎµåµÈ DataAssetÀÌ¹Ç·Î Á÷Á¢ Àü´Þ
+				// ì´ë¯¸ ë¡œë“œëœ DataAssetì´ë¯€ë¡œ ì§ì ‘ ì „ë‹¬
 				PetMgr->GiveItemToPet(PetMgr->GetActivePet(), ItemData);
 				Destroy();
 			}

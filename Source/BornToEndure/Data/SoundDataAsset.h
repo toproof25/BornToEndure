@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,39 +16,39 @@ class BORNTOENDURE_API USoundDataAsset : public UPrimaryDataAsset
 	
 public:
 
-    // ½ÇÁ¦ »ç¿îµå ¿¡¼Â (SoundWave, SoundCue µî)
+    // ì‹¤ì œ ì‚¬ìš´ë“œ ì—ì…‹ (SoundWave, SoundCue ë“±)
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
     USoundBase* Sound;
 
-    // »ç¿îµå º¼·ı ¹èÀ² (0~1 ±âº» 1) - ÀüÃ¼ À½·® Á¦¾î
+    // ì‚¬ìš´ë“œ ë³¼ë¥¨ ë°°ìœ¨ (0~1 ê¸°ë³¸ 1) - ì „ì²´ ìŒëŸ‰ ì œì–´
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound", meta = (ClampMin = "0.0", ClampMax = "1.0"))
     float VolumeMultiplier = 1.0f;
 
-    // ÇÇÄ¡ ¹èÀ² (0.5~2 ±âº» 1) - Àç»ı¼Óµµ ¹× À½³ôÀÌ Á¶Àı
+    // í”¼ì¹˜ ë°°ìœ¨ (0.5~2 ê¸°ë³¸ 1) - ì¬ìƒì†ë„ ë° ìŒë†’ì´ ì¡°ì ˆ
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound", meta = (ClampMin = "0.5", ClampMax = "2.0"))
     float PitchMultiplier = 1.0f;
 
-    // Àú¿ª ÇÊÅÍ ÄÆ¿ÀÇÁ ÁÖÆÄ¼ö (Hz, 20k ÀÌ»óÀº ÇÊÅÍ ¾øÀ½)
+    // ì €ì—­ í•„í„° ì»·ì˜¤í”„ ì£¼íŒŒìˆ˜ (Hz, 20k ì´ìƒì€ í•„í„° ì—†ìŒ)
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound", meta = (ClampMin = "0.0"))
     float LowPassFilterFrequency = 20000.0f;
 
-    // »ç¿îµå °¨¼è ¼³Á¤ (°Å¸®º° º¼·ı, °ø°£È­ µî)
+    // ì‚¬ìš´ë“œ ê°ì‡  ì„¤ì • (ê±°ë¦¬ë³„ ë³¼ë¥¨, ê³µê°„í™” ë“±)
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
     USoundAttenuation* AttenuationSettings;
 
-    // ÃÖ´ë µ¿½Ã Àç»ı ¼ö, À½¼º °æÇÕ Á¦¾î
+    // ìµœëŒ€ ë™ì‹œ ì¬ìƒ ìˆ˜, ìŒì„± ê²½í•© ì œì–´
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
     USoundConcurrency* ConcurrencySettings;
 
-    // »ç¿îµå ¿ì¼±¼øÀ§ (³ôÀ»¼ö·Ï Áß¿ä)
+    // ì‚¬ìš´ë“œ ìš°ì„ ìˆœìœ„ (ë†’ì„ìˆ˜ë¡ ì¤‘ìš”)
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound", meta = (ClampMin = "0"))
     int32 Priority = 0;
 
-    // »ç¿îµå Å¬·¡½º (¹Í½Ì, º¼·ı ±×·ìÈ­ µî)
+    // ì‚¬ìš´ë“œ í´ë˜ìŠ¤ (ë¯¹ì‹±, ë³¼ë¥¨ ê·¸ë£¹í™” ë“±)
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
     USoundClass* SoundClass;
 
-	// Asset Manager °¡ ÀÌ ¿¡¼ÂÀ» ÀÎ½ÄÇÒ ¶§ ¾²´Â Å¸ÀÔ ÀÌ¸§
+	// Asset Manager ê°€ ì´ ì—ì…‹ì„ ì¸ì‹í•  ë•Œ ì“°ëŠ” íƒ€ì… ì´ë¦„
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId("SoundDataAsset", GetFName());

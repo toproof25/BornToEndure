@@ -1,4 +1,4 @@
-#include "Subsystem/EffectSubsystem.h"
+ï»¿#include "Subsystem/EffectSubsystem.h"
 
 #include "Data/SoundDataAsset.h"
 #include "Data/NiagaraDataAsset.h"
@@ -18,7 +18,7 @@ void UEffectSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	Super::Initialize(Collection);
 
-	// ÀÌ°÷¿¡¼­ ÇÊ¿äÇÑ ÀÌÆåÆ® °ü·Ã ÃÊ±âÈ­ ÀÛ¾÷À» ¼öÇà
+	// ì´ê³³ì—ì„œ í•„ìš”í•œ ì´í™íŠ¸ ê´€ë ¨ ì´ˆê¸°í™” ì‘ì—…ì„ ìˆ˜í–‰
 	UE_LOG(LogEffectSubsystem, Display, TEXT("EffectSubsystem Initialized"));
 }
 
@@ -33,17 +33,17 @@ void UEffectSubsystem::PreloadEffectAssets(FPrimaryAssetId PrimaryAssetId)
 
 	FLoadedAsset& Asset = PreloadAsset.FindOrAdd(PrimaryAssetId);
 
-	// TMap¿¡ Á¸ÀçÇÏ¸é, Ä«¿îÆ®¸¦ Áõ°¡½ÃÅ°°í ¹Ù·Î ¸®ÅÏ
+	// TMapì— ì¡´ì¬í•˜ë©´, ì¹´ìš´íŠ¸ë¥¼ ì¦ê°€ì‹œí‚¤ê³  ë°”ë¡œ ë¦¬í„´
 	if (Asset.Count > 0)
 	{
 		Asset.Count++;
 		return;
 	}
 
-	// PreloadAsset¿¡¼­ Á÷Á¢ °ª °¡Á®¿À±â (ÃÖÃÊ¿¡´Â À¯È¿ÇÏÁö ¾ÊÀº °ª)	
+	// PreloadAssetì—ì„œ ì§ì ‘ ê°’ ê°€ì ¸ì˜¤ê¸° (ìµœì´ˆì—ëŠ” ìœ íš¨í•˜ì§€ ì•Šì€ ê°’)	
 	TSharedPtr<FStreamableHandle>& StreamableHandle = Asset.StreamableHandle;
 
-	// À¯È¿ÇÏÁö ¾ÊÀ¸¸é(ÃÖÃÊÀÇ °æ¿ì) »õ·Î ·Îµå ÈÄ TMap¿¡ ÀúÀå
+	// ìœ íš¨í•˜ì§€ ì•Šìœ¼ë©´(ìµœì´ˆì˜ ê²½ìš°) ìƒˆë¡œ ë¡œë“œ í›„ TMapì— ì €ì¥
 	if (!StreamableHandle.IsValid())
 	{
 		UAssetManager& AssetManager = UAssetManager::Get();
@@ -72,9 +72,9 @@ void UEffectSubsystem::UnloadEffectAssets(FPrimaryAssetId PrimaryAssetId)
 		{
 			if (Asset->StreamableHandle.IsValid())
 			{
-				Asset->StreamableHandle->ReleaseHandle(); // ÇÚµé ÇØÁ¦
+				Asset->StreamableHandle->ReleaseHandle(); // í•¸ë“¤ í•´ì œ
 			}
-			PreloadAsset.Remove(PrimaryAssetId);		   // TMap¿¡¼­ Á¦°Å
+			PreloadAsset.Remove(PrimaryAssetId);		   // TMapì—ì„œ ì œê±°
 		}
 	}
 }
@@ -82,22 +82,22 @@ void UEffectSubsystem::UnloadEffectAssets(FPrimaryAssetId PrimaryAssetId)
 
 void UEffectSubsystem::SpawnSoundAtLocation(FName SoundName, FVector SoundSpawnLocation)
 {
-	// ¼³Á¤ÇÑ ID "SoundDataAsset" + ¿¡¼Â ÆÄÀÏ¸í
+	// ì„¤ì •í•œ ID "SoundDataAsset" + ì—ì…‹ íŒŒì¼ëª…
 	FPrimaryAssetType AssetType(FName(TEXT("SoundDataAsset")));
 	FPrimaryAssetId AssetId(AssetType, SoundName);
 
-	// ¿¡¼Â ¸Å´ÏÀú ÂüÁ¶
+	// ì—ì…‹ ë§¤ë‹ˆì € ì°¸ì¡°
 	UAssetManager& AssetManager = UAssetManager::Get();
 	USoundDataAsset* LoadedData = Cast<USoundDataAsset>(AssetManager.GetPrimaryAssetObject(AssetId));
 
-	// ÀÌ¹Ì ¸Ş¸ğ¸®¿¡ ·ÎµåµÇ¾î ÀÖ´ÂÁö Ã¼Å© ÈÄ Àç»ı
+	// ì´ë¯¸ ë©”ëª¨ë¦¬ì— ë¡œë“œë˜ì–´ ìˆëŠ”ì§€ ì²´í¬ í›„ ì¬ìƒ
 	if (LoadedData && LoadedData->Sound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, LoadedData->Sound, SoundSpawnLocation);
 		return;
 	}
 
-	// AssetId ºñµ¿±â ·Îµå ÈÄ Äİ¹é
+	// AssetId ë¹„ë™ê¸° ë¡œë“œ í›„ ì½œë°±
 	TSharedPtr<FStreamableHandle> Handle = AssetManager.LoadPrimaryAsset(AssetId);
 	if (Handle.IsValid())
 	{
@@ -136,15 +136,15 @@ void UEffectSubsystem::OnSoundLoaded(FPrimaryAssetId LoadedAssetId, FVector Loca
 
 void UEffectSubsystem::SpawnNiagaraAtLocation(FName NiagaraName, FVector NiagaraSpawnLocation)
 {
-	// ¼³Á¤ÇÑ ID "NiagaraDataAsset" + ¿¡¼Â ÆÄÀÏ¸í
+	// ì„¤ì •í•œ ID "NiagaraDataAsset" + ì—ì…‹ íŒŒì¼ëª…
 	FPrimaryAssetType AssetType(FName(TEXT("NiagaraDataAsset")));
 	FPrimaryAssetId AssetId(AssetType, NiagaraName);
 
-	// ¿¡¼Â ¸Å´ÏÀú ÂüÁ¶
+	// ì—ì…‹ ë§¤ë‹ˆì € ì°¸ì¡°
 	UAssetManager& AssetManager = UAssetManager::Get();
 	UNiagaraDataAsset* LoadedData = Cast<UNiagaraDataAsset>(AssetManager.GetPrimaryAssetObject(AssetId));
 
-	// ÀÌ¹Ì ¸Ş¸ğ¸®¿¡ ·ÎµåµÇ¾î ÀÖ´ÂÁö Ã¼Å© ÈÄ Àç»ı
+	// ì´ë¯¸ ë©”ëª¨ë¦¬ì— ë¡œë“œë˜ì–´ ìˆëŠ”ì§€ ì²´í¬ í›„ ì¬ìƒ
 	if (LoadedData && LoadedData->Niagara)
 	{
 		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -161,7 +161,7 @@ void UEffectSubsystem::SpawnNiagaraAtLocation(FName NiagaraName, FVector Niagara
 		return;
 	}
 
-	// AssetId ºñµ¿±â ·Îµå ÈÄ Äİ¹é
+	// AssetId ë¹„ë™ê¸° ë¡œë“œ í›„ ì½œë°±
 	TSharedPtr<FStreamableHandle> Handle = AssetManager.LoadPrimaryAsset(AssetId);
 	if (Handle.IsValid())
 	{

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -32,13 +32,13 @@ private:
 	float BaseWalkSpeed = 300.f;
 
 	UPROPERTY(EditAnywhere, Category = "Stat")
-	float SprintMultiplier = 1.5f; // ´Ş¸± ¶§´Â 1.5¹è »¡¶óÁü
+	float SprintMultiplier = 1.5f; // ë‹¬ë¦´ ë•ŒëŠ” 1.5ë°° ë¹¨ë¼ì§
 
 	UPROPERTY()
 	bool bIsSprinting = false;
 
 	UPROPERTY()
-	float ItemSpeedBonus = 1.0f; // ¾ÆÀÌÅÛ È¿°ú (¿¹: +20%¸é 1.2f)
+	float ItemSpeedBonus = 1.0f; // ì•„ì´í…œ íš¨ê³¼ (ì˜ˆ: +20%ë©´ 1.2f)
 
 public:
 

@@ -1,4 +1,4 @@
-#include "Subsystem/ObjectPoolSubsystem.h"
+ï»¿#include "Subsystem/ObjectPoolSubsystem.h"
 
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
@@ -25,10 +25,10 @@ void UObjectPoolSubsystem::InitializePoolForClass(TSubclassOf<AActor> ActorClass
     UWorld* World = GetWorldChecked();
 
 
-    // AActor¸¦ ºÎ¸ğ Å¬·¡½º·Î µÎ±â¿¡ °¢ ÀÚ½Ä Å¬·¡½ºº°·Î °ü¸®ÇÒ ¼ö ÀÖµµ·Ï »ç¿ë
+    // AActorë¥¼ ë¶€ëª¨ í´ë˜ìŠ¤ë¡œ ë‘ê¸°ì— ê° ìì‹ í´ë˜ìŠ¤ë³„ë¡œ ê´€ë¦¬í•  ìˆ˜ ìˆë„ë¡ ì‚¬ìš©
     UClass* ClassKey = ActorClass.Get();
 
-    // ÀÌ¹Ì Á¸ÀçÇÏ¸é ¹«½Ã
+    // ì´ë¯¸ ì¡´ì¬í•˜ë©´ ë¬´ì‹œ
     if (ActorPools.Contains(ClassKey)) return;
 
     PoolSizes.Add(ClassKey, PoolSize);
@@ -36,7 +36,7 @@ void UObjectPoolSubsystem::InitializePoolForClass(TSubclassOf<AActor> ActorClass
 
     for (int32 i = 0; i < PoolSize; ++i)
     {
-        // ¹ß»çÃ¼ ½ºÆù ÈÄ ºñÈ°¼ºÈ­
+        // ë°œì‚¬ì²´ ìŠ¤í° í›„ ë¹„í™œì„±í™”
         AActor* PoolActor = World->SpawnActor<AActor>(ClassKey, FVector::ZeroVector, FRotator::ZeroRotator);
         if (PoolActor)
         {
@@ -59,7 +59,7 @@ AActor* UObjectPoolSubsystem::RequestPoolActor(TSubclassOf<AActor> ActorClass)
 
     UClass* ClassKey = ActorClass.Get();
 
-    // ¿äÃ»ÇÑ ¹ß»çÃ¼°¡ Ç®¿¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ (PoolPtrÀº ¹è¿­ÀÇ ½ÃÀÛ Æ÷ÀÎÅÍ°¡µÊ)
+    // ìš”ì²­í•œ ë°œì‚¬ì²´ê°€ í’€ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸ (PoolPtrì€ ë°°ì—´ì˜ ì‹œì‘ í¬ì¸í„°ê°€ë¨)
     TArray<AActor*>* PoolPtr = ActorPools.Find(ClassKey);
     if (!PoolPtr)
     {
@@ -67,7 +67,7 @@ AActor* UObjectPoolSubsystem::RequestPoolActor(TSubclassOf<AActor> ActorClass)
         return nullptr;
     }
 
-    // ¿äÃ»ÇÑ ¹ß»çÃ¼ Áß ºñÈ°¼ºÈ­µÈ ¹ß»çÃ¼¸¦ È°¼ºÈ­ ÇÏ°í ¹İÈ¯
+    // ìš”ì²­í•œ ë°œì‚¬ì²´ ì¤‘ ë¹„í™œì„±í™”ëœ ë°œì‚¬ì²´ë¥¼ í™œì„±í™” í•˜ê³  ë°˜í™˜
     for (AActor* PoolActor : *PoolPtr)
     {
         if (IsValid(PoolActor) && PoolActor->IsHidden())
@@ -81,7 +81,7 @@ AActor* UObjectPoolSubsystem::RequestPoolActor(TSubclassOf<AActor> ActorClass)
         }
     }
 
-    // ¹ß»çÃ¼°¡ ¾øÀ¸¸é Ãß°¡ »ı¼º ( ½ºÆù -> È°¼ºÈ­ -> ¹Ù·Î ¹İÈ¯ )
+    // ë°œì‚¬ì²´ê°€ ì—†ìœ¼ë©´ ì¶”ê°€ ìƒì„± ( ìŠ¤í° -> í™œì„±í™” -> ë°”ë¡œ ë°˜í™˜ )
     UWorld* World = GetWorldChecked();
 
     FActorSpawnParameters SpawnParams;
@@ -92,7 +92,7 @@ AActor* UObjectPoolSubsystem::RequestPoolActor(TSubclassOf<AActor> ActorClass)
     {
         PoolPtr->Add(PoolActor);
 
-        // Ç® Å©±â °»½Å
+        // í’€ í¬ê¸° ê°±ì‹ 
         int32* SizePtr = PoolSizes.Find(ClassKey);
         if (SizePtr)
         {
@@ -133,7 +133,7 @@ void UObjectPoolSubsystem::RemovePoolActor(TSubclassOf<AActor> PoolActor)
 
     UClass* ClassKey = PoolActor.Get();
 
-    // ¿äÃ»ÇÑ ¹ß»çÃ¼°¡ Ç®¿¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ (PoolPtrÀº ¹è¿­ÀÇ ½ÃÀÛ Æ÷ÀÎÅÍ°¡µÊ)
+    // ìš”ì²­í•œ ë°œì‚¬ì²´ê°€ í’€ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸ (PoolPtrì€ ë°°ì—´ì˜ ì‹œì‘ í¬ì¸í„°ê°€ë¨)
     TArray<AActor*>* PoolPtr = ActorPools.Find(ClassKey);
     if (!PoolPtr)
     {
@@ -168,7 +168,7 @@ void UObjectPoolSubsystem::GetPoolStats(TSubclassOf<AActor> ActorClass, int32& O
 
         for (AActor* Projectile : *PoolPtr)
         {
-            // IsHidden()ÀÌ true¸é Ç®¿¡¼­ ´ë±â Áß, false¸é ¿ùµå¿¡¼­ ³¯¾Æ°¡°í ÀÖ´Â »óÅÂ
+            // IsHidden()ì´ trueë©´ í’€ì—ì„œ ëŒ€ê¸° ì¤‘, falseë©´ ì›”ë“œì—ì„œ ë‚ ì•„ê°€ê³  ìˆëŠ” ìƒíƒœ
             if (Projectile && Projectile->IsHidden())
             {
                 OutInactive++;

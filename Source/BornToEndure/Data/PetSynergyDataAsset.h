@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
@@ -9,11 +9,11 @@
 
 
 /**
- * @brief ½Ã³ÊÁö ÇÏ³ª¸¦ Á¤ÀÇÇÏ´Â DataAsset
- * - ½Ã³ÊÁö ÀÌ¸§, ¹ßµ¿ Á¶°Ç(ÅÂ±× + °³¼ö), È¿°ú(½ºÅÈ Áõ°¨, °ø°İ º¯È­) µîÀ» Æ÷ÇÔ
- * - ½Ã³ÊÁöÀÇ ¹ßµ¿ Á¶°ÇÀ» TMap<FGameplayTag, int32>·Î Ç¥ÇöÇÏ¿© À¯¿¬ÇÏ°Ô ¿©·¯ Á¶°ÇÀ» Áö¿ø
- * - ÄÚµå¸¦ ¼öÁ¤ÇÏÁö ¾Ê°í ¿¡µğÅÍ¿¡¼­ »õ·Î¿î ½Ã³ÊÁö¸¦ ½±°Ô Ãß°¡ÇÒ ¼ö ÀÖµµ·Ï ¼³°è
- * - PetItemComponent°¡ ¸ğµç SynergyData ¿¡¼ÂÀ» ·ÎµåÇÏ¿© Á¶°ÇÀ» °Ë»ç
+ * @brief ì‹œë„ˆì§€ í•˜ë‚˜ë¥¼ ì •ì˜í•˜ëŠ” DataAsset
+ * - ì‹œë„ˆì§€ ì´ë¦„, ë°œë™ ì¡°ê±´(íƒœê·¸ + ê°œìˆ˜), íš¨ê³¼(ìŠ¤íƒ¯ ì¦ê°, ê³µê²© ë³€í™”) ë“±ì„ í¬í•¨
+ * - ì‹œë„ˆì§€ì˜ ë°œë™ ì¡°ê±´ì„ TMap<FGameplayTag, int32>ë¡œ í‘œí˜„í•˜ì—¬ ìœ ì—°í•˜ê²Œ ì—¬ëŸ¬ ì¡°ê±´ì„ ì§€ì›
+ * - ì½”ë“œë¥¼ ìˆ˜ì •í•˜ì§€ ì•Šê³  ì—ë””í„°ì—ì„œ ìƒˆë¡œìš´ ì‹œë„ˆì§€ë¥¼ ì‰½ê²Œ ì¶”ê°€í•  ìˆ˜ ìˆë„ë¡ ì„¤ê³„
+ * - PetItemComponentê°€ ëª¨ë“  SynergyData ì—ì…‹ì„ ë¡œë“œí•˜ì—¬ ì¡°ê±´ì„ ê²€ì‚¬
  */
 UCLASS(BlueprintType)
 class BORNTOENDURE_API UPetSynergyDataAsset : public UPrimaryDataAsset
@@ -25,21 +25,21 @@ public:
     FText SynergyName;
 
     /**
-     * @brief ½Ã³ÊÁö ¹ßµ¿ Á¶°Ç¿¡ ´ëÇÑ TMap
-     * Key: GameplayTag (¿¹: "Item.Element.Fire")
-     * Value: ÇÊ¿äÇÑ °³¼ö (¿¹: 3)
+     * @brief ì‹œë„ˆì§€ ë°œë™ ì¡°ê±´ì— ëŒ€í•œ TMap
+     * Key: GameplayTag (ì˜ˆ: "Item.Element.Fire")
+     * Value: í•„ìš”í•œ ê°œìˆ˜ (ì˜ˆ: 3)
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Synergy|Condition")
     TMap<FGameplayTag, int32> RequiredTagCounts;
 
     /**
-     * @brief ½Ã³ÊÁö ¹ßµ¿ ½Ã Àû¿ëµÇ´Â ½ºÅÈ Áõ°¨
+     * @brief ì‹œë„ˆì§€ ë°œë™ ì‹œ ì ìš©ë˜ëŠ” ìŠ¤íƒ¯ ì¦ê°
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Synergy|Effect")
     TArray<FStatModifier> StatBonuses;
 
     /**
-     * @brief ½Ã³ÊÁö ¹ßµ¿ ½Ã º¯È­µÇ´Â °ø°İ ¼öÁ¤ÀÚ µ¥ÀÌÅÍ
+     * @brief ì‹œë„ˆì§€ ë°œë™ ì‹œ ë³€í™”ë˜ëŠ” ê³µê²© ìˆ˜ì •ì ë°ì´í„°
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Synergy|Effect")
     FProjectileModifierData ProjectileBonus;
