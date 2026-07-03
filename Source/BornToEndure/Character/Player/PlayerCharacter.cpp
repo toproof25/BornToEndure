@@ -12,6 +12,7 @@
 #include "Component/InteractionComponent.h"
 #include "Item/Weapon/BaseWeapon.h"
 #include "Component/PetManagerComponent.h"
+#include "Component/PlayerHealthComponent.h"
 
 // Camera 관련 헤더 포함
 #include "Camera/CameraComponent.h"
@@ -48,7 +49,13 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
 	PetManagerComp = CreateDefaultSubobject<UPetManagerComponent>(TEXT("PetManagerComp"));
+	HealthComp = CreateDefaultSubobject<UPlayerHealthComponent>(TEXT("HealthComp"));
 
+}
+
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	return HealthComp->HealthTakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void APlayerCharacter::BeginPlay()

@@ -4,6 +4,8 @@
 #include "UI/LevelUpRewardWidget.h"
 #include "UI/PlayerHUDWidget.h"
 #include "Component/PlayerExperienceComponent.h"
+#include "Character/Player/PlayerCharacter.h"
+#include "Component/PlayerHealthComponent.h"
 #include "PlayerState/CombatPlayerState.h"
 #include "Data/GameTypes.h"
 #include "Component/PetManagerComponent.h"
@@ -60,10 +62,19 @@ void ADefaultPlayerController::SetUpDelegates()
 		return;
 	}
 
+	UPlayerHealthComponent* HealthComp = GetPawn() ? GetPawn()->FindComponentByClass<UPlayerHealthComponent>() : nullptr;
+	if (!HealthComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] PlayerHealthComponent not found in Pawn."));
+		return;
+	}
+
+	HealthComp->OnPlayerDeath.RemoveAll(this);
 	PlayerExpComp->OnChangeExpDelegate.RemoveAll(PlayerHUDWidgetInstance); /// 중복 방지를 위한 Delegate 초기화
 	PlayerExpComp->OnLevelUpDelegate.RemoveAll(PlayerHUDWidgetInstance);
 	PlayerExpComp->OnLevelUpDelegate.RemoveAll(this);
 
+	HealthComp->OnPlayerDeath.AddUObject(this, &ADefaultPlayerController::HandlePlayerDeath); /// 플레이어 사망 시 처리
 	PlayerExpComp->OnChangeExpDelegate.AddDynamic(PlayerHUDWidgetInstance, &UPlayerHUDWidget::UpdateExpBar);  /// 경험치 획득 시
 	PlayerExpComp->OnLevelUpDelegate.AddDynamic(PlayerHUDWidgetInstance, &UPlayerHUDWidget::UpdateLevelText); /// 레벨업 시
 	PlayerExpComp->OnLevelUpDelegate.AddDynamic(this, &ADefaultPlayerController::LevelUpHandler);			  /// 레벨업 시 레벨업 보상 창 Widget 활성화
@@ -97,6 +108,13 @@ void ADefaultPlayerController::SetUpPlayerHUDWidget()
 			PlayerHUDWidgetInstance->AddToViewport(0);
 		}
 	}
+}
+
+void ADefaultPlayerController::HandlePlayerDeath()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] Player has died. Handling death."));
+	// 플레이어가 죽었을 때 처리할 로직을 여기에 추가
+	// 예: 게임 오버 화면 표시, 리스폰 처리 등
 }
 
 void ADefaultPlayerController::LevelUpHandler(int32 NewLevel)

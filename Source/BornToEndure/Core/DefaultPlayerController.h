@@ -47,6 +47,8 @@ private:
 	void SetUpPlayerInputMode();
 	void SetUpPlayerHUDWidget();
 
+	void HandlePlayerDeath();
+
 	UFUNCTION()
 	void LevelUpHandler(int32 NewLevel);
 };

@@ -27,6 +27,7 @@ class ABaseWeapon;
 class USpringArmComponent;
 class UCameraComponent;
 class UPetManagerComponent;
+class UPlayerHealthComponent;
 
 UCLASS()
 class BORNTOENDURE_API APlayerCharacter : public ACharacter
@@ -35,6 +36,13 @@ class BORNTOENDURE_API APlayerCharacter : public ACharacter
 
 public:
 	APlayerCharacter();
+
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -107,6 +115,9 @@ private:
 	TObjectPtr<UStatComponent> StatComp;
 
 	UPROPERTY()
+	TObjectPtr<UPlayerHealthComponent> HealthComp;
+
+	UPROPERTY()
 	TObjectPtr<UInteractionComponent> InteractionComp;
 
 	UPROPERTY()
@@ -125,6 +136,9 @@ public:
 	void GetWeaponBase(ABaseWeapon*& OutWeaponBase) const { OutWeaponBase = WeaponBaseComp; }
 
 	void GetPerManagerComp(UPetManagerComponent*& OutPetManagerComp) const { OutPetManagerComp = PetManagerComp; }
+	UPlayerHealthComponent* GetPlayerHealthComp() const { return HealthComp; }
+
+
 };
 
 

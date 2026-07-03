@@ -7,9 +7,12 @@
 #include "Delegates/Delegate.h"
 #include "Data/GameTypes.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
+#include "TimerManager.h"
 
 #include "BaseEnemyCharacter.generated.h"
 
+class UBoxComponent;
+class APlayerCharacter;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseEnemyCharacter, Log, All);
 
@@ -39,9 +42,32 @@ public:
         float DamageAmount,
         struct FDamageEvent const& DamageEvent,
         AController* EventInstigator,
-        AActor* DamageCauser) override;
+        AActor* DamageCauser
+    ) override;
+
+    UFUNCTION()
+	void OnAttackOverlap(
+        UPrimitiveComponent* OverlappedComponent,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex,
+        bool bFromSweep,
+        const FHitResult& SweepResult
+    );
+
+
+    UFUNCTION()
+    void OnAttackEndOverlap(
+        UPrimitiveComponent* OverlappedComponent,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex
+	);
 
     void SetOwningSpawner(AActor* Spawner) { OwningSpawner = Spawner; }
+
+    UPROPERTY(EditAnywhere, Category = "AI")
+    TObjectPtr<UBoxComponent> AttackRangeCollision;
 
     UPROPERTY(EditAnywhere, Category = "AI")
     TObjectPtr<UBehaviorTree> BehaviorTreeAsset;
@@ -96,4 +122,17 @@ private:
     TWeakObjectPtr<AActor> OwningSpawner;
     FOnEnemyHitSound OnEnemyHitSound;
     FOnEnemyHitNiagara OnEnemyHitNiagara;
+
+    FTimerHandle AttackTimerHandle;
+	bool bIsInAttackRange = false;
+	bool bCanAttack = true;
+	float AttackCooldown = 3.0f; // 공격 쿨다운 시간 (초 단위)
+	APlayerCharacter* TargetPlayerCharacter = nullptr;
+
+    UFUNCTION()
+    void AttackPlayer();
+
+    UFUNCTION()
+    void ResetAttack();
+
 };
