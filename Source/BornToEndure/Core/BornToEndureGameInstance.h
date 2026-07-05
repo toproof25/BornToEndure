@@ -18,7 +18,7 @@ UCLASS()
 class BORNTOENDURE_API UBornToEndureGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void Init() override;
 

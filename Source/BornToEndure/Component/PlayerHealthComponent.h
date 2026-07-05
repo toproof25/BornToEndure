@@ -1,8 +1,7 @@
 ﻿/**
 * @file PlayerHealthComponent.h
-* @data 2026-06-29
-* @author toproof
 * @brief 플레이어의 체력 관리를 위한 컴포넌트 클래스
+* 
 * - 플레이어의 체력 관리
 * - 체력 회복 및 데미지 처리
 * - 사망 시 Delegate 처리
@@ -12,10 +11,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Delegates/Delegate.h"
 
 #include "PlayerHealthComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerHealthUpdate, float, float);
+DECLARE_MULTICAST_DELEGATE(FOnPlayerDeath)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BORNTOENDURE_API UPlayerHealthComponent : public UActorComponent
@@ -39,6 +39,8 @@ public:
 		AController* EventInstigator,
 		AActor* DamageCauser);
 
+	FOnPlayerHealthUpdate OnPlayerHealthUpdate;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -57,7 +59,6 @@ public:
 	float GetCurrentHealth() const { return CurrentHealth; }
 	float GetMaxHealth() const { return MaxHealth; }
 
-	DECLARE_MULTICAST_DELEGATE(FOnPlayerDeath)
 	FOnPlayerDeath OnPlayerDeath;
 		
 };

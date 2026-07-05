@@ -1,11 +1,14 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿/**
+* @file DefaultPlayerController.h
+* @brief 기본 플레이어 컨트롤러 클래스 헤더
+* 
+* - 플레이어 입력 처리 및 UI 관리
+*/
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-
-#include "EnhancedInputSubsystems.h"
 
 #include "DefaultPlayerController.generated.h"
 
@@ -13,6 +16,7 @@ class UInputMappingContext;
 class UPlayerHUDWidget;
 class ULevelUpRewardWidget;
 class UPlayerExperienceComponent;
+class UPlayerHealthBarWidget;
 
 UCLASS()
 class BORNTOENDURE_API ADefaultPlayerController : public APlayerController
@@ -33,13 +37,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI, meta = (AllowedClasses = "PlayerHUDWidget"))
 	TSubclassOf<UPlayerHUDWidget> PlayerHUDWidgetClass;
 
-	UPROPERTY()
-	TObjectPtr<UPlayerHUDWidget> PlayerHUDWidgetInstance;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
 	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;
 
 private:
+
+	UPROPERTY()
+	TObjectPtr<UPlayerHUDWidget> PlayerHUDWidgetInstance;
 
 	TObjectPtr<UPlayerExperienceComponent> PlayerExpComp;
 
@@ -51,4 +55,6 @@ private:
 
 	UFUNCTION()
 	void LevelUpHandler(int32 NewLevel);
+
+
 };

@@ -16,20 +16,21 @@
 class UCanvasPanel;
 class UTextBlock;
 class UProgressBar;
-
+class UPlayerHealthBarWidget;
+class APlayerCharacter;
 
 
 UCLASS()
 class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
-protected:
-
-	virtual void NativeOnInitialized() override;
+public:
 
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* RootCanvasPanel;
+
+	UPROPERTY(meta = (BindWidget))
+	UPlayerHealthBarWidget* HealthBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* LevelText;
@@ -37,14 +38,13 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ExpBar;
 
-public:
+	void InitializeWidget(APlayerCharacter* PlayerCharacter);
 
 	UFUNCTION()
 	void UpdateExpBar(float NewExp, float MaxExp);
 
 	UFUNCTION()
 	void UpdateLevelText(int32 NewLevel);
-
 
 
 };

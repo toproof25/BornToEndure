@@ -34,6 +34,7 @@ ABaseEnemyCharacter::ABaseEnemyCharacter()
 
 	AttackRangeCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackRangeCollision"));
 	AttackRangeCollision->SetupAttachment(RootComponent);
+	AttackRangeCollision->SetGenerateOverlapEvents(true);
 }
 
 void ABaseEnemyCharacter::InitializeEnemy(const FEnemyDataRow& EnemyData)
@@ -60,13 +61,6 @@ void ABaseEnemyCharacter::BeginPlay()
     UEffectSubsystem* EffectSubsystem = World->GetSubsystem<UEffectSubsystem>();
 	check(EffectSubsystem);
 
-	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackOverlap);
-	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
-
-    AttackRangeCollision->SetGenerateOverlapEvents(true);
-    AttackRangeCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackOverlap);
-    AttackRangeCollision->OnComponentEndOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
-
     // Niagara, Sound Asset Preload 및 Delegate 바인딩
     FPrimaryAssetType SoundType(TEXT("SoundDataAsset"));
     FPrimaryAssetType NiagaraType(TEXT("NiagaraDataAsset"));
@@ -76,8 +70,6 @@ void ABaseEnemyCharacter::BeginPlay()
 
     OnEnemyHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
     OnEnemyHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
-
-    CurrentHealth = MaxHealth;
 
 	Execute_ActivateActor(this);
 }
@@ -93,13 +85,6 @@ void ABaseEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
             EffectSubsystem->UnloadEffectAssets(FPrimaryAssetId(SoundType, HitEnemySoundId.PrimaryAssetName));
             EffectSubsystem->UnloadEffectAssets(FPrimaryAssetId(NiagaraType, HitEnemyNiagaraId.PrimaryAssetName));
         }
-
-        // 모든 이벤트 바인딩 해제
-		GetCapsuleComponent()->OnComponentBeginOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackOverlap);
-        GetCapsuleComponent()->OnComponentEndOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
-
-        AttackRangeCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackOverlap);
-        AttackRangeCollision->OnComponentEndOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
     }
     Super::EndPlay(EndPlayReason);
 }
@@ -131,6 +116,8 @@ void ABaseEnemyCharacter::ActivateActor_Implementation()
     ResetRewardPayload();
     CurrentHealth = MaxHealth;
 
+	DelegateBindng();
+
     SetActorHiddenInGame(false);
     SetActorEnableCollision(true);
 
@@ -139,9 +126,10 @@ void ABaseEnemyCharacter::ActivateActor_Implementation()
     UE_LOG(LogBaseEnemyCharacter, Display, TEXT("Enemy Activated: %s"), *GetName());
 }
 
-// 제거(비활성화)될 때 ObjectPoolSubsystem에서 호출되는 함수
 void ABaseEnemyCharacter::DeactivateActor_Implementation()
 {
+	// 제거(비활성화)될 때 ObjectPoolSubsystem에서 호출되는 함수
+
     SetActorHiddenInGame(true);
     SetActorEnableCollision(false);
 
@@ -165,6 +153,8 @@ void ABaseEnemyCharacter::DeactivateActor_Implementation()
     {
         MoveComp->StopMovementImmediately();
     }
+
+	DelegateUnbinding();
 
     UE_LOG(LogBaseEnemyCharacter, Display, TEXT("Enemy Deactivated: %s"), *GetName());
 }
@@ -203,31 +193,49 @@ float ABaseEnemyCharacter::TakeDamage(
     return ActualDamage;
 }
 
-void ABaseEnemyCharacter::OnAttackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ABaseEnemyCharacter::OnAttackBeginOverlap(
+	UPrimitiveComponent* OverlappedComponent, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex, 
+	bool bFromSweep, 
+	const FHitResult& SweepResult)
 {
-    if (!bCanAttack) return;
+    if (!bCanAttack || !OtherActor) return;
 
-    if (!OtherActor) return;
-
-    TargetPlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-	if (TargetPlayerCharacter)
+	// Overlap 된 대상이 PlayerCharacter인지 확인하고 공격 시작
+	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
     {
-		UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[%s] OnAttackOverlap: Player %s entered attack range."), *GetName(), *TargetPlayerCharacter->GetName());
-        bIsInAttackRange = true;
+		TargetPlayerCharacter = Player;
         AttackPlayer();
     }
 
 }
 
-void ABaseEnemyCharacter::OnAttackEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void ABaseEnemyCharacter::OnAttackEndOverlap(
+	UPrimitiveComponent* OverlappedComponent, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex)
 {
     if (OtherActor == TargetPlayerCharacter)
     {
 		TargetPlayerCharacter = nullptr;
-        bIsInAttackRange = false;
     }
 }
 
+
+void ABaseEnemyCharacter::DelegateBindng()
+{
+	AttackRangeCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackBeginOverlap);
+	AttackRangeCollision->OnComponentEndOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
+}
+
+void ABaseEnemyCharacter::DelegateUnbinding()
+{
+	AttackRangeCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackBeginOverlap);
+	AttackRangeCollision->OnComponentEndOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
+}
 
 void ABaseEnemyCharacter::HandleDeath()
 {
@@ -248,80 +256,35 @@ void ABaseEnemyCharacter::AttackPlayer()
     UWorld* World = GetWorld();
     if (!World) return;
 
-    if (TargetPlayerCharacter && bCanAttack)
+    if (TargetPlayerCharacter.IsValid() && bCanAttack)
     {
         // 플레이어에게 데미지 적용
         UGameplayStatics::ApplyDamage(
-            TargetPlayerCharacter,
+            TargetPlayerCharacter.Get(),
             10.f,
             GetInstigatorController(),
             this,
             UDamageType::StaticClass()
         );
 
+		// AttackCooldown 시간 후에 공격 가능 상태로 되돌리기 위해 타이머 설정
         World->GetTimerManager().SetTimer(
-            AttackTimerHandle,                       // 핸들 변수
-            this,                                    // 함수가 속한 객체
-            &ABaseEnemyCharacter::ResetAttack,      // 실행할 함수의 주소
-            AttackCooldown,                                // 대기 시간 (초)
-            false                                 // 반복 여부 (true = 무한 반복, false = 1회성)
+            AttackTimerHandle,                      
+            this,                                    
+            &ABaseEnemyCharacter::ResetAttack,     
+            AttackCooldown,                               
+            false                                 
         );
 
         bCanAttack = false;
-        UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[%s] AttackPlayer: Player %s hit for 10 damage."), *GetName(), *TargetPlayerCharacter->GetName());
-        return;
+        UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[ABaseEnemyCharacter] : [%s] 에게 공격 수행"), *GetName(), *TargetPlayerCharacter->GetName());
     }
-
-    /*
-	TArray<FHitResult> OverlapResults;
-    World->SweepMultiByChannel(
-        OverlapResults,
-        AttackRangeCollision->GetComponentLocation(),
-        AttackRangeCollision->GetComponentLocation(),
-        FQuat::Identity,
-        ECC_Pawn,
-        FCollisionShape::MakeBox(AttackRangeCollision->GetScaledBoxExtent())
-	);
-
-    for (const FHitResult& Hit : OverlapResults)
-    {
-        if (Hit.GetActor())
-        {
-            if (APlayerCharacter* Player = Cast<APlayerCharacter>(Hit.GetActor()))
-            {
-                // 플레이어에게 데미지 적용
-                UGameplayStatics::ApplyDamage(
-                    Player,
-                    10.f,
-                    GetInstigatorController(),
-                    this,
-                    UDamageType::StaticClass()
-                );
-
-                World->GetTimerManager().SetTimer(
-                    AttackTimerHandle,                       // 핸들 변수
-                    this,                                    // 함수가 속한 객체
-                    &ABaseEnemyCharacter::ResetAttack,      // 실행할 함수의 주소
-                    AttackCooldown,                                // 대기 시간 (초)
-                    false                                 // 반복 여부 (true = 무한 반복, false = 1회성)
-                );
-
-                bCanAttack = false;
-                UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[%s] AttackPlayer: Player %s hit for 10 damage."), *GetName(), *Player->GetName());
-                return;
-            }
-        }
-    }
-
-    // Player를 찾지 못하고 공격에 실패하는 경우
-	World->GetTimerManager().ClearTimer(AttackTimerHandle);
-    */
 }
 
 void ABaseEnemyCharacter::ResetAttack()
 {
     bCanAttack = true;
-    if (TargetPlayerCharacter)
+    if (TargetPlayerCharacter.IsValid())
     {
         AttackPlayer();
     }

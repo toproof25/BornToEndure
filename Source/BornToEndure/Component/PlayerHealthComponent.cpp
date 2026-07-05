@@ -1,12 +1,10 @@
-#include "Component/PlayerHealthComponent.h"
+﻿#include "Component/PlayerHealthComponent.h"
 #include "PlayerHealthComponent.h"
 
 UPlayerHealthComponent::UPlayerHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
-
-
 
 void UPlayerHealthComponent::BeginPlay()
 {
@@ -18,8 +16,8 @@ float UPlayerHealthComponent::HealthTakeDamage(float DamageAmount, FDamageEvent 
 {
 	if (bIsDead) return 0.0f;
 
-
 	CurrentHealth -= DamageAmount;
+	OnPlayerHealthUpdate.Broadcast(CurrentHealth, MaxHealth);
 	UE_LOG(LogTemp, Warning, TEXT("[UPlayerHealthComponent] HealthTakeDamage called. CurrentHealth: %f, DamageAmount: %f"), CurrentHealth, DamageAmount);
 
 	if (CurrentHealth <= 0.0f)
@@ -27,7 +25,6 @@ float UPlayerHealthComponent::HealthTakeDamage(float DamageAmount, FDamageEvent 
 		bIsDead = true;
 		CurrentHealth = 0.0f;
 		OnPlayerDeath.Broadcast();
-		UE_LOG(LogTemp, Warning, TEXT("[UPlayerHealthComponent] Player has died."));
 	}
 
 	return DamageAmount;
