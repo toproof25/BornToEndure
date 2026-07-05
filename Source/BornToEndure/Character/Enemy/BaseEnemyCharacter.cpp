@@ -191,14 +191,13 @@ float ABaseEnemyCharacter::TakeDamage(
     {
         APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(EventInstigator->GetPawn());
         EnemyRewardPayload.RegisterDamage(Pet ? Pet->GetPetName() : NAME_None, ActualDamage); // 킬에 기여한 펫이 있을 경우 데미지 정보 기록
-    }
 
-    // 사망하는 경우
-    if (CurrentHealth <= 0.f)
-    {
-		APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(EventInstigator->GetPawn());
-		EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
-        HandleDeath();
+        // 사망하는 경우
+        if (CurrentHealth <= 0.f)
+        {
+            EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
+            HandleDeath();
+        }
     }
 
     return ActualDamage;
@@ -206,7 +205,7 @@ float ABaseEnemyCharacter::TakeDamage(
 
 void ABaseEnemyCharacter::OnAttackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    //if (!bCanAttack) return;
+    if (!bCanAttack) return;
 
     if (!OtherActor) return;
 
@@ -226,8 +225,6 @@ void ABaseEnemyCharacter::OnAttackEndOverlap(UPrimitiveComponent* OverlappedComp
     {
 		TargetPlayerCharacter = nullptr;
         bIsInAttackRange = false;
-        GetWorld()->GetTimerManager().ClearTimer(AttackTimerHandle);
-        ResetAttack();
     }
 }
 
@@ -251,7 +248,7 @@ void ABaseEnemyCharacter::AttackPlayer()
     UWorld* World = GetWorld();
     if (!World) return;
 
-    if (TargetPlayerCharacter)
+    if (TargetPlayerCharacter && bCanAttack)
     {
         // 플레이어에게 데미지 적용
         UGameplayStatics::ApplyDamage(
@@ -273,10 +270,6 @@ void ABaseEnemyCharacter::AttackPlayer()
         bCanAttack = false;
         UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[%s] AttackPlayer: Player %s hit for 10 damage."), *GetName(), *TargetPlayerCharacter->GetName());
         return;
-    }
-    else 
-    {
-        World->GetTimerManager().ClearTimer(AttackTimerHandle);
     }
 
     /*
@@ -327,9 +320,9 @@ void ABaseEnemyCharacter::AttackPlayer()
 
 void ABaseEnemyCharacter::ResetAttack()
 {
+    bCanAttack = true;
     if (TargetPlayerCharacter)
     {
         AttackPlayer();
     }
-    bCanAttack = true; 
 }
