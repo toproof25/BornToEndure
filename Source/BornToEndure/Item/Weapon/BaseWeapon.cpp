@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Item/Weapon/BaseWeapon.h"
@@ -17,7 +17,7 @@ ABaseWeapon::ABaseWeapon()
 	WeaponStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponStaticMesh"));
 	RootComponent = WeaponStaticMesh;
 
-	// ¹°¸® Ãæµ¹ Çã¿ë
+	// ë¬¼ë¦¬ ì¶©ëŒ í—ˆìš©
 	WeaponStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	WeaponStaticMesh->SetSimulatePhysics(true);
 	WeaponStaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
@@ -27,11 +27,11 @@ void ABaseWeapon::Interact_Implementation(APlayerCharacter* InstigatorCharacter)
 {
 	if (InstigatorCharacter == nullptr) return;
 
-	// ¹«±â ¸Þ½¬ÀÇ ¹°¸®¿Í ÄÝ¸®Á¯ Á¦°Å
+	// ë¬´ê¸° ë©”ì‰¬ì˜ ë¬¼ë¦¬ì™€ ì½œë¦¬ì ¼ ì œê±°
 	WeaponStaticMesh->SetSimulatePhysics(false);
 	WeaponStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// ÇÃ·¹ÀÌ¾î ¸Þ½¬¿Í ¼ÒÄÏ¿¡ ¹«±â ºÎÂø
+	// í”Œë ˆì´ì–´ ë©”ì‰¬ì™€ ì†Œì¼“ì— ë¬´ê¸° ë¶€ì°©
 	USkeletalMeshComponent* PlayerMesh = InstigatorCharacter->GetMesh();
 	if (PlayerMesh)
 	{

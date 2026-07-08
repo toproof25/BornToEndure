@@ -1,20 +1,20 @@
-#include "Data/PetStatItemDataAsset.h"
+ï»¿#include "Data/PetStatItemDataAsset.h"
 #include "Component/PetItemComponent.h"
 #include "Component/PetStatComponent.h"
 #include "Stat/PetStatTypes.h"
 
 void UPetStatItemDataAsset::ApplyToComponent(UPetItemComponent* ItemComp) const
 {
-	// 1.OwnerÀÇ StatComponent¸¦ Ã£´Â´Ù
+	// 1.Ownerì˜ StatComponentë¥¼ ì°¾ëŠ”ë‹¤
 	AActor* Owner = ItemComp->GetOwner();
 	if (Owner == nullptr) return;
 	UPetStatComponent* StatComp = Owner->FindComponentByClass<UPetStatComponent>();
 	if (StatComp == nullptr) return;
 
-	// 2.È¹µæÇÑ ¾ÆÀÌÅÛÀÇ FGuid¸¦ °¡Á®¿Â´Ù
+	// 2.íšë“í•œ ì•„ì´í…œì˜ FGuidë¥¼ ê°€ì ¸ì˜¨ë‹¤
 	FGuid SourceId = ItemComp->GetLastAddedInstanceId();
 
-	// 3.ÇØ´ç ¾ÆÀÌÅÛ¿¡ ´ëÇÑ FGuid¸¦ ¸ðµÎ Ãß°¡ÇÑ ÈÄ StatComponent¿¡ Modifier·Î Ãß°¡ÇÑ´Ù (Stat ÃßÀû °¡´ÉÇÏµµ·Ï)
+	// 3.í•´ë‹¹ ì•„ì´í…œì— ëŒ€í•œ FGuidë¥¼ ëª¨ë‘ ì¶”ê°€í•œ í›„ StatComponentì— Modifierë¡œ ì¶”ê°€í•œë‹¤ (Stat ì¶”ì  ê°€ëŠ¥í•˜ë„ë¡)
 	for (FStatModifier Mod : StatModifiers)
 	{
 		Mod.SourceId = SourceId;
@@ -24,12 +24,12 @@ void UPetStatItemDataAsset::ApplyToComponent(UPetItemComponent* ItemComp) const
 
 void UPetStatItemDataAsset::RemoveFromComponent(UPetItemComponent* ItemComp, const FGuid& InstanceId) const
 {
-	// 1.OwnerÀÇ StatComponent¸¦ Ã£´Â´Ù
+	// 1.Ownerì˜ StatComponentë¥¼ ì°¾ëŠ”ë‹¤
 	AActor* Owner = ItemComp->GetOwner();
 	if (Owner == nullptr) return;
 	UPetStatComponent* StatComp = Owner->FindComponentByClass<UPetStatComponent>();
 	if (StatComp == nullptr) return;
 
-	// 2.ÇØ´ç ¾ÆÀÌÅÛÀÇ InstanceId¸¦ º¸³»¼­ StatComponent¿¡¼­ Á¦°ÅÇÑ´Ù
+	// 2.í•´ë‹¹ ì•„ì´í…œì˜ InstanceIdë¥¼ ë³´ë‚´ì„œ StatComponentì—ì„œ ì œê±°í•œë‹¤
 	StatComp->RemoveModifiersBySource(InstanceId);
 }

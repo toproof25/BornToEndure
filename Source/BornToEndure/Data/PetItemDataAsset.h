@@ -1,12 +1,12 @@
-/**
+ï»¿/**
  * @file PetItemDataAsset.h
- * @brief ¸ğµç Item¿¡ ´ëÇÑ DataAsset ±â¹İ Å¬·¡½º Á¤ÀÇ
+ * @brief ëª¨ë“  Itemì— ëŒ€í•œ DataAsset ê¸°ë°˜ í´ë˜ìŠ¤ ì •ì˜
  * @author toproof (kmnlmn123@gmail.com)
  * @date 2026-04-20
  * @details
- * - ¸ğµç ¾ÆÀÌÅÛ °øÅë µ¥ÀÌÅÍ¿Í ±â´ÉÀ» Á¤ÀÇ
- * - Stat Áõ°¨ ¾ÆÀÌÅÛ, °ø°İ º¯È­ ¾ÆÀÌÅÛÀº ÇØ´ç Å¬·¡½º¸¦ »ó¼Ó¹Ş¾Æ ±¸ÇöÇÔ
- * - ÇØ´ç Å¬·¡½º ÀÚÃ¼·Î ÀÎ½ºÅÏ½º¸¦ ¸¸µé ¼ö ¾øµµ·Ï Abstract Å°¿öµå »ç¿ë
+ * - ëª¨ë“  ì•„ì´í…œ ê³µí†µ ë°ì´í„°ì™€ ê¸°ëŠ¥ì„ ì •ì˜
+ * - Stat ì¦ê° ì•„ì´í…œ, ê³µê²© ë³€í™” ì•„ì´í…œì€ í•´ë‹¹ í´ë˜ìŠ¤ë¥¼ ìƒì†ë°›ì•„ êµ¬í˜„í•¨
+ * - í•´ë‹¹ í´ë˜ìŠ¤ ìì²´ë¡œ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ë§Œë“¤ ìˆ˜ ì—†ë„ë¡ Abstract í‚¤ì›Œë“œ ì‚¬ìš©
  */
 
 #pragma once
@@ -19,10 +19,10 @@
 class UPetItemComponent;
 
 /**
- * @brief ¸ğµç Pet ¾ÆÀÌÅÛ DataAssetÀÇ ±â¹İ Å¬·¡½º
- * - ÀÌ Å¬·¡½º´Â Á÷Á¢ ÀÎ½ºÅÏ½º¸¦ ¸¸µé ¼ö ¾øÀ¸¸ç, ¹İµå½Ã ¼­ºêÅ¬·¡½º¸¦ ÅëÇØ »ç¿ëÇØ¾ß ÇÑ´Ù.
- * - ¾ÆÀÌÅÛÀÌ Pet¿¡ Àû¿ëµÉ ¶§¿Í Á¦°ÅµÉ ¶§ÀÇ µ¿ÀÛÀ» Á¤ÀÇÇÏ´Â ¼ø¼ö °¡»ó ÇÔ¼ö¸¦ Æ÷ÇÔÇÑ´Ù.
- * - ¾ÆÀÌÅÛÀÌ °¡Áö´Â ½Ã³ÊÁö ÅÂ±×µéÀ» Æ÷ÇÔÇÏ¿©, PetItemComponent°¡ ½Ã³ÊÁö Á¶°ÇÀ» Ã¼Å©ÇÏ´Â µ¥ »ç¿ëµÈ´Ù.
+ * @brief ëª¨ë“  Pet ì•„ì´í…œ DataAssetì˜ ê¸°ë°˜ í´ë˜ìŠ¤
+ * - ì´ í´ë˜ìŠ¤ëŠ” ì§ì ‘ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ë§Œë“¤ ìˆ˜ ì—†ìœ¼ë©°, ë°˜ë“œì‹œ ì„œë¸Œí´ë˜ìŠ¤ë¥¼ í†µí•´ ì‚¬ìš©í•´ì•¼ í•œë‹¤.
+ * - ì•„ì´í…œì´ Petì— ì ìš©ë  ë•Œì™€ ì œê±°ë  ë•Œì˜ ë™ì‘ì„ ì •ì˜í•˜ëŠ” ìˆœìˆ˜ ê°€ìƒ í•¨ìˆ˜ë¥¼ í¬í•¨í•œë‹¤.
+ * - ì•„ì´í…œì´ ê°€ì§€ëŠ” ì‹œë„ˆì§€ íƒœê·¸ë“¤ì„ í¬í•¨í•˜ì—¬, PetItemComponentê°€ ì‹œë„ˆì§€ ì¡°ê±´ì„ ì²´í¬í•˜ëŠ” ë° ì‚¬ìš©ëœë‹¤.
  */
 UCLASS(Abstract, BlueprintType)
 class BORNTOENDURE_API UPetItemDataAsset : public UPrimaryDataAsset
@@ -40,19 +40,19 @@ public:
     TSoftObjectPtr<UTexture2D> ItemIcon;
 
     /**
-     * @brief ¾ÆÀÌÅÛÀÌ °¡Áö´Â ½Ã³ÊÁö ÅÂ±×µé
-	 * @note ÀÌ ÅÂ±×µéÀº PetItemComponent°¡ ½Ã³ÊÁö Á¶°ÇÀ» Ã¼Å©ÇÏ´Â µ¥ »ç¿ëµÊ
+     * @brief ì•„ì´í…œì´ ê°€ì§€ëŠ” ì‹œë„ˆì§€ íƒœê·¸ë“¤
+	 * @note ì´ íƒœê·¸ë“¤ì€ PetItemComponentê°€ ì‹œë„ˆì§€ ì¡°ê±´ì„ ì²´í¬í•˜ëŠ” ë° ì‚¬ìš©ë¨
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Synergy")
     FGameplayTagContainer SynergyTags;
 
     /**
-     * @brief ¾ÆÀÌÅÛÀÌ Pet¿¡ Ãß°¡µÉ ¶§ È£Ãâ
+     * @brief ì•„ì´í…œì´ Petì— ì¶”ê°€ë  ë•Œ í˜¸ì¶œ
      */
     virtual void ApplyToComponent(UPetItemComponent* ItemComp) const PURE_VIRTUAL(UPetItemData::ApplyToComponent, );
 
     /**
-     * @brief ¾ÆÀÌÅÛÀÌ Pet¿¡¼­ Á¦°ÅµÉ ¶§ È£Ãâ
+     * @brief ì•„ì´í…œì´ Petì—ì„œ ì œê±°ë  ë•Œ í˜¸ì¶œ
      */
     virtual void RemoveFromComponent(UPetItemComponent* ItemComp, const FGuid& InstanceId) const PURE_VIRTUAL(UPetItemData::RemoveFromComponent, );
 

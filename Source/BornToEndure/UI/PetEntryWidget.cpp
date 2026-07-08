@@ -1,4 +1,4 @@
-
+ï»¿
 #include "UI/PetEntryWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -18,11 +18,11 @@ void UPetEntryWidget::InitializeWithPetData(ULevelUpRewardWidget* InParentWidget
 	PetNameText->SetText(DisplayName);
 	SelectedPet = InPet;
 
-	// ÀÌ¹ÌÁö ºñµ¿±â ·Îµù
+	// ì´ë¯¸ì§€ ë¹„ë™ê¸° ë¡œë”©
 	TSoftObjectPtr<UTexture2D> PetIcon = InPet->GetIcon();
 	if (PetIcon.IsNull())
 	{
-		// ÃßÈÄ ¹è°æ»öÀ» »¡°­À¸·Î È¤Àº X Ç¥½Ã ÀÌ¹ÌÁö·Î Àû¿ë
+		// ì¶”í›„ ë°°ê²½ìƒ‰ì„ ë¹¨ê°•ìœ¼ë¡œ í˜¹ì€ X í‘œì‹œ ì´ë¯¸ì§€ë¡œ ì ìš©
 		//PetIconImage->SetBrushFromTexture();
 	}
 	else if (PetIcon.IsValid())
@@ -32,7 +32,7 @@ void UPetEntryWidget::InitializeWithPetData(ULevelUpRewardWidget* InParentWidget
 	}
 	else if (TextureLoadingHandle.IsValid() && TextureLoadingHandle->IsActive())
 	{
-		// ÀÌ¹Ì ·Îµù ÁßÀÎ °æ¿ì Ã³¸®
+		// ì´ë¯¸ ë¡œë”© ì¤‘ì¸ ê²½ìš° ì²˜ë¦¬
 		TextureLoadingHandle->CancelHandle();
 	}
 	else
@@ -46,7 +46,7 @@ void UPetEntryWidget::InitializeWithPetData(ULevelUpRewardWidget* InParentWidget
 
 	
 
-	// ¹öÆ° Å¬¸¯ ½Ã OnPetSelectButtonClicked ÇÔ¼ö°¡ È£Ãâ
+	// ë²„íŠ¼ í´ë¦­ ì‹œ OnPetSelectButtonClicked í•¨ìˆ˜ê°€ í˜¸ì¶œ
 	PetSelectButton->OnClicked.AddDynamic(this, &UPetEntryWidget::OnPetSelectButtonClicked);
 }
 

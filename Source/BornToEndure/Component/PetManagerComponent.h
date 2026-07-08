@@ -1,10 +1,10 @@
-/**
+ï»¿/**
  * @file PetManagerComponent.h
- * @brief ÇÃ·¹ÀÌ¾î°¡ ¼ÒÀ¯ÇÑ PetµéÀ» °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ® Çì´õ
+ * @brief í”Œë ˆì´ì–´ê°€ ì†Œìœ í•œ Petë“¤ì„ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸ í—¤ë”
  * @author toproof (kmnlmn123@gmail.com)
  * @date 2026-04-20
  * @details 
- * - ÀÌ ÆÄÀÏÀº ÇÃ·¹ÀÌ¾î°¡ ¼ÒÀ¯ÇÑ PetµéÀ» °ü¸®ÇÏ°í, ¾ÆÀÌÅÛ È¹µæ ½Ã ÀûÀıÇÑ Pet¿¡°Ô Àü´ŞÇÏ´Â ±â´ÉÀ» Á¤ÀÇ
+ * - ì´ íŒŒì¼ì€ í”Œë ˆì´ì–´ê°€ ì†Œìœ í•œ Petë“¤ì„ ê´€ë¦¬í•˜ê³ , ì•„ì´í…œ íšë“ ì‹œ ì ì ˆí•œ Petì—ê²Œ ì „ë‹¬í•˜ëŠ” ê¸°ëŠ¥ì„ ì •ì˜
  */
 
 #pragma once
@@ -20,12 +20,12 @@ class UPetItemDataAsset;
 DECLARE_LOG_CATEGORY_EXTERN(LogPetManager, Log, All);
 
 /**
- * @brief ÇÃ·¹ÀÌ¾î°¡ ¼ÒÀ¯ÇÑ PetµéÀ» °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ®
+ * @brief í”Œë ˆì´ì–´ê°€ ì†Œìœ í•œ Petë“¤ì„ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
  * @details 
- * - Pet ½ºÆù / Á¦°Å
- * - ¾ÆÀÌÅÛ È¹µæ ½Ã ¾î¶² Pet¿¡°Ô ÁÙÁö °áÁ¤ ¹× Àü´Ş
- * - ¿ÜºÎ(¾ÆÀÌÅÛ ÇÈ¾÷ ¾×ÅÍ, UI)·ÎºÎÅÍÀÇ ¿äÃ»À» Pet¿¡°Ô À§ÀÓ
- * - Pet°úÀÇ À¯ÀÏÇÑ ¼ÒÅë ¼ö´ÜÀ¸·Î °³º° PetÀ» Á¢±ÙÇÏÁö ¾Ê¾Æµµ µÇµµ·Ï ¼³°è
+ * - Pet ìŠ¤í° / ì œê±°
+ * - ì•„ì´í…œ íšë“ ì‹œ ì–´ë–¤ Petì—ê²Œ ì¤„ì§€ ê²°ì • ë° ì „ë‹¬
+ * - ì™¸ë¶€(ì•„ì´í…œ í”½ì—… ì•¡í„°, UI)ë¡œë¶€í„°ì˜ ìš”ì²­ì„ Petì—ê²Œ ìœ„ì„
+ * - Petê³¼ì˜ ìœ ì¼í•œ ì†Œí†µ ìˆ˜ë‹¨ìœ¼ë¡œ ê°œë³„ Petì„ ì ‘ê·¼í•˜ì§€ ì•Šì•„ë„ ë˜ë„ë¡ ì„¤ê³„
  */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BORNTOENDURE_API UPetManagerComponent : public UActorComponent
@@ -41,68 +41,68 @@ protected:
 public:
 
     /**
-     * @brief PetÀ» °ü¸® ¸ñ·Ï¿¡ Ãß°¡ÇÑ ÈÄ ·¹º§¿¡ ½ºÆùÇÏ´Â ÇÔ¼ö
-     * @param PetClassOverride nullÀÌ¸é DefaultPetClass¸¦ »ç¿ë
-     * @return ½ºÆùµÈ PetÀÇ Æ÷ÀÎÅÍ
+     * @brief Petì„ ê´€ë¦¬ ëª©ë¡ì— ì¶”ê°€í•œ í›„ ë ˆë²¨ì— ìŠ¤í°í•˜ëŠ” í•¨ìˆ˜
+     * @param PetClassOverride nullì´ë©´ DefaultPetClassë¥¼ ì‚¬ìš©
+     * @return ìŠ¤í°ëœ Petì˜ í¬ì¸í„°
      * @details
-	 * - PetÀ» ¼º°øÀûÀ¸·Î ½ºÆùÇÑ ÈÄ FOnPetAdded Delegate¸¦ È£Ãâ
+	 * - Petì„ ì„±ê³µì ìœ¼ë¡œ ìŠ¤í°í•œ í›„ FOnPetAdded Delegateë¥¼ í˜¸ì¶œ
      */
     UFUNCTION(BlueprintCallable, Category = "Pet")
     APetCompanionCharacter* SpawnAndAddPet(TSubclassOf<APetCompanionCharacter> PetClassOverride = nullptr);
 
     /**
-	 * @brief PetÀ» °ü¸® ¸ñ·Ï¿¡¼­ Á¦°ÅÇÏ°í, DestroyÇÏ´Â ÇÔ¼ö
-     * @param PetToRemove Á¦°ÅÇÏ°íÀÚ ÇÏ´Â PetÀÇ Æ÷ÀÎÅÍ
+	 * @brief Petì„ ê´€ë¦¬ ëª©ë¡ì—ì„œ ì œê±°í•˜ê³ , Destroyí•˜ëŠ” í•¨ìˆ˜
+     * @param PetToRemove ì œê±°í•˜ê³ ì í•˜ëŠ” Petì˜ í¬ì¸í„°
 	 * @details
-     * - PetÀ» ¼º°øÀûÀ¸·Î Á¦°ÅÇÑ ÈÄ FOnPetRemoved Delegate¸¦ È£Ãâ
+     * - Petì„ ì„±ê³µì ìœ¼ë¡œ ì œê±°í•œ í›„ FOnPetRemoved Delegateë¥¼ í˜¸ì¶œ
      */
     UFUNCTION(BlueprintCallable, Category = "Pet")
     void RemovePet(APetCompanionCharacter* PetToRemove);
 
     /**
-     * @brief UIµî¿¡¼­ ¾ÆÀÌÅÛÀ» ¼±ÅÃÇÑ ÈÄ ¾ÆÀÌÅÛÀÇ DataAssetÀ» ·ÎµåÇÏ¿© ÀÎ½ºÅÏ½ºÈ­ÇÏ´Â ÇÔ¼ö
-	 * @param ItemAssetId UI¿¡¼­ ¼±ÅÃÇÏ¿© °í¸¥ ¾ÆÀÌÅÛÀÇ PrimaryAssetId
+     * @brief UIë“±ì—ì„œ ì•„ì´í…œì„ ì„ íƒí•œ í›„ ì•„ì´í…œì˜ DataAssetì„ ë¡œë“œí•˜ì—¬ ì¸ìŠ¤í„´ìŠ¤í™”í•˜ëŠ” í•¨ìˆ˜
+	 * @param ItemAssetId UIì—ì„œ ì„ íƒí•˜ì—¬ ê³ ë¥¸ ì•„ì´í…œì˜ PrimaryAssetId
 	 * @details
-	 * - ·Îµå°¡ ¾ÈµÈ ¾ÆÀÌÅÛÀº ºñµ¿±â ·Îµå ÈÄ OnItemDataLoaded Äİ¹é¿¡¼­ Pet¿¡°Ô Àü´ŞÇÑ´Ù.
-     * - ¾ÆÀÌÅÛ Ãß°¡´Â ÇØ´ç ÇÔ¼ö¸¦ ½ÃÀÛÀ¸·Î ºñµ¿±â ·Îµå -> Pet ¼±ÅÃ SelectPetForItem -> GiveItemToPetÀ¸·Î Àü´ŞµÈ´Ù
+	 * - ë¡œë“œê°€ ì•ˆëœ ì•„ì´í…œì€ ë¹„ë™ê¸° ë¡œë“œ í›„ OnItemDataLoaded ì½œë°±ì—ì„œ Petì—ê²Œ ì „ë‹¬í•œë‹¤.
+     * - ì•„ì´í…œ ì¶”ê°€ëŠ” í•´ë‹¹ í•¨ìˆ˜ë¥¼ ì‹œì‘ìœ¼ë¡œ ë¹„ë™ê¸° ë¡œë“œ -> Pet ì„ íƒ SelectPetForItem -> GiveItemToPetìœ¼ë¡œ ì „ë‹¬ëœë‹¤
      */
     UFUNCTION(BlueprintCallable, Category = "Pet|Item")
     void RequestItemForPet(const FPrimaryAssetId& ItemAssetId);
 
     /**
-     * @brief ¾ÆÀÌÅÛÀ» ¼±ÅÃÇÑ Pet¿¡°Ô Àü´ŞÇÏ´Â ÇÔ¼ö
-     * @param TargetPet ¾ÆÀÌÅÛÀ» ÁÖ°íÀÚ ÇÏ´Â PetÀÇ Æ÷ÀÎÅÍ
-     * @param ItemData ¾ÆÀÌÅÛÀÇ DataAsset Æ÷ÀÎÅÍ
+     * @brief ì•„ì´í…œì„ ì„ íƒí•œ Petì—ê²Œ ì „ë‹¬í•˜ëŠ” í•¨ìˆ˜
+     * @param TargetPet ì•„ì´í…œì„ ì£¼ê³ ì í•˜ëŠ” Petì˜ í¬ì¸í„°
+     * @param ItemData ì•„ì´í…œì˜ DataAsset í¬ì¸í„°
      * @todo
-     * - ÇöÀç´Â ±âº»¸¸ ±¸ÇöµÇ¾î ÀÖÀ¸¸ç, ÃßÈÄ º¯°æ ¿¹Á¤
+     * - í˜„ì¬ëŠ” ê¸°ë³¸ë§Œ êµ¬í˜„ë˜ì–´ ìˆìœ¼ë©°, ì¶”í›„ ë³€ê²½ ì˜ˆì •
      */
     UFUNCTION(BlueprintCallable, Category = "Pet|Item")
     void GiveItemToPet(APetCompanionCharacter* TargetPet, UPetItemDataAsset* ItemData);
 
     /**
-     * @brief Pet ¼ÒÀ¯ÇÑ ¾ÆÀÌÅÛÀ» Á¦°ÅÇÏ´Â ÇÔ¼ö
-     * @param TargetPet ¾ÆÀÌÅÛÀ» ¼ÒÀ¯ÇÑ Pet Æ÷ÀÎÅÍ
-	 * @param InstanceId Á¦°ÅÇÏ°íÀÚ ÇÏ´Â ¾ÆÀÌÅÛ ÀÎ½ºÅÏ½ºÀÇ GUID
+     * @brief Pet ì†Œìœ í•œ ì•„ì´í…œì„ ì œê±°í•˜ëŠ” í•¨ìˆ˜
+     * @param TargetPet ì•„ì´í…œì„ ì†Œìœ í•œ Pet í¬ì¸í„°
+	 * @param InstanceId ì œê±°í•˜ê³ ì í•˜ëŠ” ì•„ì´í…œ ì¸ìŠ¤í„´ìŠ¤ì˜ GUID
 	 * @details
-	 * - UI È¤Àº ¿ÜºÎ¿¡¼­ ¾ÆÀÌÅÛ Á¦°Å¸¦ ¿äÃ»ÇÒ ¶§ »ç¿ëÇÑ´Ù. 
-     * - ¾ÆÀÌÅÛ Á¦°Å´Â PetItemComponentÀÇ RemoveItemÀ» È£ÃâÇÏ´Â ÇüÅÂ·Î ±¸Çö
+	 * - UI í˜¹ì€ ì™¸ë¶€ì—ì„œ ì•„ì´í…œ ì œê±°ë¥¼ ìš”ì²­í•  ë•Œ ì‚¬ìš©í•œë‹¤. 
+     * - ì•„ì´í…œ ì œê±°ëŠ” PetItemComponentì˜ RemoveItemì„ í˜¸ì¶œí•˜ëŠ” í˜•íƒœë¡œ êµ¬í˜„
      */
     UFUNCTION(BlueprintCallable, Category = "Pet|Item")
     void RemoveItemFromPet(APetCompanionCharacter* TargetPet, const FGuid& InstanceId);
 
 
     /**
-     * @brief ÇöÀç º¸À¯ÇÑ Pet List¸¦ ¹İÈ¯ÇÏ´Â ÇÔ¼ö
-	 * @return Player°¡ ¼ÒÀ¯ÇÑ PetµéÀÇ Æ÷ÀÎÅÍ ¹è¿­
+     * @brief í˜„ì¬ ë³´ìœ í•œ Pet Listë¥¼ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜
+	 * @return Playerê°€ ì†Œìœ í•œ Petë“¤ì˜ í¬ì¸í„° ë°°ì—´
      */
     const TArray<TObjectPtr<APetCompanionCharacter>>& GetPetList() const { return PetList; } //UFUNCTION(BlueprintPure, Category = "Pet")
 
     /**
-     * @brief ÇöÀç È°¼ºÈ­ µÈ PetÀ» ¹İÈ¯ÇÏ´Â ÇÔ¼ö
-     * @return È°¼ºÈ­ µÈ PetÀÇ Æ÷ÀÎÅÍ, ¾øÀ¸¸é nullptr
+     * @brief í˜„ì¬ í™œì„±í™” ëœ Petì„ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜
+     * @return í™œì„±í™” ëœ Petì˜ í¬ì¸í„°, ì—†ìœ¼ë©´ nullptr
      * @todo
-     * - ÇöÀç´Â PetÀÌ ÇÏ³ª·Î 0¹øÂ° Pet¸¸ ¹İÈ¯ÇÔ
-     * - ÃßÈÄ UI µî¿¡¼­ È°¼ºÈ­µÈ PetÀ» ¼±ÅÃÇÒ ¼ö ÀÖµµ·Ï ±¸ÇöÇÒ ¿¹Á¤
+     * - í˜„ì¬ëŠ” Petì´ í•˜ë‚˜ë¡œ 0ë²ˆì§¸ Petë§Œ ë°˜í™˜í•¨
+     * - ì¶”í›„ UI ë“±ì—ì„œ í™œì„±í™”ëœ Petì„ ì„ íƒí•  ìˆ˜ ìˆë„ë¡ êµ¬í˜„í•  ì˜ˆì •
      */
     UFUNCTION(BlueprintPure, Category = "Pet")
     APetCompanionCharacter* GetActivePet() const;
@@ -110,15 +110,15 @@ public:
     UFUNCTION(BlueprintPure, Category = "Pet")
     int32 GetPetCount() const { return PetList.Num(); }
 
-    // PetÀÌ Ãß°¡µÉ ¶§ ¹æ¼ÛÇÑ´Ù
+    // Petì´ ì¶”ê°€ë  ë•Œ ë°©ì†¡í•œë‹¤
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetAdded, APetCompanionCharacter*);
     FOnPetAdded OnPetAdded;
 
-    // PetÀÌ Á¦°ÅµÉ ¶§ ¹æ¼ÛÇÑ´Ù
+    // Petì´ ì œê±°ë  ë•Œ ë°©ì†¡í•œë‹¤
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetRemoved, APetCompanionCharacter*);
     FOnPetRemoved OnPetRemoved;
 
-    // PetÀÌ ¾ÆÀÌÅÛÀ» ¹ŞÀ» ¶§ È¤Àº Á¦°ÅµÉ ¶§ ¹æ¼ÛÇÑ´Ù
+    // Petì´ ì•„ì´í…œì„ ë°›ì„ ë•Œ í˜¹ì€ ì œê±°ë  ë•Œ ë°©ì†¡í•œë‹¤
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPetItemReceived, APetCompanionCharacter*, const UPetItemDataAsset*);
     FOnPetItemReceived OnPetItemReceived;
 
@@ -138,12 +138,12 @@ private:
     FTransform CalculateSpawnTransform(int32 PetIndex) const;
 
     /**
-     * @brief ¾ÆÀÌÅÛÀ» Àü´ŞÇÒ PetÀ» ¼±ÅÃÇÏ´Â ÇÔ¼ö
-	 * @param ItemData Àü´ŞÇÒ ItemÀÇ DataAsset Æ÷ÀÎÅÍ
-     * @return ¼±ÅÃµÈ PetÀÇ Æ÷ÀÎÅÍ, ¾øÀ¸¸é nullptr
+     * @brief ì•„ì´í…œì„ ì „ë‹¬í•  Petì„ ì„ íƒí•˜ëŠ” í•¨ìˆ˜
+	 * @param ItemData ì „ë‹¬í•  Itemì˜ DataAsset í¬ì¸í„°
+     * @return ì„ íƒëœ Petì˜ í¬ì¸í„°, ì—†ìœ¼ë©´ nullptr
      * @todo
-     * - ÇöÀç´Â GetActivePet()¿Í ¸¶Âù°¡Áö·Î 0¹øÀç Pet¸¸ ¹İÈ¯. ÃßÈÄ UI¸¦ ±¸¼ºÇÏ¿© ¼±ÅÃÇÏµµ·Ï ±¸Çö
-     * - Selection Policy ÆĞÅÏÀ¸·Î È®Àå
+     * - í˜„ì¬ëŠ” GetActivePet()ì™€ ë§ˆì°¬ê°€ì§€ë¡œ 0ë²ˆì¬ Petë§Œ ë°˜í™˜. ì¶”í›„ UIë¥¼ êµ¬ì„±í•˜ì—¬ ì„ íƒí•˜ë„ë¡ êµ¬í˜„
+     * - Selection Policy íŒ¨í„´ìœ¼ë¡œ í™•ì¥
      */
     APetCompanionCharacter* SelectPetForItem(const UPetItemDataAsset* ItemData) const;
 

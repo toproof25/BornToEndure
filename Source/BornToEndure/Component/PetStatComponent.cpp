@@ -1,4 +1,4 @@
-#include "Component/PetStatComponent.h"
+ï»¿#include "Component/PetStatComponent.h"
 
 UPetStatComponent::UPetStatComponent()
 {
@@ -20,7 +20,7 @@ void UPetStatComponent::InitializeBaseStats(const FPetBaseStatSheet& BaseStatShe
 
 float UPetStatComponent::GetFinalStat(EPetStatType StatType) const
 {
-    // Ä³½Ã°¡ À¯È¿ÇÏ¸é Ä³½Ã¿¡¼­ ¹Ù·Î ¹İÈ¯
+    // ìºì‹œê°€ ìœ íš¨í•˜ë©´ ìºì‹œì—ì„œ ë°”ë¡œ ë°˜í™˜
     if (!bCacheDirty)
     {
         if (const float* Cached = CachedFinalStats.Find(StatType))
@@ -29,7 +29,7 @@ float UPetStatComponent::GetFinalStat(EPetStatType StatType) const
         }
     }
 
-    // Æ¯Á¤ ½ºÅÈ Àç°è»ê
+    // íŠ¹ì • ìŠ¤íƒ¯ ì¬ê³„ì‚°
     const float Base = BaseStats.FindRef(StatType);
 
     float AdditiveSum = 0.f;
@@ -45,16 +45,16 @@ float UPetStatComponent::GetFinalStat(EPetStatType StatType) const
                 AdditiveSum += Mod.Value;
                 break;
             case EStatModifierType::Multiplicative:
-                // °ö¿¬»ê ÁßÃ¸
+                // ê³±ì—°ì‚° ì¤‘ì²©
                 MultiplicativeProduct *= (1.f + Mod.Value);
                 break;
             case EStatModifierType::Override:
-                // Override´Â ±× Áï½Ã ¹İÈ¯ (´Ù¸¥ °è»ê ¹«½Ã)
+                // OverrideëŠ” ê·¸ ì¦‰ì‹œ ë°˜í™˜ (ë‹¤ë¥¸ ê³„ì‚° ë¬´ì‹œ)
                 return Mod.Value;
         }
     }
 
-    // ÃÖÁ¾°ª = (±âº» + ÇÕ) * °ö
+    // ìµœì¢…ê°’ = (ê¸°ë³¸ + í•©) * ê³±
     const float FinalValue = (Base + AdditiveSum) * MultiplicativeProduct;
     CachedFinalStats.Add(StatType, FinalValue);
 
@@ -70,7 +70,7 @@ void UPetStatComponent::AddModifier(const FStatModifier& Modifier)
 
 void UPetStatComponent::RemoveModifiersBySource(const FGuid& SourceId)
 {
-    // 1. °¡Áø ¸ğµç ¾ÆÀÌÅÛ¿¡¼­ ÀÏÄ¡ÇÏ´Â Å¸ÀÔµéÀ» ¸ğµÎ ¼öÁı (Áßº¹Àº ¾øµµ·Ï SetÀ¸·Î »ç¿ë)
+    // 1. ê°€ì§„ ëª¨ë“  ì•„ì´í…œì—ì„œ ì¼ì¹˜í•˜ëŠ” íƒ€ì…ë“¤ì„ ëª¨ë‘ ìˆ˜ì§‘ (ì¤‘ë³µì€ ì—†ë„ë¡ Setìœ¼ë¡œ ì‚¬ìš©)
     TSet<EPetStatType> AffectedStats;
     for (const FStatModifier& Mod : ActiveModifiers)
     {
@@ -80,14 +80,14 @@ void UPetStatComponent::RemoveModifiersBySource(const FGuid& SourceId)
         }
     }
 
-    // 2. SourceId°¡ ÀÏÄ¡ÇÏ´Â modifier ¸ğµÎ Á¦°Å
+    // 2. SourceIdê°€ ì¼ì¹˜í•˜ëŠ” modifier ëª¨ë‘ ì œê±°
     ActiveModifiers.RemoveAllSwap([&SourceId](const FStatModifier& Mod)
         {
             return Mod.SourceId == SourceId;
         }
     );
 
-    // 3. ¿µÇâ¹ŞÀº ½ºÅÈ¸¸ Àç°è»ê
+    // 3. ì˜í–¥ë°›ì€ ìŠ¤íƒ¯ë§Œ ì¬ê³„ì‚°
     for (EPetStatType StatType : AffectedStats)
     {
         RecalculateStat(StatType);
@@ -96,13 +96,13 @@ void UPetStatComponent::RemoveModifiersBySource(const FGuid& SourceId)
 
 void UPetStatComponent::RecalculateStat(EPetStatType StatType)
 {
-    // ÇØ´ç ½ºÅÈÀÇ Ä³½Ã¸¦ ¹«È¿È­ÇÏ°í »õ °ªÀ» °è»ê
+    // í•´ë‹¹ ìŠ¤íƒ¯ì˜ ìºì‹œë¥¼ ë¬´íš¨í™”í•˜ê³  ìƒˆ ê°’ì„ ê³„ì‚°
     CachedFinalStats.Remove(StatType);
-    bCacheDirty = false; // ºÎºĞ Àç°è»êÀÌ¹Ç·Î ÀüÃ¼ dirty´Â ¾Æ´Ô
+    bCacheDirty = false; // ë¶€ë¶„ ì¬ê³„ì‚°ì´ë¯€ë¡œ ì „ì²´ dirtyëŠ” ì•„ë‹˜
 
     const float NewValue = GetFinalStat(StatType);
 
-    // ±¸µ¶ÀÚµé¿¡°Ô º¯°æ ¾Ë¸²
+    // êµ¬ë…ìë“¤ì—ê²Œ ë³€ê²½ ì•Œë¦¼
     OnStatChanged.Broadcast(StatType, NewValue);
 }
 

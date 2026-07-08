@@ -1,8 +1,8 @@
-/**
+ï»¿/**
 * @file EnemyDataRow.h
 * @date 2026-05-16
 * @author toproof (kmnlmn123@gmail.com)
-* @brief Àû µ¥ÀÌÅÍ Å×ÀÌºí Çà ±¸Á¶Ã¼ Á¤ÀÇÇÏ´Â ÆÄÀÏ·Î DataTableÀÇ µ¥ÀÌÅÍµéÀ» Á¤ÀÇÇÏ±â À§ÇØ ÀÛ¼º
+* @brief ì  ë°ì´í„° í…Œì´ë¸” í–‰ êµ¬ì¡°ì²´ ì •ì˜í•˜ëŠ” íŒŒì¼ë¡œ DataTableì˜ ë°ì´í„°ë“¤ì„ ì •ì˜í•˜ê¸° ìœ„í•´ ì‘ì„±
 */
 
 
@@ -22,7 +22,7 @@ struct FEnemyDataRow : public FTableRowBase
 
 public:
 
-	// Àû¿¡ ´ëÇÑ °íÀ¯ ID, Name, ¼³¸í, Ã¼·Â, °ø°İ·Â, ¹æ¾î·Â, ÀÌµ¿ ¼Óµµ, ¾ÆÀÌÄÜ, DataAsset(»ç¿îµå, ³ªÀÌ¾Æ°¡¶ó, ¸Å½¬ µî)
+	// ì ì— ëŒ€í•œ ê³ ìœ  ID, Name, ì„¤ëª…, ì²´ë ¥, ê³µê²©ë ¥, ë°©ì–´ë ¥, ì´ë™ ì†ë„, ì•„ì´ì½˜, DataAsset(ì‚¬ìš´ë“œ, ë‚˜ì´ì•„ê°€ë¼, ë§¤ì‰¬ ë“±)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
 	FName EnemyID;
@@ -37,9 +37,9 @@ public:
 	int32 SpawnLevel;
 
 	/**
-	 * @brief ÀûÀÌ »ç¿ëÇÏ´Â Mesh, Sound, Niagara µîÀÇ µ¥ÀÌÅÍ¸¦ ´ã°í ÀÖ´Â DataAsset¿¡ ´ëÇÑ SoftObjectPtr
-	 * - DataTableÀº ·ÎµåÇÒ ¶§ TObjectPtrÀ» »ç¿ëÇÏ¸é ¸ğµÎ ·ÎµåÇÑ »óÅÂ°¡ µÊ (¼º´É ÀúÇÏ ¹× ¸Ş¸ğ¸® ³¶ºñ)
-	 * - TSoftObjectPtrÀ» »ç¿ëÇÏ¸é ½ÇÁ¦·Î ÇÊ¿äÇÑ ½ÃÁ¡¿¡ ·ÎµåÇÒ ¼ö ÀÖ´Ù
+	 * @brief ì ì´ ì‚¬ìš©í•˜ëŠ” Mesh, Sound, Niagara ë“±ì˜ ë°ì´í„°ë¥¼ ë‹´ê³  ìˆëŠ” DataAssetì— ëŒ€í•œ SoftObjectPtr
+	 * - DataTableì€ ë¡œë“œí•  ë•Œ TObjectPtrì„ ì‚¬ìš©í•˜ë©´ ëª¨ë‘ ë¡œë“œí•œ ìƒíƒœê°€ ë¨ (ì„±ëŠ¥ ì €í•˜ ë° ë©”ëª¨ë¦¬ ë‚­ë¹„)
+	 * - TSoftObjectPtrì„ ì‚¬ìš©í•˜ë©´ ì‹¤ì œë¡œ í•„ìš”í•œ ì‹œì ì— ë¡œë“œí•  ìˆ˜ ìˆë‹¤
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
 	TSoftObjectPtr<UDataAsset> EnemyDataAsset;

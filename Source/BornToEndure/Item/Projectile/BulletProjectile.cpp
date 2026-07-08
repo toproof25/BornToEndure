@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BulletProjectile.h"
@@ -51,7 +51,7 @@ void ABulletProjectile::OnProjectileHit(
 			UE_LOG(LogBaseProjectile, Warning, TEXT("DamageType is nullptr!"));
 		}
 
-		// OtherActor¿¡ ProjectileDamage¸¸Å­ ÇÇÇØ¸¦ ÀÔÈ÷´Â ApplyDamage ÇÔ¼ö È£Ãâ
+		// OtherActorì— ProjectileDamageë§Œí¼ í”¼í•´ë¥¼ ì…íˆëŠ” ApplyDamage í•¨ìˆ˜ í˜¸ì¶œ
 		UE_LOG(LogBaseProjectile, Display, TEXT("Bullet hit: %s"), *OtherActor->GetName());
 		UGameplayStatics::ApplyDamage(
 			OtherActor,
@@ -62,7 +62,7 @@ void ABulletProjectile::OnProjectileHit(
 		);
 
 
-		// ºÎ¸ğ Å¬·¡½º¿¡¼­ Á¦°ÅµÊ
+		// ë¶€ëª¨ í´ë˜ìŠ¤ì—ì„œ ì œê±°ë¨
 		Super::OnProjectileHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 	}
 }

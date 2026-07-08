@@ -1,25 +1,25 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿#include "UI/PlayerHUDWidget.h"
 
-
-#include "UI/PlayerHUDWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+#include "UI/PlayerHealthBarWidget.h"
 
 #include "PlayerState/CombatPlayerState.h"
+#include "Character/Player/PlayerCharacter.h"
+
 #include "Component/PlayerExperienceComponent.h"
+#include "Component/PlayerHealthComponent.h"
 
-void UPlayerHUDWidget::NativeOnInitialized()
+
+void UPlayerHUDWidget::InitializeWidget(APlayerCharacter* PlayerCharacter)
 {
-	//APawn* Player = GetOwningPlayer()->GetPawn();
-	//if (!Player) return;
-	//ACombatPlayerState* CombatPlayerState = Player->GetPlayerState<ACombatPlayerState>();
-	//if (!CombatPlayerState) return;
-	//UPlayerExperienceComponent* PlayerExpComp = CombatPlayerState->FindComponentByClass<UPlayerExperienceComponent>();
-	//if (!PlayerExpComp) return;
+	if (!PlayerCharacter) return;
 
-	//PlayerExpComp->OnChangeExpDelegate.AddDynamic(this, &UPlayerHUDWidget::UpdateExpBar);
-	//PlayerExpComp->OnLevelUpDelegate.AddDynamic(this, &UPlayerHUDWidget::UpdateLevelText);
+	UPlayerHealthComponent* HealthComp = PlayerCharacter->GetPlayerHealthComp();
+	if (!HealthComp) return;
+
+	HealthBarWidget->InitializeWidget(HealthComp);
 }
 
 void UPlayerHUDWidget::UpdateExpBar(float NewExp, float MaxExp)

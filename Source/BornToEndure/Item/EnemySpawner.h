@@ -1,10 +1,10 @@
-/**
+ï»¿/**
  * @file EnemySpawner.h
- * @brief Àû ½ºÆ÷³Ê Å¬·¡½º Á¤ÀÇ
+ * @brief ì  ìŠ¤í¬ë„ˆ í´ë˜ìŠ¤ ì •ì˜
  * @author toproof (kmnlmn123@gmail.com)
  * @date 2026-04-27
  * @details
- * - ¿¡µğÅÍ¿¡¼­ ¼³Á¤ÇÑ EnemyClass¸¦ ÀÏÁ¤ °£°İÀ¸·Î ½ºÆùÇÏ°í Ç®¸µ ½Ã½ºÅÛ°ú ¿¬µ¿
+ * - ì—ë””í„°ì—ì„œ ì„¤ì •í•œ EnemyClassë¥¼ ì¼ì • ê°„ê²©ìœ¼ë¡œ ìŠ¤í°í•˜ê³  í’€ë§ ì‹œìŠ¤í…œê³¼ ì—°ë™
  */
 
 
@@ -34,23 +34,23 @@ protected:
 
 
 private: 
-    /** @brief ½ºÆùÇÒ Àû Å¬·¡½º. ºí·çÇÁ¸°Æ®¿¡¼­ ¼³Á¤ */
+    /** @brief ìŠ¤í°í•  ì  í´ë˜ìŠ¤. ë¸”ë£¨í”„ë¦°íŠ¸ì—ì„œ ì„¤ì • */
     UPROPERTY(EditAnywhere, Category = "Spawner")
     TSubclassOf<AActor> EnemyClass;
 
-    /** @brief ½ºÆù ¹İ°æ (cm). ½ºÆ÷³Ê À§Ä¡ Áß½É */
+    /** @brief ìŠ¤í° ë°˜ê²½ (cm). ìŠ¤í¬ë„ˆ ìœ„ì¹˜ ì¤‘ì‹¬ */
     UPROPERTY(EditAnywhere, Category = "Spawner", meta = (ClampMin = "100.0"))
     float SpawnRadius = 1500.f;
 
-    /** @brief ½ºÆù °£°İ (ÃÊ) */
+    /** @brief ìŠ¤í° ê°„ê²© (ì´ˆ) */
     UPROPERTY(EditAnywhere, Category = "Spawner", meta = (ClampMin = "0.1"))
     float SpawnInterval = 2.f;
 
-    /** @brief ÇÑ ¹ø¿¡ ½ºÆùÇÒ ÃÖ´ë È°¼º Àû ¼ö */
+    /** @brief í•œ ë²ˆì— ìŠ¤í°í•  ìµœëŒ€ í™œì„± ì  ìˆ˜ */
     UPROPERTY(EditAnywhere, Category = "Spawner")
     int32 MaxActiveEnemies = 30;
 
-    /** @brief ÃÊ±â Ç® Å©±â */
+    /** @brief ì´ˆê¸° í’€ í¬ê¸° */
     UPROPERTY(EditAnywhere, Category = "Spawner")
     int32 PoolSize = 50;
 
@@ -59,9 +59,9 @@ private:
     void SpawnEnemy();
     bool GetRandomSpawnLocation(FVector& OutLocation) const;
 
-    /** @brief ÇöÀç È°¼ºÈ­µÈ Àû ¼ö ¹İÈ¯ */
+    /** @brief í˜„ì¬ í™œì„±í™”ëœ ì  ìˆ˜ ë°˜í™˜ */
     int32 GetActiveEnemyCount() const;
 
-	TMap<FName, FEnemyDataRow> CachedEnemyDataMap; // µ¥ÀÌÅÍ Å×ÀÌºí¿¡¼­ ÀĞ¾î¿Â Àû µ¥ÀÌÅÍ ¸Ê
+	TMap<FName, FEnemyDataRow> CachedEnemyDataMap; // ë°ì´í„° í…Œì´ë¸”ì—ì„œ ì½ì–´ì˜¨ ì  ë°ì´í„° ë§µ
 
 };

@@ -1,4 +1,4 @@
-#include "UI/LevelUpRewardWidget.h"
+ï»¿#include "UI/LevelUpRewardWidget.h"
 #include "Components/Button.h"
 #include "Core/DefaultPlayerController.h"
 #include "UI/PetEntryWidget.h"
@@ -43,7 +43,7 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 {
 	if (!PetListBox || !ItemListBox) return;
 
-	// WBP¿¡¼­ ÀÓ½Ã UIµéÀ» Á¦°Å
+	// WBPì—ì„œ ì„ì‹œ UIë“¤ì„ ì œê±°
 	PetListBox->ClearChildren();
 	ItemListBox->ClearChildren();
 
@@ -58,7 +58,7 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 
 	for (TObjectPtr<APetCompanionCharacter> Pet : InLevelUpData.PetList)
 	{
-		// Pet À§Á¬ ÃÊ±âÈ­ ·ÎÁ÷ Ãß°¡
+		// Pet ìœ„ì ¯ ì´ˆê¸°í™” ë¡œì§ ì¶”ê°€
 		UPetEntryWidget* NewPetEntry = CreateWidget<UPetEntryWidget>(this, PetEntryWidgetClass);
 		NewPetEntry->InitializeWithPetData(this, Pet);
 		NewPetEntry->OnPetSelectedDelegate.AddDynamic(this, &ULevelUpRewardWidget::HandlePetSelected);
@@ -74,7 +74,7 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 
 	for (TObjectPtr<UObject> Item : InLevelUpData.RandomItemList)
 	{
-		// Item À§Á¬ ÃÊ±âÈ­ ·ÎÁ÷ Ãß°¡
+		// Item ìœ„ì ¯ ì´ˆê¸°í™” ë¡œì§ ì¶”ê°€
 		UItemEntryWidget* NewItemEntry = CreateWidget<UItemEntryWidget>(this, ItemEntryWidgetClass);
 		NewItemEntry->InitializeWithItemData(this, Item);
 		NewItemEntry->OnItemSelectedDelegate.AddDynamic(this, &ULevelUpRewardWidget::HandleItemSelected);

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -22,11 +22,11 @@ class BORNTOENDURE_API IPoolable
 
 public:
 
-	// Object Pool ¿äÃ» ½Ã È°¼ºÈ­ ÇÔ¼ö 
+	// Object Pool ìš”ì²­ ì‹œ í™œì„±í™” í•¨ìˆ˜ 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
 	void ActivateActor();
 
-	// Object Pool ¿äÃ» ½Ã ºñÈ°¼ºÈ­ ÇÔ¼ö 
+	// Object Pool ìš”ì²­ ì‹œ ë¹„í™œì„±í™” í•¨ìˆ˜ 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
 	void DeactivateActor();
 

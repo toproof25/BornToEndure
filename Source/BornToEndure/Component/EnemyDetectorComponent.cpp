@@ -1,4 +1,4 @@
-#include "Component/EnemyDetectorComponent.h"
+ï»¿#include "Component/EnemyDetectorComponent.h"
 #include "Character/Enemy/BaseEnemyCharacter.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -18,7 +18,7 @@ void UEnemyDetectorComponent::BeginPlay()
         &UEnemyDetectorComponent::UpdateEnemyList,
         UpdateInterval,
         true,
-        0.0f  // Áï½Ã Ã¹ ½ÇÇà
+        0.0f  // ì¦‰ì‹œ ì²« ì‹¤í–‰
     );
 }
 
@@ -54,7 +54,7 @@ void UEnemyDetectorComponent::UpdateEnemyList()
     for (const FOverlapResult& Result : OverlapResults)
     {
         ABaseEnemyCharacter* Enemy = Cast<ABaseEnemyCharacter>(Result.GetActor());
-        // IsValid + IsPendingKillPending µ¿½Ã Ã¼Å©
+        // IsValid + IsPendingKillPending ë™ì‹œ ì²´í¬
         if (IsValid(Enemy))
         {
             CachedEnemies.Add(Enemy);

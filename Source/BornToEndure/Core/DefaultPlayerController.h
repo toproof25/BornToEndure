@@ -1,11 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿/**
+* @file DefaultPlayerController.h
+* @brief ê¸°ë³¸ í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ í´ë˜ìŠ¤ í—¤ë”
+* 
+* - í”Œë ˆì´ì–´ ì…ë ¥ ì²˜ë¦¬ ë° UI ê´€ë¦¬
+*/
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-
-#include "EnhancedInputSubsystems.h"
 
 #include "DefaultPlayerController.generated.h"
 
@@ -13,6 +16,7 @@ class UInputMappingContext;
 class UPlayerHUDWidget;
 class ULevelUpRewardWidget;
 class UPlayerExperienceComponent;
+class UPlayerHealthBarWidget;
 
 UCLASS()
 class BORNTOENDURE_API ADefaultPlayerController : public APlayerController
@@ -26,20 +30,20 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	/** * @brief Input Mapping Context¸¦ ÆíÁı±â¿¡¼­ ÇÒ´ç °¡´ÉÇÏµµ·Ï ¼±¾ğ */
+	/** * @brief Input Mapping Contextë¥¼ í¸ì§‘ê¸°ì—ì„œ í• ë‹¹ ê°€ëŠ¥í•˜ë„ë¡ ì„ ì–¸ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI, meta = (AllowedClasses = "PlayerHUDWidget"))
 	TSubclassOf<UPlayerHUDWidget> PlayerHUDWidgetClass;
 
-	UPROPERTY()
-	TObjectPtr<UPlayerHUDWidget> PlayerHUDWidgetInstance;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
 	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;
 
 private:
+
+	UPROPERTY()
+	TObjectPtr<UPlayerHUDWidget> PlayerHUDWidgetInstance;
 
 	TObjectPtr<UPlayerExperienceComponent> PlayerExpComp;
 
@@ -47,6 +51,10 @@ private:
 	void SetUpPlayerInputMode();
 	void SetUpPlayerHUDWidget();
 
+	void HandlePlayerDeath();
+
 	UFUNCTION()
 	void LevelUpHandler(int32 NewLevel);
+
+
 };

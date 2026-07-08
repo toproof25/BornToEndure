@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -25,7 +25,7 @@ class BORNTOENDURE_API UEffectSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	// ¿ùµå ¼­ºê½Ã½ºÅÛ ÃÊ±âÈ­ ½Ã È£Ãâ (BeginPlay¿Í ºñ½ÁÇÑ ´À³¦)
+	// ì›”ë“œ ì„œë¸Œì‹œìŠ¤í…œ ì´ˆê¸°í™” ì‹œ í˜¸ì¶œ (BeginPlayì™€ ë¹„ìŠ·í•œ ëŠë‚Œ)
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	void PreloadEffectAssets(FPrimaryAssetId PrimaryAssetId);
@@ -54,8 +54,8 @@ private:
 public:
 
 	/**
-	 * @brief ImGui¿¡¼­ ·ÎµåµÈ ¿¡¼Â Ä«¿îÆ®¸¦ È®ÀÎÇÏ±â À§ÇÑ Getter
-	 * @return LoadµÈ ¿¡¼ÂÀÇ PrimaryAssetId¿Í Ä«¿îÆ®°¡ ´ã±ä TMap
+	 * @brief ImGuiì—ì„œ ë¡œë“œëœ ì—ì…‹ ì¹´ìš´íŠ¸ë¥¼ í™•ì¸í•˜ê¸° ìœ„í•œ Getter
+	 * @return Loadëœ ì—ì…‹ì˜ PrimaryAssetIdì™€ ì¹´ìš´íŠ¸ê°€ ë‹´ê¸´ TMap
 	 */
 	const TMap<FPrimaryAssetId, FLoadedAsset>& GetPreloadAssetCounts() const { return PreloadAsset; }
 

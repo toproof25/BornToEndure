@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_MoveToAttackPosition.generated.h"
 
 /**
- * @brief Service°¡ °è»êÇÑ MoveTargetLocationÀ¸·Î ÀÌµ¿
- * - µµ´Ş ÆÇÁ¤: Pet°ú ¸ñÇ¥ À§Ä¡ÀÇ °Å¸®°¡ AcceptanceRadius ÀÌÇÏ
- * - ÀÌµ¿ Áß ¼­ºñ½º°¡ À§Ä¡¸¦ °»½ÅÇÏ¹Ç·Î ÀÚ¿¬½º·´°Ô ÃßÀû
+ * @brief Serviceê°€ ê³„ì‚°í•œ MoveTargetLocationìœ¼ë¡œ ì´ë™
+ * - ë„ë‹¬ íŒì •: Petê³¼ ëª©í‘œ ìœ„ì¹˜ì˜ ê±°ë¦¬ê°€ AcceptanceRadius ì´í•˜
+ * - ì´ë™ ì¤‘ ì„œë¹„ìŠ¤ê°€ ìœ„ì¹˜ë¥¼ ê°±ì‹ í•˜ë¯€ë¡œ ìì—°ìŠ¤ëŸ½ê²Œ ì¶”ì 
  */
 UCLASS()
 class BORNTOENDURE_API UBTTask_MoveToAttackPosition : public UBTTaskNode
@@ -30,12 +30,12 @@ public:
     FBlackboardKeySelector OwnerActorKey;
 
     /**
-     * @brief ¸ñÇ¥ µµ´Ş ÆÇÁ¤ ¹İ°æ ¼öÄ¡
+     * @brief ëª©í‘œ ë„ë‹¬ íŒì • ë°˜ê²½ ìˆ˜ì¹˜
      */
     UPROPERTY(EditAnywhere, Category = "AI|Movement")
     float AcceptanceRadius = 60.0f;
 
-    /** Player ¹İ°æ ÃÊ°ú ½Ã ÀÌµ¿ Áß´Ü ¿©ºÎ */
+    /** Player ë°˜ê²½ ì´ˆê³¼ ì‹œ ì´ë™ ì¤‘ë‹¨ ì—¬ë¶€ */
     UPROPERTY(EditAnywhere, Category = "AI|Movement")
     float MaxDistanceToOwner = 1000.0f;
 };

@@ -1,26 +1,26 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Data/PetItemDataAsset.h"
 #include "PetProjectileItemDataAsset.generated.h"
 
 /**
- * @brief ¹ß»çÃ¼ÀÇ ÇüÅÂ¸¦ º¯È¯ÇÏ´Â ÆĞÅÏ
+ * @brief ë°œì‚¬ì²´ì˜ í˜•íƒœë¥¼ ë³€í™˜í•˜ëŠ” íŒ¨í„´
  */
 UENUM(BlueprintType)
 enum class EProjectilePattern : uint8
 {
-    Single      UMETA(DisplayName = "´Ü¹ß"),
-    Spread      UMETA(DisplayName = "»êÅº"),
-    Laser       UMETA(DisplayName = "·¹ÀÌÀú"),
-    Spiral      UMETA(DisplayName = "³ª¼±"),
+    Single      UMETA(DisplayName = "ë‹¨ë°œ"),
+    Spread      UMETA(DisplayName = "ì‚°íƒ„"),
+    Laser       UMETA(DisplayName = "ë ˆì´ì €"),
+    Spiral      UMETA(DisplayName = "ë‚˜ì„ "),
 };
 
 /**
- * @brief ¹ß»çÃ¼ ¼öÁ¤ÀÚ µ¥ÀÌÅÍ
+ * @brief ë°œì‚¬ì²´ ìˆ˜ì •ì ë°ì´í„°
  * @note 
- * - ¾ÆÀÌÅÛ ÇÏ³ª°¡ ¹ß»çÃ¼¿¡ ¹ÌÄ¡´Â ¿µÇâÀ» ±â¼úÇÑ´Ù.
- * - ¿©·¯ ¹ß»çÃ¼ ¾ÆÀÌÅÛÀÌ ÁßÃ¸µÉ ¶§¸¦ ´ëºñÇÏ¿© PetItemComponent¿¡¼­ ÀÌ modifierµéÀ» StackÀ» ÀÌ¿ëÇÏ¿© °ü¸®
+ * - ì•„ì´í…œ í•˜ë‚˜ê°€ ë°œì‚¬ì²´ì— ë¯¸ì¹˜ëŠ” ì˜í–¥ì„ ê¸°ìˆ í•œë‹¤.
+ * - ì—¬ëŸ¬ ë°œì‚¬ì²´ ì•„ì´í…œì´ ì¤‘ì²©ë  ë•Œë¥¼ ëŒ€ë¹„í•˜ì—¬ PetItemComponentì—ì„œ ì´ modifierë“¤ì„ Stackì„ ì´ìš©í•˜ì—¬ ê´€ë¦¬
  */
 USTRUCT(BlueprintType)
 struct BORNTOENDURE_API FProjectileModifierData
@@ -28,39 +28,39 @@ struct BORNTOENDURE_API FProjectileModifierData
     GENERATED_BODY()
 
     /**
-     * @brief °ø°İ ¹ß»çÃ¼ Actor Å¬·¡½º
-     * @note nullÀÌ¸é PetÀÇ ±âº» ¹ß»çÃ¼ Å¬·¡½º¸¦ À¯Áö
+     * @brief ê³µê²© ë°œì‚¬ì²´ Actor í´ë˜ìŠ¤
+     * @note nullì´ë©´ Petì˜ ê¸°ë³¸ ë°œì‚¬ì²´ í´ë˜ìŠ¤ë¥¼ ìœ ì§€
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     TSoftClassPtr<AActor> OverrideProjectileClass;
 
     /**
-     * @brief Ãß°¡ ¹ß»çÃ¼ °³¼ö
+     * @brief ì¶”ê°€ ë°œì‚¬ì²´ ê°œìˆ˜
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     int32 ProjectileCountAdd = 0;           
 
     /**
-     * @brief Ãß°¡ ¹ß»çÃ¼ Å©±â ¹èÀ²
+     * @brief ì¶”ê°€ ë°œì‚¬ì²´ í¬ê¸° ë°°ìœ¨
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     float SizeMultiplier = 1.0f;
 
     /**
-     * @brief Ãß°¡ ½ºÇÇµå ¹èÀ²
+     * @brief ì¶”ê°€ ìŠ¤í”¼ë“œ ë°°ìœ¨
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     float SpeedMultiplier = 1.0f;
 
     /**
-     * @brief °ø°İ ÆĞÅÏ µ¥ÀÌÅÍ
+     * @brief ê³µê²© íŒ¨í„´ ë°ì´í„°
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     EProjectilePattern Pattern = EProjectilePattern::Single;
 };
 
 /**
- * @brief ½ÇÁ¦·Î ÀÎ½ºÅÏ½º°¡ µÇ¸ç °ø°İÀ» º¯È¯ÇÏ´Â ¾ÆÀÌÅÛ DataAsset
+ * @brief ì‹¤ì œë¡œ ì¸ìŠ¤í„´ìŠ¤ê°€ ë˜ë©° ê³µê²©ì„ ë³€í™˜í•˜ëŠ” ì•„ì´í…œ DataAsset
  */
 UCLASS(BlueprintType)
 class BORNTOENDURE_API UPetProjectileItemDataAsset : public UPetItemDataAsset

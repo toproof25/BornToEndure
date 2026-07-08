@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -39,14 +39,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Test")
 	int32 SpawnCount = 500;
 
-	// --- ¿¬¼Ó ½ºÆù Å×½ºÆ®(±â°üÃÑ)¿ë º¯¼ö ---
-	int32 FireDurationSeconds = 5;       // NÃÊ µ¿¾È ½ò °ÍÀÎ°¡?
-	int32 FireSpawnCountPerTick = 10;    // 0.1ÃÊ¸¶´Ù M°³¸¦ ½ò °ÍÀÎ°¡? (Áï 1ÃÊ¿¡ M*10°³)
+	// --- ì—°ì† ìŠ¤í° í…ŒìŠ¤íŠ¸(ê¸°ê´€ì´)ìš© ë³€ìˆ˜ ---
+	int32 FireDurationSeconds = 5;       // Nì´ˆ ë™ì•ˆ ì  ê²ƒì¸ê°€?
+	int32 FireSpawnCountPerTick = 10;    // 0.1ì´ˆë§ˆë‹¤ Mê°œë¥¼ ì  ê²ƒì¸ê°€? (ì¦‰ 1ì´ˆì— M*10ê°œ)
 
-	int32 CurrentFireTick = 0;           // ÇöÀç ¸î ¹ø ½ú´ÂÁö Ä«¿îÆ®
-	int32 MaxFireTick = 0;               // ÃÑ ½÷¾ß ÇÒ È½¼ö
-	FTimerHandle FireTimerHandle;        // Å¸ÀÌ¸Ó ÇÚµé
-	ENCPoolMethod CurrentTestPoolMethod; // ÇöÀç Àû¿ë ÁßÀÎ Ç®¸µ ¸Ş¼­µå
+	int32 CurrentFireTick = 0;           // í˜„ì¬ ëª‡ ë²ˆ ìˆëŠ”ì§€ ì¹´ìš´íŠ¸
+	int32 MaxFireTick = 0;               // ì´ ì´ì•¼ í•  íšŸìˆ˜
+	FTimerHandle FireTimerHandle;        // íƒ€ì´ë¨¸ í•¸ë“¤
+	ENCPoolMethod CurrentTestPoolMethod; // í˜„ì¬ ì ìš© ì¤‘ì¸ í’€ë§ ë©”ì„œë“œ
 
 	void StartContinuousFire(ENCPoolMethod Method);
 	void OnContinuousFireTick();

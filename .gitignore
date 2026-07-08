@@ -4,6 +4,8 @@ DerivedDataCache/
 Intermediate/
 Saved/
 
+Plugins/
+
 # ========== Build Files ==========
 *.VC.db
 *.VC.opendb

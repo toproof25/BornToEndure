@@ -1,10 +1,10 @@
-/**
+ï»¿/**
  * @file PlayerExperienceComponent.h
- * @brief ÇÃ·¹ÀÌ¾îÀÇ °æÇèÄ¡¿Í °ñµå¸¦ °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ® Çì´õ
+ * @brief í”Œë ˆì´ì–´ì˜ ê²½í—˜ì¹˜ì™€ ê³¨ë“œë¥¼ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸ í—¤ë”
  * @author toproof (kmnlmn123@gmail.com)
  * @date 2026-04-27
  * @details
- * - ÀÌ ÆÄÀÏÀº ÇÃ·¹ÀÌ¾îÀÇ °æÇèÄ¡¿Í °ñµå¸¦ °ü¸®¸¦ ¸ñÀûÀ¸·Î ±¸Çö
+ * - ì´ íŒŒì¼ì€ í”Œë ˆì´ì–´ì˜ ê²½í—˜ì¹˜ì™€ ê³¨ë“œë¥¼ ê´€ë¦¬ë¥¼ ëª©ì ìœ¼ë¡œ êµ¬í˜„
  */
 
 #pragma once
@@ -19,11 +19,11 @@ class ABaseEnemyCharacter;
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerExperienceComponent, Log, All);
 
 /**
- * @brief ÇÃ·¹ÀÌ¾îÀÇ °æÇèÄ¡¿Í º¸»óÀ» °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ®	
+ * @brief í”Œë ˆì´ì–´ì˜ ê²½í—˜ì¹˜ì™€ ë³´ìƒì„ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸	
  * @datails
- * - ÀûÀÌ ½ºÆùµÉ ¶§ ¸¶´Ù RegisterEnemyPayload¸¦ È£ÃâÇÏ¿© ÀûÀÇ Delegate¸¦ ±¸µ¶ (¿ÜºÎ ½ºÆ÷³Ê¿¡¼­ È£Ãâ)
- * - Àû Ã³Áö ½Ã °æÇèÄ¡¿Í º¸»óÀ» ¿¬»ê
- * - PlayerState·Î Åë°è µ¥ÀÌÅÍ Àü¼Û
+ * - ì ì´ ìŠ¤í°ë  ë•Œ ë§ˆë‹¤ RegisterEnemyPayloadë¥¼ í˜¸ì¶œí•˜ì—¬ ì ì˜ Delegateë¥¼ êµ¬ë… (ì™¸ë¶€ ìŠ¤í¬ë„ˆì—ì„œ í˜¸ì¶œ)
+ * - ì  ì²˜ì§€ ì‹œ ê²½í—˜ì¹˜ì™€ ë³´ìƒì„ ì—°ì‚°
+ * - PlayerStateë¡œ í†µê³„ ë°ì´í„° ì „ì†¡
  */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BORNTOENDURE_API UPlayerExperienceComponent : public UActorComponent
@@ -39,19 +39,19 @@ protected:
 public:	
 
 	/**
-	 * @brief ¿ÜºÎ¿¡¼­ Àû Ã³Ä¡ ½Ã ¹æ¼ÛµÇ´Â Delegate¸¦ ±¸µ¶ÇÏ±â À§ÇÑ ÇÔ¼ö
-	 * @param Enemy ±¸µ¶ÇÏ°íÀÚ ÇÏ´Â Enemy
+	 * @brief ì™¸ë¶€ì—ì„œ ì  ì²˜ì¹˜ ì‹œ ë°©ì†¡ë˜ëŠ” Delegateë¥¼ êµ¬ë…í•˜ê¸° ìœ„í•œ í•¨ìˆ˜
+	 * @param Enemy êµ¬ë…í•˜ê³ ì í•˜ëŠ” Enemy
 	 * @details
-	 * - ÇØ´ç ÇÔ¼ö´Â Àû ½ºÆ÷³Ê¿¡¼­ ÀûÀÌ ½ºÆùµÉ ¶§ ¸¶´Ù °¢ Enemy°¡ °¡Áø Delegate¿¡ ±¸µ¶ÇÏµµ·Ï È£ÃâµÈ´Ù
-	 * - °¢ Àû¸¶´Ù °¢ÀÚÀÇ Delegate°¡ Á¸ÀçÇÏ¹Ç·Î, ÀûÀÌ ½ºÆùµÉ ¶§¸¶´Ù ±¸µ¶ÇÏ´Â ¹æ½Ä
+	 * - í•´ë‹¹ í•¨ìˆ˜ëŠ” ì  ìŠ¤í¬ë„ˆì—ì„œ ì ì´ ìŠ¤í°ë  ë•Œ ë§ˆë‹¤ ê° Enemyê°€ ê°€ì§„ Delegateì— êµ¬ë…í•˜ë„ë¡ í˜¸ì¶œëœë‹¤
+	 * - ê° ì ë§ˆë‹¤ ê°ìì˜ Delegateê°€ ì¡´ì¬í•˜ë¯€ë¡œ, ì ì´ ìŠ¤í°ë  ë•Œë§ˆë‹¤ êµ¬ë…í•˜ëŠ” ë°©ì‹
 	 */
 	void RegisterEnemyPayload(ABaseEnemyCharacter* Enemy);
 
 	/**
-	 * @brief Àû Ã³Ä¡ ½Ã Delegate·Î È£ÃâµÇ´Â ÇÔ¼ö·Î °æÇèÄ¡¿Í º¸»óÀ» Ã³¸®ÇÑ´Ù
-	 * @param Payload ÀûÀÌ º¸³½ º¸»ó Á¤º¸ ±¸Á¶Ã¼
+	 * @brief ì  ì²˜ì¹˜ ì‹œ Delegateë¡œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ë¡œ ê²½í—˜ì¹˜ì™€ ë³´ìƒì„ ì²˜ë¦¬í•œë‹¤
+	 * @param Payload ì ì´ ë³´ë‚¸ ë³´ìƒ ì •ë³´ êµ¬ì¡°ì²´
 	 * @details
-	 * - °æÇèÄ¡¿Í º¸»óÀ» Ã³¸®ÇÏ´Â °Í ÀÌ¿Ü¿¡ PlayerState·Î Åë°è µ¥ÀÌÅÍ Àü¼Ûµµ ´ã´çÇÑ´Ù
+	 * - ê²½í—˜ì¹˜ì™€ ë³´ìƒì„ ì²˜ë¦¬í•˜ëŠ” ê²ƒ ì´ì™¸ì— PlayerStateë¡œ í†µê³„ ë°ì´í„° ì „ì†¡ë„ ë‹´ë‹¹í•œë‹¤
 	 */
 	UFUNCTION()
 	void OnEnemyKilledHandler(const FEnemyRewardPayload& Payload);
@@ -72,7 +72,7 @@ private:
 
 public:
 	
-	// µğ¹ö±ë ¿ëµµ
+	// ë””ë²„ê¹… ìš©ë„
 	UFUNCTION(BlueprintCallable, Category = "Experience")
 	float GetCurrentEXP() const { return CurrentEXP; }
 
