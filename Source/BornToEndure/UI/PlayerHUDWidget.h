@@ -18,6 +18,7 @@ class UTextBlock;
 class UProgressBar;
 class UPlayerHealthBarWidget;
 class APlayerCharacter;
+class UGameOverWidget;
 
 
 UCLASS()
@@ -38,6 +39,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* ExpBar;
 
+	UPROPERTY(meta = (BindWidget))
+	UGameOverWidget* GameOverWidget;
+
 	void InitializeWidget(APlayerCharacter* PlayerCharacter);
 
 	UFUNCTION()
@@ -46,5 +50,10 @@ public:
 	UFUNCTION()
 	void UpdateLevelText(int32 NewLevel);
 
+protected:
+	virtual void NativeConstruct() override;
 
+private:
+
+	bool isInitialized = false;
 };
