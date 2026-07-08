@@ -12,6 +12,9 @@
 
 #include "Component/PlayerExperienceComponent.h"
 #include "Component/PlayerHealthComponent.h"
+#include "PlayerExpBarWidget.h"
+
+#include "PlayerState/CombatPlayerState.h"
 
 
 void UPlayerHUDWidget::InitializeWidget(APlayerCharacter* PlayerCharacter)
@@ -19,31 +22,16 @@ void UPlayerHUDWidget::InitializeWidget(APlayerCharacter* PlayerCharacter)
 	if (!PlayerCharacter) return;
 
 	UPlayerHealthComponent* HealthComp = PlayerCharacter->GetPlayerHealthComp();
-	if (!HealthComp) return;
-
-	HealthBarWidget->InitializeWidget(HealthComp);
-	GameOverWidget->InitializeWidget(HealthComp);
-}
-
-void UPlayerHUDWidget::UpdateExpBar(float NewExp, float MaxExp)
-{
-	float ExpPercent = MaxExp > 0.f ? NewExp / MaxExp : 0.f;
-	if (ExpBar)
+	if (HealthComp)
 	{
-		ExpBar->SetPercent(ExpPercent);
+		HealthBarWidget->InitializeWidget(HealthComp);
+		GameOverWidget->InitializeWidget(HealthComp);
+	}
+
+	ACombatPlayerState* PlayerState = PlayerCharacter->GetPlayerState<ACombatPlayerState>();
+	UPlayerExperienceComponent* ExperienceComp = PlayerState ? PlayerState->GetPlayerExperienceComponent() : nullptr;
+	if (PlayerState && ExperienceComp)
+	{
+		PlayerExpBarWidget->InitializeWidget(ExperienceComp);
 	}
 }
-
-void UPlayerHUDWidget::UpdateLevelText(int32 NewLevel)
-{
-	if (LevelText)
-	{
-		LevelText->SetText(FText::Format(NSLOCTEXT("PlayerHUD", "LevelFormat", "Level {0}"), FText::AsNumber(NewLevel)));
-	}
-}
-
-void UPlayerHUDWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-}
-
