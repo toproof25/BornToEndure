@@ -137,7 +137,7 @@ public:
 
 	void GetPerManagerComp(UPetManagerComponent*& OutPetManagerComp) const { OutPetManagerComp = PetManagerComp; }
 	UPlayerHealthComponent* GetPlayerHealthComp() const { return HealthComp; }
-
+	
 
 };
 

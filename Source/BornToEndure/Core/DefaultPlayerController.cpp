@@ -113,12 +113,6 @@ void ADefaultPlayerController::SetUpDelegates()
 		return;
 	}
 
-	//if (!PlayerHealthBarWidgetInstance)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] PlayerHealthWidgetInstance is null. Cannot set up delegates."));
-	//	return;
-	//}
-
 	ACombatPlayerState* PS = GetPlayerState<ACombatPlayerState>();
 	if (!PS)
 	{
@@ -138,17 +132,13 @@ void ADefaultPlayerController::SetUpDelegates()
 	UPlayerHealthComponent* HealthComp = PlayerCharacter->GetPlayerHealthComp();
 	if (!HealthComp) return;
 
-	PlayerHUDWidgetInstance->InitializeWidget(PlayerCharacter);
+	PlayerHUDWidgetInstance->InitializeWidget(PlayerCharacter); // UI Delegate 초기화
 
 	HealthComp->OnPlayerDeath.RemoveAll(this);
-	PlayerExpComp->OnChangeExpDelegate.RemoveAll(PlayerHUDWidgetInstance); /// 중복 방지를 위한 Delegate 초기화
-	PlayerExpComp->OnLevelUpDelegate.RemoveAll(PlayerHUDWidgetInstance);
 	PlayerExpComp->OnLevelUpDelegate.RemoveAll(this);
 
 	HealthComp->OnPlayerDeath.AddUObject(this, &ADefaultPlayerController::HandlePlayerDeath); /// 플레이어 사망 시 처리
-	PlayerExpComp->OnChangeExpDelegate.AddDynamic(PlayerHUDWidgetInstance, &UPlayerHUDWidget::UpdateExpBar);  /// 경험치 획득 시
-	PlayerExpComp->OnLevelUpDelegate.AddDynamic(PlayerHUDWidgetInstance, &UPlayerHUDWidget::UpdateLevelText); /// 레벨업 시
-	PlayerExpComp->OnLevelUpDelegate.AddDynamic(this, &ADefaultPlayerController::LevelUpHandler);			  /// 레벨업 시 레벨업 보상 창 Widget 활성화
+	PlayerExpComp->OnLevelUpDelegate.AddDynamic(this, &ADefaultPlayerController::LevelUpHandler); /// 레벨업 시 레벨업 보상 창 Widget 활성화
 
 	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] DefaultPlayerController Delegate SetUp"));
 }
