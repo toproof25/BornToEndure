@@ -24,9 +24,7 @@ void ULevelUpRewardWidget::ExitButtonClicked()
     ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(GetOwningPlayer());
 	if (!PC) return;
 
-    FInputModeGameOnly InputMode;
-    PC->SetInputMode(InputMode);
-    PC->bShowMouseCursor = false;
+	PC->SetGameInputMode();
 
 	UPetManagerComponent* PetManager = PC->GetPawn()->FindComponentByClass<UPetManagerComponent>();
 	if (!PetManager) return;	
@@ -81,6 +79,11 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 		ItemListBox->AddChild(NewItemEntry);
 	}
 
+	ADefaultPlayerController* PC = GetOwningPlayer<ADefaultPlayerController>();
+	if (PC) 
+	{
+		PC->SetUIInputMode(this, true);
+	}
 
 	UE_LOG(LogTemp, Log, TEXT("LevelUpRewardWidget initialized with PetList Num: %d, ItemList Num: %d"), DisplayedPets.Num(), DisplayedItems.Num());
 }

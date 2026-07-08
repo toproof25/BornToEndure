@@ -3,7 +3,9 @@
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+
 #include "UI/PlayerHealthBarWidget.h"
+#include "UI/GameOverWidget.h"
 
 #include "PlayerState/CombatPlayerState.h"
 #include "Character/Player/PlayerCharacter.h"
@@ -20,6 +22,7 @@ void UPlayerHUDWidget::InitializeWidget(APlayerCharacter* PlayerCharacter)
 	if (!HealthComp) return;
 
 	HealthBarWidget->InitializeWidget(HealthComp);
+	GameOverWidget->InitializeWidget(HealthComp);
 }
 
 void UPlayerHUDWidget::UpdateExpBar(float NewExp, float MaxExp)
@@ -38,3 +41,9 @@ void UPlayerHUDWidget::UpdateLevelText(int32 NewLevel)
 		LevelText->SetText(FText::Format(NSLOCTEXT("PlayerHUD", "LevelFormat", "Level {0}"), FText::AsNumber(NewLevel)));
 	}
 }
+
+void UPlayerHUDWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+}
+

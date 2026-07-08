@@ -15,6 +15,70 @@
 #include "Data/DataTableRow/ItemDataRow.h"
 
 
+void ADefaultPlayerController::SetGameInputMode()
+{
+	FInputModeGameOnly InputMode;
+	InputMode.SetConsumeCaptureMouseDown(false);
+
+	SetInputMode(InputMode);
+
+	SetShowMouseCursor(false);
+
+	// UI에서 막았던 이동/시점 입력 복구
+	ResetIgnoreInputFlags();
+
+	// 게임 일시정지도 같이 관리할 거면 여기서 해제
+	SetPause(false);
+}
+
+void ADefaultPlayerController::SetUIInputMode(UUserWidget* WidgetToFocus, bool bInPauseGame)
+{
+	if (!WidgetToFocus) return;
+	
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+	SetInputMode(InputMode);
+
+	SetShowMouseCursor(true);
+
+	// UI 전용이면 보통 이동/시점 입력은 막는 게 자연스러움
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
+
+	SetPause(bInPauseGame);
+}
+
+void ADefaultPlayerController::SetGameAndUIInputMode(UUserWidget* WidgetToFocus, bool bIgnoreMoveInput, bool bIgnoreLookInput)
+{
+	if (!WidgetToFocus) return;
+
+	FInputModeGameAndUI InputMode;
+	InputMode.SetWidgetToFocus(WidgetToFocus->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetHideCursorDuringCapture(false);
+
+	SetInputMode(InputMode);
+
+	SetShowMouseCursor(true);
+
+	if (bIgnoreMoveInput)
+	{
+		SetIgnoreMoveInput(true);
+	}
+
+	if (bIgnoreLookInput)
+	{
+		SetIgnoreLookInput(true);
+	}
+}
+
+void ADefaultPlayerController::RestoreGameInputMode()
+{
+	SetGameInputMode();
+}
+
 void ADefaultPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

@@ -17,12 +17,23 @@ class UPlayerHUDWidget;
 class ULevelUpRewardWidget;
 class UPlayerExperienceComponent;
 class UPlayerHealthBarWidget;
+class UUserWidget;
 
 UCLASS()
 class BORNTOENDURE_API ADefaultPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+
+	void SetGameInputMode();
+	void SetUIInputMode(UUserWidget* WidgetToFocus, bool bInPauseGame = false);
+	void SetGameAndUIInputMode(
+		UUserWidget* WidgetToFocus,
+		bool bIgnoreMoveInput = true,
+		bool bIgnoreLookInput = false
+	);
+	void RestoreGameInputMode();
 
 protected:
 
