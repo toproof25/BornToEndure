@@ -9,6 +9,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Data/GameTypes.h"
+
 #include "PlayerHUDWidget.generated.h"
 
 class UCanvasPanel;
@@ -19,6 +21,7 @@ class APlayerCharacter;
 class UGameOverWidget;
 class UPlayerExpBarWidget;
 class UGameStatusWidget;
+class ULevelUpRewardWidget;
 
 UCLASS()
 class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
@@ -42,6 +45,11 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UGameStatusWidget* GameStatusWidget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
+	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;
+
 	void InitializeWidget(APlayerCharacter* PlayerCharacter);
+
+	void ShowLevelUpWidget(FLevelUpDataBundle LevelUpData);
 
 };

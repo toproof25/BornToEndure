@@ -7,13 +7,15 @@
 #include "UI/PlayerHealthBarWidget.h"
 #include "UI/GameOverWidget.h"
 #include "UI/GameStatusWidget.h"
+#include "UI/LevelUpRewardWidget.h"
+#include "UI/PlayerExpBarWidget.h"
 
 #include "PlayerState/CombatPlayerState.h"
 #include "Character/Player/PlayerCharacter.h"
-
 #include "Component/PlayerExperienceComponent.h"
 #include "Component/PlayerHealthComponent.h"
-#include "PlayerExpBarWidget.h"
+
+#include "Data/GameTypes.h"
 
 #include "PlayerState/CombatPlayerState.h"
 
@@ -43,4 +45,16 @@ void UPlayerHUDWidget::InitializeWidget(APlayerCharacter* PlayerCharacter)
 	}
 
 
+}
+
+void UPlayerHUDWidget::ShowLevelUpWidget(FLevelUpDataBundle LevelUpData)
+{
+	ULevelUpRewardWidget* LevelUpWidget = CreateWidget<ULevelUpRewardWidget>(GetWorld(), LevelUpWidgetClass);
+
+	if (LevelUpWidget)
+	{
+		LevelUpWidget->InitializeWithLevelUpData(LevelUpData); /// 레벨업 보상 창에 데이터 전달
+		LevelUpWidget->AddToViewport(1);
+		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 레벨업 창 활성화"));
+	}
 }

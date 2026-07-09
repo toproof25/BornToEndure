@@ -79,6 +79,7 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 		ItemListBox->AddChild(NewItemEntry);
 	}
 
+	// UI 입력 활성화
 	ADefaultPlayerController* PC = GetOwningPlayer<ADefaultPlayerController>();
 	if (PC) 
 	{

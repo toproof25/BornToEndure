@@ -48,9 +48,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI, meta = (AllowedClasses = "PlayerHUDWidget"))
 	TSubclassOf<UPlayerHUDWidget> PlayerHUDWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
-	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;
-
 private:
 
 	UPROPERTY()

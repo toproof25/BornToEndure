@@ -180,78 +180,20 @@ void ADefaultPlayerController::HandlePlayerDeath()
 
 void ADefaultPlayerController::LevelUpHandler(int32 NewLevel)
 {
-	if (LevelUpWidgetClass)
-	{
-		// Pet 목록 가져오기
-		FLevelUpDataBundle LevelUpData;
-		UPetManagerComponent* PetManager = GetPawn()->FindComponentByClass<UPetManagerComponent>();
-		LevelUpData.PetList = PetManager ? PetManager->GetPetList() : TArray<TObjectPtr<APetCompanionCharacter>>(); /// 시작 직후에는 목록이 비어있음 (어차피 실제 게임 레벨업 시점에서는 있을 수 밖에 없음)
+	// Pet 목록 가져오기
+	FLevelUpDataBundle LevelUpData;
+	UPetManagerComponent* PetManager = GetPawn()->FindComponentByClass<UPetManagerComponent>();
+	LevelUpData.PetList = PetManager ? PetManager->GetPetList() : TArray<TObjectPtr<APetCompanionCharacter>>(); 
 
-		if (LevelUpData.PetList.IsEmpty())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: Pet 목록이 비어 있습니다."));
-			return;
-		}
-		else
-		{
-			for (TObjectPtr<APetCompanionCharacter> Pet : LevelUpData.PetList)
-			{
-				FName PetName = Pet ? Pet->GetPetName() : NAME_None;
-				UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 찾은 Pet들 - %s"), *Pet->GetName());
-			}
-		}
+	// 랜덤 Item 가져오기
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UItemPoolSubsystem* ItemPool = World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>(); /// GameInstance에서 ItemPoolSubsystem을 가져옴
+	if (!ItemPool) return;
+	TArray<TObjectPtr<UObject>> RandomItems = ItemPool->GetRandomItemObjects(3); /// 레벨업 보상으로 3개의 랜덤 아이템을 가져옴
+	LevelUpData.RandomItemList = RandomItems;
 
-		// 랜덤 Item 가져오기
-		UWorld* World = GetWorld();
-		if (!World) return;
-		UItemPoolSubsystem* ItemPool = World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>(); /// GameInstance에서 ItemPoolSubsystem을 가져옴
-		if (!ItemPool) return;
-		TArray<TObjectPtr<UObject>> RandomItems = ItemPool->GetRandomItemObjects(3); /// 레벨업 보상으로 3개의 랜덤 아이템을 가져옴
-		
-		LevelUpData.RandomItemList = RandomItems;
+	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 가져온 랜덤 아이템 개수 - %d"), RandomItems.Num());
 
-		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 가져온 랜덤 아이템 개수 - %d"), RandomItems.Num());
-		for (TObjectPtr<UObject> ItemObject : RandomItems)
-		{
-			UItemDataObject* ItemDataObject = Cast<UItemDataObject>(ItemObject);
-			if (ItemDataObject)
-			{
-				FText ItemName = ItemDataObject->ItemData.ItemText.Name;
-				UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 가져온 랜덤 아이템 - %s"), *ItemName.ToString());
-				//LevelUpData.RewardItems.Add(ItemData);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 가져온 랜덤 아이템 객체가 UItemDataObject로 캐스팅되지 않았습니다."));
-			}
-		}
-
-
-		// Level Up Widget 생성 및 화면에 추가
-		ULevelUpRewardWidget* LevelUpWidget = CreateWidget<ULevelUpRewardWidget>(GetWorld(), LevelUpWidgetClass);
-		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler called. LevelUpWidget created: %s"), *GetNameSafe(LevelUpWidget));
-
-		if (LevelUpWidget)
-		{
-			LevelUpWidget->InitializeWithLevelUpData(LevelUpData); /// 레벨업 보상 창에 데이터 전달
-
-			FInputModeGameAndUI InputModeData;
-
-			// 위젯을 포커스하되, 마우스 클릭 시 게임 뷰포트가 마우스를 뺏어가지 않도록 설정
-			InputModeData.SetWidgetToFocus(LevelUpWidget->TakeWidget());
-			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			InputModeData.SetHideCursorDuringCapture(false); // 중요: 클릭 시 커서가 사라지지 않게 함
-
-			this->SetInputMode(InputModeData);
-			this->bShowMouseCursor = true; // 마우스 커서 표시
-
-			LevelUpWidget->AddToViewport(1);
-
-			UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 레벨업 창 활성화"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler called but LevelUpWidgetClass is not set."));
-	}
+	PlayerHUDWidgetInstance->ShowLevelUpWidget(LevelUpData); /// PlayerHUDWidget에 레벨업 보상 창 활성화 요청
 }
