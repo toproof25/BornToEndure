@@ -1,7 +1,5 @@
 ﻿/**
 * @file CombatPlayerState.h
-* @data 2025-04-28
-* @author toproof
 * @brief 플레이어가 전투를 하며 처치한 적과 데미지 통계를 집계하기 위한 PlayerState 클래스
 * - Player의 전투 집계 및 통계를 관리
 * - 경험치, 재화 관리
@@ -37,7 +35,6 @@ public:
 	 * - 추후 Pet이름이 아닌 Pet의 고유 ID로 변경하는 것을 고려할 수 있음 (FGuid 또는 int32)
 	 */
 	TMap<FName, float> PetDamageStats;
-
 
 
 	/**
