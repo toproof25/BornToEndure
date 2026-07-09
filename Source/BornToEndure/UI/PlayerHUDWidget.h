@@ -18,7 +18,7 @@ class UPlayerHealthBarWidget;
 class APlayerCharacter;
 class UGameOverWidget;
 class UPlayerExpBarWidget;
-
+class UGameStatusWidget;
 
 UCLASS()
 class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
@@ -38,6 +38,9 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UGameOverWidget* GameOverWidget;
+
+	UPROPERTY(meta = (BindWidget))
+	UGameStatusWidget* GameStatusWidget;
 
 	void InitializeWidget(APlayerCharacter* PlayerCharacter);
 
