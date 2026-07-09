@@ -37,9 +37,6 @@ protected:
 	virtual void NativeDestruct() override;
 
 private:
-
-	void ShowGameStatus();
-
 	UPlayerHealthComponent* PlayerHealthComp;
 	ACombatPlayerState* CombatPlayerState;
 };
