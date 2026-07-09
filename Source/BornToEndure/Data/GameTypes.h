@@ -1,10 +1,7 @@
 ﻿/**
  * @file GameTypes.h
  * @brief 게임에서 사용되는 다양한 데이터 타입과 구조체를 정의하는 헤더
- * @author toproof (kmnlmn123@gmail.com)
- * @date 2026-04-27
- * @modified 2026-05-23
- * @details
+ * 
  * - 이 파일은 게임에서 사용되는 다양한 데이터 타입과 구조체를 정의
  * - 경험치, 골드, Pet 관련 데이터 구조체 포함
  * - Level Up 보상과 관련된 데이터 번들 정의 (PlayerController에서 LevelUp 시 Pet 목록과 Item 목록을 하나의 구조체로 담아 전달)
