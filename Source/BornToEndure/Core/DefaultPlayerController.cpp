@@ -1,6 +1,7 @@
 ﻿#include "Core/DefaultPlayerController.h"
 
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "UI/LevelUpRewardWidget.h"
 #include "UI/PlayerHUDWidget.h"
@@ -83,6 +84,23 @@ void ADefaultPlayerController::RestoreGameInputMode()
 	SetGameInputMode();
 }
 
+void ADefaultPlayerController::TravelToLobbyLevel()
+{
+	if (LobbyLevel.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LobbyLevel is not set. Please set a valid level in the DefaultPlayerController."));
+		return;
+	}
+
+	UGameplayStatics::OpenLevelBySoftObjectPtr(
+		this,
+		LobbyLevel,
+		true,
+		FString()
+	);
+	UE_LOG(LogTemp, Log, TEXT("Traveling to Lobby Level: %s"), *LobbyLevel.ToString());
+}
+
 void ADefaultPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -90,6 +108,7 @@ void ADefaultPlayerController::BeginPlay()
 	SetUpPlayerInputMode();
 	SetUpPlayerHUDWidget();
 	SetUpDelegates();
+	SetGameInputMode();
 }
 
 void ADefaultPlayerController::OnPossess(APawn* InPawn)
