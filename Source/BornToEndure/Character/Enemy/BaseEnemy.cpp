@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Enemy/BaseEnemy.h"
@@ -38,7 +38,7 @@ void ABaseEnemy::BeginPlay()
 	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
 	check(EffectSubsystem);
 
-	// »ç¿ëÇÏ´Â Asset Preload
+	// ì‚¬ìš©í•˜ëŠ” Asset Preload
 	FPrimaryAssetType SoundIdType(FName(TEXT("SoundDataAsset")));
 	FPrimaryAssetType NiagaraType(FName(TEXT("NiagaraDataAsset")));
 
@@ -64,7 +64,7 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UEffectSubsystem* EffectSubsystem = world->GetSubsystem<UEffectSubsystem>();
 	check(EffectSubsystem);
 
-	// »ç¿ëÇÏ´Â Asset Unload
+	// ì‚¬ìš©í•˜ëŠ” Asset Unload
 	FPrimaryAssetType SoundIdType(FName(TEXT("SoundDataAsset")));
 	FPrimaryAssetType NiagaraType(FName(TEXT("NiagaraDataAsset")));
 
@@ -106,7 +106,7 @@ float ABaseEnemy::TakeDamage(
 		//OnEnemyHitNiagara.ExecuteIfBound(HitEnemyNiagaraId.PrimaryAssetName, GetActorLocation());
 	}
 
-	// ´ëÃæ ¹°¸® ¹æ¾î·Â Àû¿ëÇß´Ù°í °¡Á¤
+	// ëŒ€ì¶© ë¬¼ë¦¬ ë°©ì–´ë ¥ ì ìš©í–ˆë‹¤ê³  ê°€ì •
 	DamageAmount -= 5;
 	CurrentHealth -= DamageAmount;
 	if (CurrentHealth <= 0)

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,7 +18,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Niagara")
 	TObjectPtr<UNiagaraSystem> Niagara;
 
-	// Asset Manager °¡ ÀÌ ¿¡¼ÂÀ» ÀÎ½ÄÇÒ ¶§ ¾²´Â Å¸ÀÔ ÀÌ¸§
+	// Asset Manager ê°€ ì´ ì—ì…‹ì„ ì¸ì‹í•  ë•Œ ì“°ëŠ” íƒ€ì… ì´ë¦„
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId("NiagaraDataAsset", GetFName());

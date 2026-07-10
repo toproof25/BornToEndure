@@ -1,40 +1,60 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿#include "UI/PlayerHUDWidget.h"
 
-
-#include "UI/PlayerHUDWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
 
+#include "UI/PlayerHealthBarWidget.h"
+#include "UI/GameOverWidget.h"
+#include "UI/GameStatusWidget.h"
+#include "UI/LevelUpRewardWidget.h"
+#include "UI/PlayerExpBarWidget.h"
+
 #include "PlayerState/CombatPlayerState.h"
+#include "Character/Player/PlayerCharacter.h"
 #include "Component/PlayerExperienceComponent.h"
+#include "Component/PlayerHealthComponent.h"
 
-void UPlayerHUDWidget::NativeOnInitialized()
+#include "Data/GameTypes.h"
+
+#include "PlayerState/CombatPlayerState.h"
+
+
+void UPlayerHUDWidget::InitializeWidget(APlayerCharacter* PlayerCharacter)
 {
-	//APawn* Player = GetOwningPlayer()->GetPawn();
-	//if (!Player) return;
-	//ACombatPlayerState* CombatPlayerState = Player->GetPlayerState<ACombatPlayerState>();
-	//if (!CombatPlayerState) return;
-	//UPlayerExperienceComponent* PlayerExpComp = CombatPlayerState->FindComponentByClass<UPlayerExperienceComponent>();
-	//if (!PlayerExpComp) return;
+	if (!PlayerCharacter) return;
 
-	//PlayerExpComp->OnChangeExpDelegate.AddDynamic(this, &UPlayerHUDWidget::UpdateExpBar);
-	//PlayerExpComp->OnLevelUpDelegate.AddDynamic(this, &UPlayerHUDWidget::UpdateLevelText);
-}
+	UPlayerHealthComponent* HealthComp = PlayerCharacter->GetPlayerHealthComp();
+	ACombatPlayerState* PlayerState = PlayerCharacter->GetPlayerState<ACombatPlayerState>();
+	UPlayerExperienceComponent* ExperienceComp = PlayerState ? PlayerState->GetPlayerExperienceComponent() : nullptr;
 
-void UPlayerHUDWidget::UpdateExpBar(float NewExp, float MaxExp)
-{
-	float ExpPercent = MaxExp > 0.f ? NewExp / MaxExp : 0.f;
-	if (ExpBar)
+	if (HealthComp)
 	{
-		ExpBar->SetPercent(ExpPercent);
+		HealthBarWidget->InitializeWidget(HealthComp);
+		GameOverWidget->InitializeWidget(HealthComp);
 	}
+
+	if (PlayerState && ExperienceComp)
+	{
+		PlayerExpBarWidget->InitializeWidget(ExperienceComp);
+	}
+	
+	if (HealthComp && PlayerState)
+	{
+		GameStatusWidget->InitializeWidget(HealthComp, PlayerState);
+	}
+
+
 }
 
-void UPlayerHUDWidget::UpdateLevelText(int32 NewLevel)
+void UPlayerHUDWidget::ShowLevelUpWidget(FLevelUpDataBundle LevelUpData)
 {
-	if (LevelText)
+	ULevelUpRewardWidget* LevelUpWidget = CreateWidget<ULevelUpRewardWidget>(GetWorld(), LevelUpWidgetClass);
+
+	if (LevelUpWidget)
 	{
-		LevelText->SetText(FText::Format(NSLOCTEXT("PlayerHUD", "LevelFormat", "Level {0}"), FText::AsNumber(NewLevel)));
+		LevelUpWidget->InitializeWithLevelUpData(LevelUpData); /// 레벨업 보상 창에 데이터 전달
+		LevelUpWidget->AddToViewport(1);
+		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 레벨업 창 활성화"));
 	}
 }

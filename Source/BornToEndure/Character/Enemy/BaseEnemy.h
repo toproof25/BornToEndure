@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -12,7 +12,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogBaseEnemy, Log, All);
 class UStaticMeshComponent;
 class UCapsuleComponent;
 
-// Delegate ¼±¾ð
+// Delegate ì„ ì–¸
 //DECLARE_DELEGATE_TwoParams(FOnEnemyHitSound, FName, FVector);
 //DECLARE_DELEGATE_TwoParams(FOnEnemyHitNiagara, FName, FVector);
 

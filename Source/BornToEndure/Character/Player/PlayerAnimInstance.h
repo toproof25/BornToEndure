@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,10 +18,10 @@ class BORNTOENDURE_API UPlayerAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
-	// ¾Ö´Ï¸ŞÀÌ¼Ç ÃÊ±âÈ­ ½Ã 1È¸ È£Ãâ (BeginPlay¿Í À¯»ç)
+	// ì• ë‹ˆë©”ì´ì…˜ ì´ˆê¸°í™” ì‹œ 1íšŒ í˜¸ì¶œ (BeginPlayì™€ ìœ ì‚¬)
 	virtual void NativeInitializeAnimation() override;
 
-	// ¸Å ÇÁ·¹ÀÓ È£Ãâ (Tick°ú À¯»ç) - ¿©±â¼­ ¼Óµµ, Á¡ÇÁ »óÅÂ¸¦ °è»ê
+	// ë§¤ í”„ë ˆì„ í˜¸ì¶œ (Tickê³¼ ìœ ì‚¬) - ì—¬ê¸°ì„œ ì†ë„, ì í”„ ìƒíƒœë¥¼ ê³„ì‚°
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:
@@ -31,7 +31,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UCharacterMovementComponent> MovementComponent;
 
-	// AnimBP¿¡¼­ »ç¿ëÇÒ º¯¼öµé
+	// AnimBPì—ì„œ ì‚¬ìš©í•  ë³€ìˆ˜ë“¤
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	float GroundSpeed;
 

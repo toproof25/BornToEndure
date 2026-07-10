@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -14,7 +14,7 @@ class UItemEntryWidget;
 class APetCompanionCharacter;
 
 
-// Pet°ú Item ¼±ÅÃ ½Ã Æ÷ÀÎÅÍ¸¦ Àü´ŞÇÏ±â À§ÇÑ Delegate
+// Petê³¼ Item ì„ íƒ ì‹œ í¬ì¸í„°ë¥¼ ì „ë‹¬í•˜ê¸° ìœ„í•œ Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPetSelected, APetCompanionCharacter*, SelectedPet);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSelected, UObject*, SelectedItem);
 //FOnItemSelected OnItemSelectedDelegate;
@@ -68,14 +68,14 @@ public:
 	void HandleItemSelected(UObject* InSelectedItem);
 
 	/**
-	 * @brief ItemWidget¿¡¼­ °¢ ¾ÆÀÌÅÛÀÌ ¼±ÅÃµÉ ¶§ È£ÃâµÇ´Â ÇÔ¼ö·Î, ¼±ÅÃµÈ ¾ÆÀÌÅÛ À§Á¬À» Á÷°üÀûÀ¸·Î Ç¥½ÃÇÏ±â À§ÇØ »ç¿ëµÊ
-	 * @param InSelectedItemWidget ¼±ÅÃµÈ UItemEntryWidget Æ÷ÀÎÅÍ
+	 * @brief ItemWidgetì—ì„œ ê° ì•„ì´í…œì´ ì„ íƒë  ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ë¡œ, ì„ íƒëœ ì•„ì´í…œ ìœ„ì ¯ì„ ì§ê´€ì ìœ¼ë¡œ í‘œì‹œí•˜ê¸° ìœ„í•´ ì‚¬ìš©ë¨
+	 * @param InSelectedItemWidget ì„ íƒëœ UItemEntryWidget í¬ì¸í„°
 	 */
 	void OnSelectedItemWidget(UItemEntryWidget* InSelectedItemWidget);
 
 	/**
-	 * @brief PetWidget¿¡¼­ °¢ ÆêÀÌ ¼±ÅÃµÉ ¶§ È£ÃâµÇ´Â ÇÔ¼ö·Î, ¼±ÅÃµÈ Æê À§Á¬À» Á÷°üÀûÀ¸·Î Ç¥½ÃÇÏ±â À§ÇØ »ç¿ëµÊ
-	 * @param InSelectedPetWidget ¼±ÅÃµÈ UPetEntryWidget Æ÷ÀÎÅÍ
+	 * @brief PetWidgetì—ì„œ ê° í«ì´ ì„ íƒë  ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ë¡œ, ì„ íƒëœ í« ìœ„ì ¯ì„ ì§ê´€ì ìœ¼ë¡œ í‘œì‹œí•˜ê¸° ìœ„í•´ ì‚¬ìš©ë¨
+	 * @param InSelectedPetWidget ì„ íƒëœ UPetEntryWidget í¬ì¸í„°
 	 */
 	void OnSelectedPetWidget(UPetEntryWidget* InSelectedPetWidget);
 
@@ -87,12 +87,12 @@ private:
 	UObject* SelectedItem;
 
 	/**
-	 * @brief ÇöÀç ¼±ÅÃµÈ ¾ÆÀÌÅÛ À§Á¬À» Ä³½Ì
+	 * @brief í˜„ì¬ ì„ íƒëœ ì•„ì´í…œ ìœ„ì ¯ì„ ìºì‹±
 	 */
 	UItemEntryWidget* SelectedItemWidget;
 
 	/**
-	 * @brief ÇöÀç ¼±ÅÃµÈ Æê À§Á¬À» Ä³½Ì
+	 * @brief í˜„ì¬ ì„ íƒëœ í« ìœ„ì ¯ì„ ìºì‹±
 	 */
 	UPetEntryWidget* SelectedPetWidget;
 };

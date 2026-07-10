@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Data/PetItemDataAsset.h"
@@ -8,8 +8,8 @@
 class UPetItemComponent;
 
 /**
- * @brief ½ºÅÈ Áõ°¨ ¾ÆÀÌÅÛÀÇ DataAsset Å¬·¡½º
- * - GameTypes.hÀÇ FStatModifier ±¸Á¶Ã¼¸¦ »ç¿ëÇÏ¿© ¾ÆÀÌÅÛÀÌ Àû¿ëÇÏ´Â ½ºÅÈ ¼öÁ¤À» Á¤ÀÇ
+ * @brief ìŠ¤íƒ¯ ì¦ê° ì•„ì´í…œì˜ DataAsset í´ë˜ìŠ¤
+ * - GameTypes.hì˜ FStatModifier êµ¬ì¡°ì²´ë¥¼ ì‚¬ìš©í•˜ì—¬ ì•„ì´í…œì´ ì ìš©í•˜ëŠ” ìŠ¤íƒ¯ ìˆ˜ì •ì„ ì •ì˜
  */
 UCLASS(BlueprintType)
 class BORNTOENDURE_API UPetStatItemDataAsset : public UPetItemDataAsset
@@ -19,9 +19,9 @@ class BORNTOENDURE_API UPetStatItemDataAsset : public UPetItemDataAsset
 public:
 
     /**
-     * @brief 1°³ ¿ä¼Ò´ç ÇÏ³ªÀÇ ½ºÅÈ ¼öÁ¤ÀÚ¸¦ °¡Áö°Ô µÈ´Ù
+     * @brief 1ê°œ ìš”ì†Œë‹¹ í•˜ë‚˜ì˜ ìŠ¤íƒ¯ ìˆ˜ì •ìë¥¼ ê°€ì§€ê²Œ ëœë‹¤
      * @details
-     * - TArray<FStatModifier>·Î ¿©·¯ ½ºÅÈÀ» µ¿½Ã¿¡ ¼öÁ¤
+     * - TArray<FStatModifier>ë¡œ ì—¬ëŸ¬ ìŠ¤íƒ¯ì„ ë™ì‹œì— ìˆ˜ì •
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Stat")
     TArray<FStatModifier> StatModifiers;

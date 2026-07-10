@@ -1,13 +1,10 @@
-/**
+ï»¿/**
  * @file GameTypes.h
- * @brief °ÔÀÓ¿¡¼­ »ç¿ëµÇ´Â ´Ù¾çÇÑ µ¥ÀÌÅÍ Å¸ÀÔ°ú ±¸Á¶Ã¼¸¦ Á¤ÀÇÇÏ´Â Çì´õ
- * @author toproof (kmnlmn123@gmail.com)
- * @date 2026-04-27
- * @modified 2026-05-23
- * @details
- * - ÀÌ ÆÄÀÏÀº °ÔÀÓ¿¡¼­ »ç¿ëµÇ´Â ´Ù¾çÇÑ µ¥ÀÌÅÍ Å¸ÀÔ°ú ±¸Á¶Ã¼¸¦ Á¤ÀÇ
- * - °æÇèÄ¡, °ñµå, Pet °ü·Ã µ¥ÀÌÅÍ ±¸Á¶Ã¼ Æ÷ÇÔ
- * - Level Up º¸»ó°ú °ü·ÃµÈ µ¥ÀÌÅÍ ¹øµé Á¤ÀÇ (PlayerController¿¡¼­ LevelUp ½Ã Pet ¸ñ·Ï°ú Item ¸ñ·ÏÀ» ÇÏ³ªÀÇ ±¸Á¶Ã¼·Î ´ã¾Æ Àü´Ş)
+ * @brief ê²Œì„ì—ì„œ ì‚¬ìš©ë˜ëŠ” ë‹¤ì–‘í•œ ë°ì´í„° íƒ€ì…ê³¼ êµ¬ì¡°ì²´ë¥¼ ì •ì˜í•˜ëŠ” í—¤ë”
+ * 
+ * - ì´ íŒŒì¼ì€ ê²Œì„ì—ì„œ ì‚¬ìš©ë˜ëŠ” ë‹¤ì–‘í•œ ë°ì´í„° íƒ€ì…ê³¼ êµ¬ì¡°ì²´ë¥¼ ì •ì˜
+ * - ê²½í—˜ì¹˜, ê³¨ë“œ, Pet ê´€ë ¨ ë°ì´í„° êµ¬ì¡°ì²´ í¬í•¨
+ * - Level Up ë³´ìƒê³¼ ê´€ë ¨ëœ ë°ì´í„° ë²ˆë“¤ ì •ì˜ (PlayerControllerì—ì„œ LevelUp ì‹œ Pet ëª©ë¡ê³¼ Item ëª©ë¡ì„ í•˜ë‚˜ì˜ êµ¬ì¡°ì²´ë¡œ ë‹´ì•„ ì „ë‹¬)
  */
 
 #pragma once
@@ -32,7 +29,7 @@ struct BORNTOENDURE_API FEnemyRewardPayload
 	float ExpReward = 0.f;
 	int32 GoldReward = 0;
 
-	// Pet Á¤º¸ ÃëÇÕÇÒ ¶§ »ç¿ë
+	// Pet ì •ë³´ ì·¨í•©í•  ë•Œ ì‚¬ìš©
 	FName KillerPetId = NAME_None;
 	FPetDamageMap PetDamageMap;
 	float TotalDamageReceiced = 0.f;
@@ -58,7 +55,7 @@ struct BORNTOENDURE_API FEnemyRewardPayload
 	}
 };
 
-// Àû »ç¸Á ½Ã Player¿¡°Ô Payload¸¦ Àü´ŞÇÏ´Â Delegate
+// ì  ì‚¬ë§ ì‹œ Playerì—ê²Œ Payloadë¥¼ ì „ë‹¬í•˜ëŠ” Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyKilled, const FEnemyRewardPayload&, EnemyRewardPayload);
 
 USTRUCT()
@@ -68,11 +65,11 @@ struct FLevelUpDataBundle
 
 public:
 
-	// °¢ PetCharacter¸¦ ÂüÁ¶ÇÏ´Â TArray¸¦ ¸¸µé°í, ÇØ´ç Gettter¿¡¼­ ÀÌ¸§ µîÀ» °¡Á®¿À±â?
+	// ê° PetCharacterë¥¼ ì°¸ì¡°í•˜ëŠ” TArrayë¥¼ ë§Œë“¤ê³ , í•´ë‹¹ Gettterì—ì„œ ì´ë¦„ ë“±ì„ ê°€ì ¸ì˜¤ê¸°?
 	UPROPERTY()
 	TArray<TObjectPtr<APetCompanionCharacter>> PetList;
 
-	// Item¿¡ ´ëÇÑ Á¤º¸µé 
+	// Itemì— ëŒ€í•œ ì •ë³´ë“¤ 
 	UPROPERTY()
 	TArray<TObjectPtr<UObject>> RandomItemList;
 };

@@ -1,10 +1,10 @@
-/**
+ï»¿/**
  * @file PetBaseDataAsset.h
- * @brief PetÀÇ ±âº» µ¥ÀÌÅÍ ¿¡¼Â Çì´õ
+ * @brief Petì˜ ê¸°ë³¸ ë°ì´í„° ì—ì…‹ í—¤ë”
  * @author toproof (kmnlmn123@gmail.com)
  * @date 2026-04-20
  * @details
- * - ÀÌ ÆÄÀÏÀº PetµéÀÇ ±âº» µ¥ÀÌÅÍ¸¦ Á¤ÀÇ
+ * - ì´ íŒŒì¼ì€ Petë“¤ì˜ ê¸°ë³¸ ë°ì´í„°ë¥¼ ì •ì˜
  */
 
 #pragma once
@@ -20,8 +20,8 @@ class UBehaviorTree;
 
 
 /**
- * @brief PetÀÇ ±âº» µ¥ÀÌÅÍ ¿¡¼Â Å¬·¡½º
- * - PetÀÇ ÀÌ¸§, ¾ÆÀÌÄÜ, ¸Ş½Ã, ½ºÅÈ, AI Çàµ¿ Æ®¸® µîÀ» Á¤ÀÇ
+ * @brief Petì˜ ê¸°ë³¸ ë°ì´í„° ì—ì…‹ í´ë˜ìŠ¤
+ * - Petì˜ ì´ë¦„, ì•„ì´ì½˜, ë©”ì‹œ, ìŠ¤íƒ¯, AI í–‰ë™ íŠ¸ë¦¬ ë“±ì„ ì •ì˜
  */
 UCLASS(BlueprintType)
 class BORNTOENDURE_API UPetBaseDataAsset : public UPrimaryDataAsset

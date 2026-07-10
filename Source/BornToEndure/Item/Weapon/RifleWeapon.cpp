@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Item/Weapon/RifleWeapon.h"
@@ -29,28 +29,28 @@ void ARifleWeapon::Attack()
     UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
 
 
-    // ¹ß»çÃ¼ ½ºÆù À§Ä¡¿Í È¸Àü ¼³Á¤
+    // ë°œì‚¬ì²´ ìŠ¤í° ìœ„ì¹˜ì™€ íšŒì „ ì„¤ì •
     FVector SpawnLocation = ProjectilePoint->GetComponentLocation();
     FRotator SpawnRotation = ProjectilePoint->GetComponentRotation();
 
     OnAttackSound(SpawnLocation);
     OnAttackNiagara(SpawnLocation);
 
-    // »ç¿ëÇÒ ¹ß»çÃ¼ °¡Á®¿À±â
+    // ì‚¬ìš©í•  ë°œì‚¬ì²´ ê°€ì ¸ì˜¤ê¸°
     UClass* ProjectileClassKey = ProjectileClass.Get();
     AActor* GetPoolActor = ObjectPoolSubsystem->RequestPoolActor(ProjectileClassKey);
     if (GetPoolActor == nullptr) return;
     ABaseProjectile* Projectile = Cast<ABaseProjectile>(GetPoolActor);
     if (Projectile == nullptr) return;
 
-    // ¼ÒÀ¯ÀÚ¿Í ÁÖÃ¼ÀÚ ÃÊ±âÈ­
+    // ì†Œìœ ìžì™€ ì£¼ì²´ìž ì´ˆê¸°í™”
 	Projectile->Owner = GetOwner();
     Projectile->SetInstigator(GetInstigator());
 
-	// ÀÌµ¿ ½Ã ¹ß»çÃ¼°¡ Ãæµ¹ÇÏÁö ¾Êµµ·Ï À§Ä¡¿Í È¸ÀüÀ» ¼³Á¤ (À§Ä¡ ÃÊ±âÈ­)
+	// ì´ë™ ì‹œ ë°œì‚¬ì²´ê°€ ì¶©ëŒí•˜ì§€ ì•Šë„ë¡ ìœ„ì¹˜ì™€ íšŒì „ì„ ì„¤ì • (ìœ„ì¹˜ ì´ˆê¸°í™”)
     Projectile->SetActorLocationAndRotation(SpawnLocation, SpawnRotation, false, nullptr, ETeleportType::TeleportPhysics);
 
-    // ¹ß»çÃ¼ ÄÄÆ÷³ÍÆ®¸¦ Ã£¾Æ ¹ß»ç
+    // ë°œì‚¬ì²´ ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì•„ ë°œì‚¬
 	UProjectileMovementComponent* ProjectileMovementComp;
     Projectile->GetProjectileMovementComponent(ProjectileMovementComp);
     if (ProjectileMovementComp)

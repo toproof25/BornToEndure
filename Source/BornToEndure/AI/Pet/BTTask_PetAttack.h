@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
@@ -20,13 +20,13 @@ protected:
 public:
 
     /**
-     * @brief BTService_PetRadar°¡ ¼³Á¤ÇÏ´Â TargetEnemy
+     * @brief BTService_PetRadarê°€ ì„¤ì •í•˜ëŠ” TargetEnemy
      */
     UPROPERTY(EditAnywhere, Category = "Blackboard")
     FBlackboardKeySelector TargetEnemyKey;
 
     /**
-     * @brief °ø°İ ½Ã ÀûÀ» ÇâÇØ È¸ÀüÇÒÁö ¿©ºÎ
+     * @brief ê³µê²© ì‹œ ì ì„ í–¥í•´ íšŒì „í• ì§€ ì—¬ë¶€
      */
     UPROPERTY(EditAnywhere, Category = "AI|Attack")
     bool bFaceTargetBeforeAttack = true;

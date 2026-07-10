@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -35,10 +35,10 @@ protected:
 public:
 	void RenderImGui();
 
-	FTimerHandle FireTimerHandle;        // Å¸ÀÌ¸Ó ÇÚµé
+	FTimerHandle FireTimerHandle;        // íƒ€ì´ë¨¸ í•¸ë“¤
 	FImGuiDelegateHandle ImGuiDelegateHandle;
 
-    // ¿¡µğÅÍ¿¡¼­ DataAssetÀ» Á÷Á¢ ÂüÁ¶ (Å×½ºÆ® ´Ü°è¿¡¼­´Â ÇÏµå ·¹ÆÛ·±½º Çã¿ë)
+    // ì—ë””í„°ì—ì„œ DataAssetì„ ì§ì ‘ ì°¸ì¡° (í…ŒìŠ¤íŠ¸ ë‹¨ê³„ì—ì„œëŠ” í•˜ë“œ ë ˆí¼ëŸ°ìŠ¤ í—ˆìš©)
     UPROPERTY(EditAnywhere, Category = "Item")
     TObjectPtr<UPetItemDataAsset> ItemData;
 

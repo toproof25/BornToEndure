@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,69 +16,69 @@ class BORNTOENDURE_API UObjectPoolSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	// ¿ùµå ¼­ºê½Ã½ºÅÛ ÃÊ±âÈ­ ½Ã È£Ãâ (BeginPlay¿Í ºñ½ÁÇÑ ´À³¦)
+	// ì›”ë“œ ì„œë¸Œì‹œìŠ¤í…œ ì´ˆê¸°í™” ì‹œ í˜¸ì¶œ (BeginPlayì™€ ë¹„ìŠ·í•œ ëŠë‚Œ)
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	/**
-	 * @brief AActor Class Å¸ÀÔÀ¸·Î Ç® ÃÊ±âÈ­
-	 * @param ActorClass Å¸ÀÔ
-	 * @param PoolSize °ü¸®ÇÒ ¹ß»çÃ¼ ¼ö
+	 * @brief AActor Class íƒ€ì…ìœ¼ë¡œ í’€ ì´ˆê¸°í™”
+	 * @param ActorClass íƒ€ì…
+	 * @param PoolSize ê´€ë¦¬í•  ë°œì‚¬ì²´ ìˆ˜
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	void InitializePoolForClass(TSubclassOf<AActor> ActorClass, int32 PoolSize);
 
 	/**
-	 * @brief »ç¿ëÇÒ AActor Class¸¦ Pool¿¡¼­ ¿äÃ»
-	 * @param ActorClass ¿äÃ»ÇÒ AActor Class Å¸ÀÔ
-	 * @return ¿äÃ»ÇÑ ¹ß»çÃ¼ ÀÎ½ºÅÏ½º¿¡ ´ëÇÑ Æ÷ÀÎÅÍ¸¦ ¹İÈ¯ÇÕ´Ï´Ù.
+	 * @brief ì‚¬ìš©í•  AActor Classë¥¼ Poolì—ì„œ ìš”ì²­
+	 * @param ActorClass ìš”ì²­í•  AActor Class íƒ€ì…
+	 * @return ìš”ì²­í•œ ë°œì‚¬ì²´ ì¸ìŠ¤í„´ìŠ¤ì— ëŒ€í•œ í¬ì¸í„°ë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	AActor* RequestPoolActor(TSubclassOf<AActor> ActorClass);
 
 	/**
-	 * @brief »ç¿ëÇÑ AActor ¾×ÅÍ¸¦ Ç®·Î ¹İÈ¯
+	 * @brief ì‚¬ìš©í•œ AActor ì•¡í„°ë¥¼ í’€ë¡œ ë°˜í™˜
 	 * @param PoolActor
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	void ReturnPoolActor(AActor* PoolActor);
 
 	/**
-	 * @brief Æ¯Á¤ ¾×ÅÍ¸¦ Ç®¿¡¼­ Á¦°ÅÇÏ´Â ÇÔ¼ö
-	 * @param PoolActor Á¦°ÅÇÏ°íÀÚ ÇÏ´Â Actor class
+	 * @brief íŠ¹ì • ì•¡í„°ë¥¼ í’€ì—ì„œ ì œê±°í•˜ëŠ” í•¨ìˆ˜
+	 * @param PoolActor ì œê±°í•˜ê³ ì í•˜ëŠ” Actor class
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Object Pool")
 	void RemovePoolActor(TSubclassOf<AActor> PoolActor);
 
 public:
 	/**
-	 * @brief Æ¯Á¤ ¹ß»çÃ¼ Å¬·¡½ºÀÇ Ç® »óÅÂ¸¦ ¹İÈ¯ÇÕ´Ï´Ù. (µğ¹ö±× ¹× UI ¿ëµµ)
-	 * @param ActorClass Á¶È¸ÇÒ Å¬·¡½º
-	 * @param OutTotal Ç®¿¡ »ı¼ºµÈ ÀüÃ¼ ¾×ÅÍ ¼ö
-	 * @param OutActive ÇöÀç È°¼ºÈ­µÇ¾î ³¯¾Æ°¡°í ÀÖ´Â ¾×ÅÍ ¼ö
-	 * @param OutInactive Ç®¿¡¼­ ´ë±â ÁßÀÎ(Hidden) ¾×ÅÍ ¼ö
+	 * @brief íŠ¹ì • ë°œì‚¬ì²´ í´ë˜ìŠ¤ì˜ í’€ ìƒíƒœë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤. (ë””ë²„ê·¸ ë° UI ìš©ë„)
+	 * @param ActorClass ì¡°íšŒí•  í´ë˜ìŠ¤
+	 * @param OutTotal í’€ì— ìƒì„±ëœ ì „ì²´ ì•¡í„° ìˆ˜
+	 * @param OutActive í˜„ì¬ í™œì„±í™”ë˜ì–´ ë‚ ì•„ê°€ê³  ìˆëŠ” ì•¡í„° ìˆ˜
+	 * @param OutInactive í’€ì—ì„œ ëŒ€ê¸° ì¤‘ì¸(Hidden) ì•¡í„° ìˆ˜
 	 */
 	void GetPoolStats(TSubclassOf<AActor> ActorClass, int32& OutTotal, int32& OutActive, int32& OutInactive) const;
 
 private:
 	/**
-	 * @brief AActor Å¸ÀÔ°ú ½ÇÁ¦ ÀÎ½ºÅÏ½º ¾×ÅÍ¸¦ °ü¸®ÇÏ´Â ¹è¿­
-	 * @note Key: AActor Å¬·¡½º Å¸ÀÔ, Value: AActor Å¸ÀÔÀÇ ÀÎ½ºÅÏ½º ¹è¿­
+	 * @brief AActor íƒ€ì…ê³¼ ì‹¤ì œ ì¸ìŠ¤í„´ìŠ¤ ì•¡í„°ë¥¼ ê´€ë¦¬í•˜ëŠ” ë°°ì—´
+	 * @note Key: AActor í´ë˜ìŠ¤ íƒ€ì…, Value: AActor íƒ€ì…ì˜ ì¸ìŠ¤í„´ìŠ¤ ë°°ì—´
 	 */
 	TMap<TSubclassOf<AActor>, TArray<AActor*>> ActorPools;
 
 	/**
-	 * @brief AActor Å¸ÀÔ°ú Ç® Å©±â °ü¸® ¹è¿­
-	 * @note Key: AActor Å¬·¡½º Å¸ÀÔ, Value: ÇØ´ç Å¬·¡½º Å¸ÀÔÀÇ Ç® Å©±â
+	 * @brief AActor íƒ€ì…ê³¼ í’€ í¬ê¸° ê´€ë¦¬ ë°°ì—´
+	 * @note Key: AActor í´ë˜ìŠ¤ íƒ€ì…, Value: í•´ë‹¹ í´ë˜ìŠ¤ íƒ€ì…ì˜ í’€ í¬ê¸°
 	 */
 	TMap<TSubclassOf<AActor>, int32> PoolSizes;
 
-	// World°¡ Àı´ë nullptrÀÌ ¾Æ´ÔÀ» º¸Àå (ÀÌ·¸°Ô ÇØ¾ß ¾ÈÀüÇÏ´Ù°í ÇÔ..?)
+	// Worldê°€ ì ˆëŒ€ nullptrì´ ì•„ë‹˜ì„ ë³´ì¥ (ì´ë ‡ê²Œ í•´ì•¼ ì•ˆì „í•˜ë‹¤ê³  í•¨..?)
 	UWorld* GetWorldChecked();
 
 
 public:
 	/**
-	 * @brief ImGui µğ¹ö±× ½Ã½ºÅÛ¿¡¼­ ÇöÀç °ü¸® ÁßÀÎ Ç®ÀÇ ÀüÃ¼ ¸ñ·ÏÀ» ¼øÈ¸ÇÏ±â À§ÇÑ Getter
+	 * @brief ImGui ë””ë²„ê·¸ ì‹œìŠ¤í…œì—ì„œ í˜„ì¬ ê´€ë¦¬ ì¤‘ì¸ í’€ì˜ ì „ì²´ ëª©ë¡ì„ ìˆœíšŒí•˜ê¸° ìœ„í•œ Getter
 	 */
 	const TMap<TSubclassOf<AActor>, TArray<AActor*>>& GetActorPools() const { return ActorPools; }
 };

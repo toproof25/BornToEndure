@@ -9,7 +9,14 @@
 #include "AI/Enemy/BaseEnemyAIController.h"
 #include "Data/GameTypes.h"
 #include "Character/Pet/PetCompanionCharacter.h"
+#include "Character/Player/PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"	
+#include "GameFramework/DamageType.h"
+#include "Components/CapsuleComponent.h"
+#include "TimerManager.h"
+#include "Components/BoxComponent.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
+#include "Character/Player/PlayerCharacter.h"
 
 DEFINE_LOG_CATEGORY(LogBaseEnemyCharacter);
 
@@ -22,6 +29,12 @@ ABaseEnemyCharacter::ABaseEnemyCharacter()
 
     // 이동 속도 초기화
     GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+	RootComponent = GetCapsuleComponent();
+
+	AttackRangeCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackRangeCollision"));
+	AttackRangeCollision->SetupAttachment(RootComponent);
+	AttackRangeCollision->SetGenerateOverlapEvents(true);
 }
 
 void ABaseEnemyCharacter::InitializeEnemy(const FEnemyDataRow& EnemyData)
@@ -57,8 +70,6 @@ void ABaseEnemyCharacter::BeginPlay()
 
     OnEnemyHitSound.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
     OnEnemyHitNiagara.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);;
-
-    CurrentHealth = MaxHealth;
 
 	Execute_ActivateActor(this);
 }
@@ -105,15 +116,20 @@ void ABaseEnemyCharacter::ActivateActor_Implementation()
     ResetRewardPayload();
     CurrentHealth = MaxHealth;
 
+	DelegateBindng();
+
     SetActorHiddenInGame(false);
     SetActorEnableCollision(true);
+
+    bCanAttack = true;
 
     UE_LOG(LogBaseEnemyCharacter, Display, TEXT("Enemy Activated: %s"), *GetName());
 }
 
-// 제거(비활성화)될 때 ObjectPoolSubsystem에서 호출되는 함수
 void ABaseEnemyCharacter::DeactivateActor_Implementation()
 {
+	// 제거(비활성화)될 때 ObjectPoolSubsystem에서 호출되는 함수
+
     SetActorHiddenInGame(true);
     SetActorEnableCollision(false);
 
@@ -137,6 +153,8 @@ void ABaseEnemyCharacter::DeactivateActor_Implementation()
     {
         MoveComp->StopMovementImmediately();
     }
+
+	DelegateUnbinding();
 
     UE_LOG(LogBaseEnemyCharacter, Display, TEXT("Enemy Deactivated: %s"), *GetName());
 }
@@ -163,17 +181,60 @@ float ABaseEnemyCharacter::TakeDamage(
     {
         APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(EventInstigator->GetPawn());
         EnemyRewardPayload.RegisterDamage(Pet ? Pet->GetPetName() : NAME_None, ActualDamage); // 킬에 기여한 펫이 있을 경우 데미지 정보 기록
-    }
 
-    // 사망하는 경우
-    if (CurrentHealth <= 0.f)
-    {
-		APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(EventInstigator->GetPawn());
-		EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
-        HandleDeath();
+        // 사망하는 경우
+        if (CurrentHealth <= 0.f)
+        {
+            EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
+            HandleDeath();
+        }
     }
 
     return ActualDamage;
+}
+
+void ABaseEnemyCharacter::OnAttackBeginOverlap(
+	UPrimitiveComponent* OverlappedComponent, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex, 
+	bool bFromSweep, 
+	const FHitResult& SweepResult)
+{
+    if (!bCanAttack || !OtherActor) return;
+
+	// Overlap 된 대상이 PlayerCharacter인지 확인하고 공격 시작
+	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
+    {
+		TargetPlayerCharacter = Player;
+        AttackPlayer();
+    }
+
+}
+
+void ABaseEnemyCharacter::OnAttackEndOverlap(
+	UPrimitiveComponent* OverlappedComponent, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex)
+{
+    if (OtherActor == TargetPlayerCharacter)
+    {
+		TargetPlayerCharacter = nullptr;
+    }
+}
+
+
+void ABaseEnemyCharacter::DelegateBindng()
+{
+	AttackRangeCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackBeginOverlap);
+	AttackRangeCollision->OnComponentEndOverlap.AddDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
+}
+
+void ABaseEnemyCharacter::DelegateUnbinding()
+{
+	AttackRangeCollision->OnComponentBeginOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackBeginOverlap);
+	AttackRangeCollision->OnComponentEndOverlap.RemoveDynamic(this, &ABaseEnemyCharacter::OnAttackEndOverlap);
 }
 
 void ABaseEnemyCharacter::HandleDeath()
@@ -188,4 +249,43 @@ void ABaseEnemyCharacter::HandleDeath()
     UObjectPoolSubsystem* Pool = World->GetSubsystem<UObjectPoolSubsystem>();
     if (!Pool) return;
     Pool->ReturnPoolActor(this);
+}
+
+void ABaseEnemyCharacter::AttackPlayer()
+{
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    if (TargetPlayerCharacter.IsValid() && bCanAttack)
+    {
+        // 플레이어에게 데미지 적용
+        UGameplayStatics::ApplyDamage(
+            TargetPlayerCharacter.Get(),
+            10.f,
+            GetInstigatorController(),
+            this,
+            UDamageType::StaticClass()
+        );
+
+		// AttackCooldown 시간 후에 공격 가능 상태로 되돌리기 위해 타이머 설정
+        World->GetTimerManager().SetTimer(
+            AttackTimerHandle,                      
+            this,                                    
+            &ABaseEnemyCharacter::ResetAttack,     
+            AttackCooldown,                               
+            false                                 
+        );
+
+        bCanAttack = false;
+        UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[ABaseEnemyCharacter] : [%s] 에게 공격 수행"), *GetName(), *TargetPlayerCharacter->GetName());
+    }
+}
+
+void ABaseEnemyCharacter::ResetAttack()
+{
+    bCanAttack = true;
+    if (TargetPlayerCharacter.IsValid())
+    {
+        AttackPlayer();
+    }
 }

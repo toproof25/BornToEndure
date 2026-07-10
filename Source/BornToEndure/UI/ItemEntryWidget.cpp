@@ -1,4 +1,4 @@
-#include "UI/ItemEntryWidget.h"
+ï»¿#include "UI/ItemEntryWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
@@ -18,11 +18,11 @@ void UItemEntryWidget::InitializeWithItemData(ULevelUpRewardWidget* InParentWidg
 	FItemDataRow* ItemData = &(ItemDataObject->ItemData);
 	FItemText* ItemText = &(ItemData->ItemText);
 
-	// ÀÌ¹ÌÁö ºñµ¿±â ·Îµù
+	// ì´ë¯¸ì§€ ë¹„ë™ê¸° ë¡œë”©
 	TSoftObjectPtr<UTexture2D>& ItemIcon = ItemData->ItemIcon;
 	if (ItemIcon.IsNull())
 	{
-		// ÃßÈÄ ¹è°æ»öÀ» »¡°­À¸·Î È¤Àº X Ç¥½Ã ÀÌ¹ÌÁö·Î Àû¿ë
+		// ì¶”í›„ ë°°ê²½ìƒ‰ì„ ë¹¨ê°•ìœ¼ë¡œ í˜¹ì€ X í‘œì‹œ ì´ë¯¸ì§€ë¡œ ì ìš©
 		//ItemIconImage->SetBrushFromTexture();
 	}
 	else if (ItemIcon.IsValid())
@@ -32,7 +32,7 @@ void UItemEntryWidget::InitializeWithItemData(ULevelUpRewardWidget* InParentWidg
 	}
 	else if (TextureLoadingHandle.IsValid() && TextureLoadingHandle->IsActive())
 	{
-		// ÀÌ¹Ì ·Îµù ÁßÀÎ °æ¿ì Ã³¸®
+		// ì´ë¯¸ ë¡œë”© ì¤‘ì¸ ê²½ìš° ì²˜ë¦¬
 		TextureLoadingHandle->CancelHandle();
 	}
 	else
@@ -44,13 +44,13 @@ void UItemEntryWidget::InitializeWithItemData(ULevelUpRewardWidget* InParentWidg
 		);
 	}
 
-	// ÀÌ¸§, ¼³¸í µî ¼³Á¤
+	// ì´ë¦„, ì„¤ëª… ë“± ì„¤ì •
 	ItemNameText->SetText(ItemText->Name);
 	ItemDescriptionText->SetText(ItemText->Description);
 
 	SelectedItem = InItem;
 
-	// ¹öÆ° Å¬¸¯ ½Ã OnItemSelectButtonClicked ÇÔ¼ö°¡ È£Ãâ
+	// ë²„íŠ¼ í´ë¦­ ì‹œ OnItemSelectButtonClicked í•¨ìˆ˜ê°€ í˜¸ì¶œ
 	ItemSelectButton->OnClicked.AddDynamic(this, &UItemEntryWidget::OnItemSelectButtonClicked);
 }
 
@@ -66,11 +66,11 @@ void UItemEntryWidget::SetSelectedVisual(bool bSelected)
 	bIsSelected = bSelected;
 	if (bIsSelected)
 	{
-		ItemBoxBorder->SetBrushColor(FLinearColor::Yellow); // ¼±ÅÃµÈ »óÅÂÀÏ ¶§ ³ë¶õ»öÀ¸·Î º¯°æ
+		ItemBoxBorder->SetBrushColor(FLinearColor::Yellow); // ì„ íƒëœ ìƒíƒœì¼ ë•Œ ë…¸ëž€ìƒ‰ìœ¼ë¡œ ë³€ê²½
 	}
 	else
 	{
-		ItemBoxBorder->SetBrushColor(FLinearColor::White); // ¼±ÅÃµÇÁö ¾ÊÀº »óÅÂÀÏ ¶§ Èò»öÀ¸·Î º¯°æ
+		ItemBoxBorder->SetBrushColor(FLinearColor::White); // ì„ íƒë˜ì§€ ì•Šì€ ìƒíƒœì¼ ë•Œ í°ìƒ‰ìœ¼ë¡œ ë³€ê²½
 	}
 }
 

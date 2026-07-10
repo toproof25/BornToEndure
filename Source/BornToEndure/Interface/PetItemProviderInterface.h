@@ -1,11 +1,11 @@
-/**
+ï»¿/**
  * @file PetItemProviderInterface.h
- * @brief Item °ü·Ã ±â´É¿¡ ´ëÇØ °øÅëÀûÀ¸·Î ÇÊ¿äÇÑ ±â´ÉÀ» Á¤ÀÇÇÏ´Â ÀÎÅÍÆäÀÌ½º
+ * @brief Item ê´€ë ¨ ê¸°ëŠ¥ì— ëŒ€í•´ ê³µí†µì ìœ¼ë¡œ í•„ìš”í•œ ê¸°ëŠ¥ì„ ì •ì˜í•˜ëŠ” ì¸í„°í˜ì´ìŠ¤
  * @author toproof (kmnlmn123@gmail.com)
  * @date 2026-04-20
  * @details
- * - ¿ÜºÎ¿¡¼­ PetÀÇ Item¿¡ Á¢±ÙÇÏÁö ¾Ê¾Æµµ ÃÖÁ¾ °è»êµÈ ¹ß»çÃ¼ modifier¿Í ÁÖ¿ä ¼Ó¼º ÅÂ±×¸¦ ¹İÈ¯ÇÏ´Â ±â´ÉÀ» Á¦°øÇÑ´Ù.
- * - °áÇÕµµ¿Í ÀÇÁ¸¼ºÀ» ÁÙÀÌ±â À§ÇØ Interface·Î ±¸Çö
+ * - ì™¸ë¶€ì—ì„œ Petì˜ Itemì— ì ‘ê·¼í•˜ì§€ ì•Šì•„ë„ ìµœì¢… ê³„ì‚°ëœ ë°œì‚¬ì²´ modifierì™€ ì£¼ìš” ì†ì„± íƒœê·¸ë¥¼ ë°˜í™˜í•˜ëŠ” ê¸°ëŠ¥ì„ ì œê³µí•œë‹¤.
+ * - ê²°í•©ë„ì™€ ì˜ì¡´ì„±ì„ ì¤„ì´ê¸° ìœ„í•´ Interfaceë¡œ êµ¬í˜„
  */
 
 #pragma once
@@ -29,14 +29,14 @@ class BORNTOENDURE_API IPetItemProviderInterface
 
 public:
     /**
-     * @brief ÇöÀç ÀåÂøµÈ ¸ğµç ¹ß»çÃ¼ modifier¸¦ ÇÕ»êÇÑ °á°ú¸¦ ¹İÈ¯ÇÑ´Ù.
-     * - PetCombatComponent°¡ ÀÌ °ªÀ¸·Î ¹ß»çÃ¼¸¦ ±¸¼ºÇÑ´Ù.
+     * @brief í˜„ì¬ ì¥ì°©ëœ ëª¨ë“  ë°œì‚¬ì²´ modifierë¥¼ í•©ì‚°í•œ ê²°ê³¼ë¥¼ ë°˜í™˜í•œë‹¤.
+     * - PetCombatComponentê°€ ì´ ê°’ìœ¼ë¡œ ë°œì‚¬ì²´ë¥¼ êµ¬ì„±í•œë‹¤.
      */
     virtual FProjectileModifierData GetAggregatedProjectileModifier() const = 0;
 
     /**
-     * @brief ÇöÀç PetÀÇ ÁÖ ¼Ó¼º ÅÂ±×¸¦ ¹İÈ¯ÇÑ´Ù.
-     * - ºÒ ¾ÆÀÌÅÛÀÌ °¡Àå ¸¹À¸¸é "Item.Element.Fire" ¹İÈ¯
+     * @brief í˜„ì¬ Petì˜ ì£¼ ì†ì„± íƒœê·¸ë¥¼ ë°˜í™˜í•œë‹¤.
+     * - ë¶ˆ ì•„ì´í…œì´ ê°€ì¥ ë§ìœ¼ë©´ "Item.Element.Fire" ë°˜í™˜
      */
     virtual FGameplayTag GetDominantElementTag() const = 0;
 };

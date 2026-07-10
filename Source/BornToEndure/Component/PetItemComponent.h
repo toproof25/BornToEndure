@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -11,32 +11,32 @@ class UPetItemDataAsset;
 class UPetSynergyDataAsset;
 
 /**
- * @brief ¾ÆÀÌÅÛ ÀÎ½ºÅÏ½º¸¦ Ç¥ÇöÇÏ´Â ±¸Á¶Ã¼
+ * @brief ì•„ì´í…œ ì¸ìŠ¤í„´ìŠ¤ë¥¼ í‘œí˜„í•˜ëŠ” êµ¬ì¡°ì²´
  * @details
- * - DataAsset Æ÷ÀÎÅÍ¿Í °íÀ¯ ID(¸¦ ÇÔ²² °ü¸®ÇÏ¿© °°Àº ¾ÆÀÌÅÛÀÌ¶óµµ °¢°¢ÀÇ ¾ÆÀÌÅÛÀ¸·Î Ãë±Ş
- * - °°Àº ¾ÆÀÌÅÛ DataAssetÀ» µÎ ¹ø È¹µæÇÏ¸é InstanceId°¡ ´Ù¸£±â¿¡ µ¶¸³ÀûÀ¸·Î Á¸ÀçÇÑ´Ù
+ * - DataAsset í¬ì¸í„°ì™€ ê³ ìœ  ID(ë¥¼ í•¨ê»˜ ê´€ë¦¬í•˜ì—¬ ê°™ì€ ì•„ì´í…œì´ë¼ë„ ê°ê°ì˜ ì•„ì´í…œìœ¼ë¡œ ì·¨ê¸‰
+ * - ê°™ì€ ì•„ì´í…œ DataAssetì„ ë‘ ë²ˆ íšë“í•˜ë©´ InstanceIdê°€ ë‹¤ë¥´ê¸°ì— ë…ë¦½ì ìœ¼ë¡œ ì¡´ì¬í•œë‹¤
  */
 USTRUCT()
 struct FPetItemInstance
 {
     GENERATED_BODY()
 
-    // ÀÌ ÀÎ½ºÅÏ½ºÀÇ °íÀ¯ ID
+    // ì´ ì¸ìŠ¤í„´ìŠ¤ì˜ ê³ ìœ  ID
     FGuid InstanceId;
 
-    // ½ÇÁ¦ ¾ÆÀÌÅÛ µ¥ÀÌÅÍ
+    // ì‹¤ì œ ì•„ì´í…œ ë°ì´í„°
     UPROPERTY()
     TObjectPtr<UPetItemDataAsset> LoadedData = nullptr;
 };
 
 
 /**
- * @brief PetÀÌ º¸À¯ÇÑ ¸ğµç ¾ÆÀÌÅÛÀ» °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ®
+ * @brief Petì´ ë³´ìœ í•œ ëª¨ë“  ì•„ì´í…œì„ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
  * @details
- * - ¾ÆÀÌÅÛ Ãß°¡/Á¦°Å
- * - ¾ÆÀÌÅÛ Ãß°¡/Á¦°Å ½Ã StatComponent¿¡ modifier ¹İ¿µ (DataAssetÀÇ Apply/Remove È£Ãâ)
- * - ¾ÆÀÌÅÛ Ãß°¡¸¶´Ù ½Ã³ÊÁö Á¶°Ç °Ë»ç
- * - ¹ß»çÃ¼ modifier Áı°è
+ * - ì•„ì´í…œ ì¶”ê°€/ì œê±°
+ * - ì•„ì´í…œ ì¶”ê°€/ì œê±° ì‹œ StatComponentì— modifier ë°˜ì˜ (DataAssetì˜ Apply/Remove í˜¸ì¶œ)
+ * - ì•„ì´í…œ ì¶”ê°€ë§ˆë‹¤ ì‹œë„ˆì§€ ì¡°ê±´ ê²€ì‚¬
+ * - ë°œì‚¬ì²´ modifier ì§‘ê³„
  */
 UCLASS(ClassGroup = (Pet), meta = (BlueprintSpawnableComponent))
 class BORNTOENDURE_API UPetItemComponent : public UActorComponent, public IPetItemProviderInterface
@@ -46,49 +46,49 @@ class BORNTOENDURE_API UPetItemComponent : public UActorComponent, public IPetIt
 public:
     UPetItemComponent();
 
-    // IPetItemProviderInterface ¿À¹ö¶óÀÌµå ±¸Çö
+    // IPetItemProviderInterface ì˜¤ë²„ë¼ì´ë“œ êµ¬í˜„
     virtual FProjectileModifierData GetAggregatedProjectileModifier() const override;
     virtual FGameplayTag GetDominantElementTag() const override;
 
     /**
-     * @brief ¾ÆÀÌÅÛ Ãß°¡
-     * @param ItemData PetManagerComponent¿¡¼­ ¾ÆÀÌÅÛ DataAssetÀ» º¸³»ÁØ´Ù
+     * @brief ì•„ì´í…œ ì¶”ê°€
+     * @param ItemData PetManagerComponentì—ì„œ ì•„ì´í…œ DataAssetì„ ë³´ë‚´ì¤€ë‹¤
      * @details
-	 * - ÆÄ¶ó¹ÌÅÍ·Î ¿Â ¾ÆÀÌÅÛÀÇ FPetItemInstance¸¦ »ı¼ºÇÑ ÈÄ OwnedItems¿¡ Ãß°¡ÇÑ´Ù
-	 * - °¢ ItemDataÀÇ ApplyToComponent¸¦ È£ÃâÇÏ¿© ÀûÀıÇÏ°Ô ¹İ¿µµÊ
+	 * - íŒŒë¼ë¯¸í„°ë¡œ ì˜¨ ì•„ì´í…œì˜ FPetItemInstanceë¥¼ ìƒì„±í•œ í›„ OwnedItemsì— ì¶”ê°€í•œë‹¤
+	 * - ê° ItemDataì˜ ApplyToComponentë¥¼ í˜¸ì¶œí•˜ì—¬ ì ì ˆí•˜ê²Œ ë°˜ì˜ë¨
      */
     void AddItem(UPetItemDataAsset* ItemData);
 
     /**
-     * @brief ¾ÆÀÌÅÛ Á¦°Å
-     * @param InstanceId Á¦°ÅÇÒ IdÀÇ °íÀ¯ FGuid°ª 
+     * @brief ì•„ì´í…œ ì œê±°
+     * @param InstanceId ì œê±°í•  Idì˜ ê³ ìœ  FGuidê°’ 
      * @details
-     * - º¸À¯ ¾ÆÀÌÅÛ OwnedItems¿¡¼­ °°ÀÎ ID¸¦ Ã£¾Æ Á¦°ÅÇÑ´Ù 
-	 * - Á¦°ÅÇÒ ¾ÆÀÌÅÛ DataAssetÀÇ RemoveFromComponent¸¦ È£ÃâÇÏ¿© ÀûÀıÇÏ°Ô ¹İ¿µµÊ
+     * - ë³´ìœ  ì•„ì´í…œ OwnedItemsì—ì„œ ê°™ì¸ IDë¥¼ ì°¾ì•„ ì œê±°í•œë‹¤ 
+	 * - ì œê±°í•  ì•„ì´í…œ DataAssetì˜ RemoveFromComponentë¥¼ í˜¸ì¶œí•˜ì—¬ ì ì ˆí•˜ê²Œ ë°˜ì˜ë¨
      */
     void RemoveItem(const FGuid& InstanceId);
 
     FGuid GetLastAddedInstanceId() const { return LastAddedInstanceId; }
 
     /**
-     * @brief º¸À¯ ¾ÆÀÌÅÛÀÇ ¹ß»çÃ¼ modifier¸¦ Ãß°¡ÇÑ´Ù.
-     * - UPetProjectileItemData::ApplyToComponent¿¡¼­ È£ÃâÇÑ´Ù.
+     * @brief ë³´ìœ  ì•„ì´í…œì˜ ë°œì‚¬ì²´ modifierë¥¼ ì¶”ê°€í•œë‹¤.
+     * - UPetProjectileItemData::ApplyToComponentì—ì„œ í˜¸ì¶œí•œë‹¤.
      */
 
     /**
-	 * @brief ProjectileModifier¸¦ TMap¿¡ Ãß°¡
-     * @param Modifier »õ·Î Ãß°¡ÇÒ ¹ß»çÃ¼¿¡ ´ëÇÑ modifire ±¸Á¶Ã¼
-     * @param InstanceId Ãß°¡ÇÒ ¹ß»çÃ¼ÀÇ °íÀ¯ ID
+	 * @brief ProjectileModifierë¥¼ TMapì— ì¶”ê°€
+     * @param Modifier ìƒˆë¡œ ì¶”ê°€í•  ë°œì‚¬ì²´ì— ëŒ€í•œ modifire êµ¬ì¡°ì²´
+     * @param InstanceId ì¶”ê°€í•  ë°œì‚¬ì²´ì˜ ê³ ìœ  ID
      */
     void AddProjectileModifier(const FProjectileModifierData& Modifier, const FGuid& InstanceId);
 
     /**
-     * @brief Projectile modifier¸¦ Á¦°Å
-     * @param InstanceId Á¦°ÅÇÒ modifireÀÇ °íÀ¯ÇÑ FGuid
+     * @brief Projectile modifierë¥¼ ì œê±°
+     * @param InstanceId ì œê±°í•  modifireì˜ ê³ ìœ í•œ FGuid
      */
     void RemoveProjectileModifier(const FGuid& InstanceId);
 
-	// ¾ÆÀÌÅÛ Ãß°¡, Á¦°Å, ½Ã³ÊÁö º¯°æ Delegate (UI ¾÷µ¥ÀÌÆ® µî¿¡ È°¿ëÇÏ¿© ¾ÆÁ÷ ±¸µ¶µÈ °÷ ¾øÀ½)
+	// ì•„ì´í…œ ì¶”ê°€, ì œê±°, ì‹œë„ˆì§€ ë³€ê²½ Delegate (UI ì—…ë°ì´íŠ¸ ë“±ì— í™œìš©í•˜ì—¬ ì•„ì§ êµ¬ë…ëœ ê³³ ì—†ìŒ)
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const UPetItemDataAsset*);
     FOnItemAdded OnItemAdded;
 
@@ -106,13 +106,13 @@ private:
     TArray<FPetItemInstance> OwnedItems;
     TMap<FGuid, FProjectileModifierData> ProjectileModifiers;
 
-    /** @briefÈ°¼ºÈ­µÈ ½Ã³ÊÁö ¸ñ·Ï */
+    /** @briefí™œì„±í™”ëœ ì‹œë„ˆì§€ ëª©ë¡ */
     UPROPERTY()
     TArray<TObjectPtr<UPetSynergyDataAsset>> ActiveSynergies;
 
     /** 
-    * @brief ¸ğµç ½Ã³ÊÁö DataAsset·Î °ÔÀÓ¿¡ Á¸ÀçÇÏ´Â ¸ğµç ½Ã³ÊÁö¸¦ ¹Ì¸® Ä³½ÌÇÑ´Ù
-    * - ÃßÈÄ ¾ÆÀÌÅÛ È¹µæ ½Ã ºñ±³ÇÏ±â À§ÇØ »ç¿ëÇÔ
+    * @brief ëª¨ë“  ì‹œë„ˆì§€ DataAssetë¡œ ê²Œì„ì— ì¡´ì¬í•˜ëŠ” ëª¨ë“  ì‹œë„ˆì§€ë¥¼ ë¯¸ë¦¬ ìºì‹±í•œë‹¤
+    * - ì¶”í›„ ì•„ì´í…œ íšë“ ì‹œ ë¹„êµí•˜ê¸° ìœ„í•´ ì‚¬ìš©í•¨
     */
     UPROPERTY()
     TArray<TObjectPtr<UPetSynergyDataAsset>> AllSynergyData;
@@ -120,31 +120,31 @@ private:
     FGuid LastAddedInstanceId;
 
     /**
-     * @brief ÇöÀç º¸À¯ ¾ÆÀÌÅÛÀÇ ¸ğµç SynergyTag¸¦ Áı°èÇÏ°í AllSynergyData¿Í ºñ±³ÇÏ¿© ÇöÀç Àû¿ëµÈ ½Ã³ÊÁö »óÅÂ¸¦ ¾÷µ¥ÀÌÆ®
+     * @brief í˜„ì¬ ë³´ìœ  ì•„ì´í…œì˜ ëª¨ë“  SynergyTagë¥¼ ì§‘ê³„í•˜ê³  AllSynergyDataì™€ ë¹„êµí•˜ì—¬ í˜„ì¬ ì ìš©ëœ ì‹œë„ˆì§€ ìƒíƒœë¥¼ ì—…ë°ì´íŠ¸
      */
     void CheckAndUpdateSynergies();
 
     /**
-     * @brief Àû¿ëÇÒ ½Ã³ÊÁöÀÇ Á¶°ÇÀÌ ÇöÀç º¸À¯ ¾ÆÀÌÅÛ¿¡¼­ Á¸ÀçÇÏ´ÂÁö Ã¼Å©ÇÏ¿© ¿©ºÎ¸¦ ¹İÈ¯
-     * - ¸ğµç ½Ã³ÊÁö¸¦ ¼øÈ¸ÇÏ¸ç °¢ ½Ã³ÊÁöº°·Î Á¶°ÇÀ» Ã¼Å©
-     * @param SynergyData Àû¿ëÇÒ ½Ã³ÊÁö¿¡ ´ëÇÑ DataAsset
-     * @param CurrentTagCounts ÇöÀç º¸À¯ ¾ÆÀÌÅÛ¿¡¼­ Áı°èµÈ ¸ğµç ¼Ó¼º Å×±× ¸ğÀ½
-     * @return `SynergyData` ½Ã³ÊÁö°¡ Àû¿ëµÉ ¿©ºÎ¸¦ ¹İÈ¯
+     * @brief ì ìš©í•  ì‹œë„ˆì§€ì˜ ì¡°ê±´ì´ í˜„ì¬ ë³´ìœ  ì•„ì´í…œì—ì„œ ì¡´ì¬í•˜ëŠ”ì§€ ì²´í¬í•˜ì—¬ ì—¬ë¶€ë¥¼ ë°˜í™˜
+     * - ëª¨ë“  ì‹œë„ˆì§€ë¥¼ ìˆœíšŒí•˜ë©° ê° ì‹œë„ˆì§€ë³„ë¡œ ì¡°ê±´ì„ ì²´í¬
+     * @param SynergyData ì ìš©í•  ì‹œë„ˆì§€ì— ëŒ€í•œ DataAsset
+     * @param CurrentTagCounts í˜„ì¬ ë³´ìœ  ì•„ì´í…œì—ì„œ ì§‘ê³„ëœ ëª¨ë“  ì†ì„± í…Œê·¸ ëª¨ìŒ
+     * @return `SynergyData` ì‹œë„ˆì§€ê°€ ì ìš©ë  ì—¬ë¶€ë¥¼ ë°˜í™˜
      */
     bool IsSynergyConditionMet(
         const UPetSynergyDataAsset* SynergyData,
         const TMap<FGameplayTag, int32>& CurrentTagCounts ) const;
 
     /**
-     * @brief ½Ã³ÊÁö DataAssetÀ» AssetManager¸¦ ÅëÇØ ºñµ¿±â ·Îµå
-     * - BeginPlay¿¡¼­ ÇÑ ¹ø¸¸ È£Ãâ
+     * @brief ì‹œë„ˆì§€ DataAssetì„ AssetManagerë¥¼ í†µí•´ ë¹„ë™ê¸° ë¡œë“œ
+     * - BeginPlayì—ì„œ í•œ ë²ˆë§Œ í˜¸ì¶œ
      */
     void LoadSynergyDataAsync();
     void OnSynergyDataLoaded(TArray<FPrimaryAssetId> LoadedIds);
 
 public:
 
-    // µğ¹ö±× ¹× UI¿ë Getter
+    // ë””ë²„ê·¸ ë° UIìš© Getter
     const TArray<FPetItemInstance>& GetOwnedItems() const { return OwnedItems; }
     const TArray<TObjectPtr<UPetSynergyDataAsset>>& GetActiveSynergies() const { return ActiveSynergies; }
 };

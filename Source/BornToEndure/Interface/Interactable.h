@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -21,7 +21,7 @@ class BORNTOENDURE_API IInteractable
 
 public:
 
-	// »óÈ£ÀÛ¿ë °øÅë ÇÔ¼ö 
+	// ìƒí˜¸ì‘ìš© ê³µí†µ í•¨ìˆ˜ 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
 	void Interact(class APlayerCharacter* InstigatorCharacter);
 };

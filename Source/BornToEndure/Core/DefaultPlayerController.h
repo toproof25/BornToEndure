@@ -1,11 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿/**
+* @file DefaultPlayerController.h
+* @brief ê¸°ë³¸ í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ í´ë˜ìŠ¤ í—¤ë”
+* 
+* - í”Œë ˆì´ì–´ ì…ë ¥ ì²˜ë¦¬ ë° UI ê´€ë¦¬
+*/
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-
-#include "EnhancedInputSubsystems.h"
 
 #include "DefaultPlayerController.generated.h"
 
@@ -13,12 +16,24 @@ class UInputMappingContext;
 class UPlayerHUDWidget;
 class ULevelUpRewardWidget;
 class UPlayerExperienceComponent;
+class UPlayerHealthBarWidget;
+class UUserWidget;
 
 UCLASS()
 class BORNTOENDURE_API ADefaultPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+
+	void SetGameInputMode();
+	void SetUIInputMode(UUserWidget* WidgetToFocus, bool bInPauseGame = false);
+	void SetGameAndUIInputMode(
+		UUserWidget* WidgetToFocus,
+		bool bIgnoreMoveInput = true,
+		bool bIgnoreLookInput = false
+	);
+	void RestoreGameInputMode();
 
 protected:
 
@@ -26,20 +41,17 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	/** * @brief Input Mapping Context¸¦ ÆíÁı±â¿¡¼­ ÇÒ´ç °¡´ÉÇÏµµ·Ï ¼±¾ğ */
+	/** * @brief Input Mapping Contextë¥¼ í¸ì§‘ê¸°ì—ì„œ í• ë‹¹ ê°€ëŠ¥í•˜ë„ë¡ ì„ ì–¸ */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI, meta = (AllowedClasses = "PlayerHUDWidget"))
 	TSubclassOf<UPlayerHUDWidget> PlayerHUDWidgetClass;
 
+private:
+
 	UPROPERTY()
 	TObjectPtr<UPlayerHUDWidget> PlayerHUDWidgetInstance;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
-	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;
-
-private:
 
 	TObjectPtr<UPlayerExperienceComponent> PlayerExpComp;
 
@@ -47,6 +59,10 @@ private:
 	void SetUpPlayerInputMode();
 	void SetUpPlayerHUDWidget();
 
+	void HandlePlayerDeath();
+
 	UFUNCTION()
 	void LevelUpHandler(int32 NewLevel);
+
+
 };

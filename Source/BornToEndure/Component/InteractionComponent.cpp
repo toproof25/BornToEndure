@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Component/InteractionComponent.h"
@@ -9,7 +9,7 @@ UInteractionComponent::UInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SphereShape = FCollisionShape::MakeSphere(15.f);
-	QueryParams.AddIgnoredActor(Owner); // ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ´Â ¹«½Ã ¼³Á¤ 
+	QueryParams.AddIgnoredActor(Owner); // í”Œë ˆì´ì–´ ìºë¦­í„°ëŠ” ë¬´ì‹œ ì„¤ì • 
 }
 
 
@@ -25,17 +25,17 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// 1. ÇÃ·¹ÀÌ¾î¸¦ ¸øÃ£À» °æ¿ì
+	// 1. í”Œë ˆì´ì–´ë¥¼ ëª»ì°¾ì„ ê²½ìš°
 	if (Owner == nullptr) return;
 
-	// 2. ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯°¡ ¾øÀ¸¸é ´Ù½Ã ½Ãµµ (BeginPlay¿¡¼­ ¸øÃ£À» ¼ö ÀÖ´Ù°í ÇÔ)
+	// 2. í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ê°€ ì—†ìœ¼ë©´ ë‹¤ì‹œ ì‹œë„ (BeginPlayì—ì„œ ëª»ì°¾ì„ ìˆ˜ ìˆë‹¤ê³  í•¨)
 	if (PlayerController == nullptr)
 	{
 		PlayerController = Cast<APlayerController>(Owner->GetController());
 		if (PlayerController == nullptr) return;
 	}
 
-	// 3. ÇÃ·¹ÀÌ¾î°¡ »óÈ£ÀÛ¿ë °¡´ÉÇÑ ¾×ÅÍ¸¦ ¹Ù¶óº¸°í ÀÖ´ÂÁö È®ÀÎ
+	// 3. í”Œë ˆì´ì–´ê°€ ìƒí˜¸ì‘ìš© ê°€ëŠ¥í•œ ì•¡í„°ë¥¼ ë°”ë¼ë³´ê³  ìˆëŠ”ì§€ í™•ì¸
 	FHitResult HitResult;
 	bool bHit = PerformInteractionTrace(HitResult);
 
@@ -54,7 +54,7 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 bool UInteractionComponent::PerformInteractionTrace(FHitResult& OutHitResult)
 {
-	// ÄÁÆ®·Ñ·¯ÀÇ Ä«¸Ş¶ó À§Ä¡¿Í È¸ÀüÀ» °¡Á®¿Â´Ù
+	// ì»¨íŠ¸ë¡¤ëŸ¬ì˜ ì¹´ë©”ë¼ ìœ„ì¹˜ì™€ íšŒì „ì„ ê°€ì ¸ì˜¨ë‹¤
 	FVector CameraLocation;
 	FRotator CameraRotation;
 	PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);

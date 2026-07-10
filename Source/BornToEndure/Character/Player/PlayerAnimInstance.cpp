@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Player/PlayerAnimInstance.h"
@@ -12,7 +12,7 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 
 	Super::NativeInitializeAnimation();
 
-	// ¾Ö´Ï¸ŞÀÌ¼ÇÀ» ¼ÒÀ¯ÇÑ Æù(Pawn)À» ³» Ä³¸¯ÅÍ·Î Ä³½ºÆÃÇÏ¿© Ä³½Ì
+	// ì• ë‹ˆë©”ì´ì…˜ì„ ì†Œìœ í•œ í°(Pawn)ì„ ë‚´ ìºë¦­í„°ë¡œ ìºìŠ¤íŒ…í•˜ì—¬ ìºì‹±
 	PlayerCharacter = Cast<APlayerCharacter>(TryGetPawnOwner());
 
 	if (PlayerCharacter)
@@ -28,31 +28,31 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (PlayerCharacter == nullptr || MovementComponent == nullptr) return;
 
-	// »óÇÏ¸¦ Á¦¿ÜÇÑ XY ÀÌµ¿ ¼Óµµ °è»ê
+	// ìƒí•˜ë¥¼ ì œì™¸í•œ XY ì´ë™ ì†ë„ ê³„ì‚°
 	FVector Velocity = PlayerCharacter->GetVelocity();
 	Velocity.Z = 0.f;
 	GroundSpeed = Velocity.Size();
 
-	// °øÁß¿¡ ¶° ÀÖ´ÂÁö È®ÀÎ
+	// ê³µì¤‘ì— ë–  ìˆëŠ”ì§€ í™•ì¸
 	bIsFalling = MovementComponent->IsFalling();
 
 
-	// PlayerCharacter¿¡¼­ AWaeponBase¸¦ °¡Áö°í ÀÖ´Â Áö È®ÀÎ
+	// PlayerCharacterì—ì„œ AWaeponBaseë¥¼ ê°€ì§€ê³  ìˆëŠ” ì§€ í™•ì¸
 	ABaseWeapon* CurrentWeapon;
 	PlayerCharacter->GetWeaponBase(CurrentWeapon);
 
 	if (CurrentWeapon && CurrentWeapon->GetWeaponStaticMesh())
 	{
-		// ¹«±â¸¦ µé°í ÀÖ´Ù¸é, "LHIK" ¼ÒÄÏ ÁÂÇ¥¸¦ °è¼Ó ÀúÀå
+		// ë¬´ê¸°ë¥¼ ë“¤ê³  ìˆë‹¤ë©´, "LHIK" ì†Œì¼“ ì¢Œí‘œë¥¼ ê³„ì† ì €ì¥
 		WeaponBaseComp = CurrentWeapon;
 		LHIKTargetTransform = CurrentWeapon->GetWeaponStaticMesh()->GetSocketTransform(FName("LHIK"), ERelativeTransformSpace::RTS_World);
-		Alpha = 1.0f; // IK Àû¿ë
+		Alpha = 1.0f; // IK ì ìš©
 		CurrentWeaponType = WeaponBaseComp->WeaponType;
 	}
 	else
 	{
 		WeaponBaseComp = nullptr;
-		Alpha = 0.0f; // IK Àû¿ë ¾ÈÇÔ
+		Alpha = 0.0f; // IK ì ìš© ì•ˆí•¨
 		CurrentWeaponType = EWeaponType::EWT_Unarmed;
 	}
 

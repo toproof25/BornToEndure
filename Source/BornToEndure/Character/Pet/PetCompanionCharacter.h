@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -13,10 +13,10 @@ class UPetBaseDataAsset;
 
 
 /**
- * @brief PetÀÇ º»Ã¼ Ä³¸¯ÅÍ Å¬·¡½º
- * - PetÀÌ »ç¿ëÇÏ´Â ÄÄÆ÷³ÍÆ®µéÀ» »ı¼ºÇÏ°í Ä³½Ì º¯¼ö·Î º¸À¯
- * - DataAsset(UPetBaseData)À» ÀĞ¾î ÄÄÆ÷³ÍÆ®µéÀ» ÃÊ±âÈ­
- * - ¿ÜºÎ¿¡¼­ ÄÄÆ÷³ÍÆ®¿¡ Á¢±ÙÇÏ´Â Getter Á¦°ø
+ * @brief Petì˜ ë³¸ì²´ ìºë¦­í„° í´ë˜ìŠ¤
+ * - Petì´ ì‚¬ìš©í•˜ëŠ” ì»´í¬ë„ŒíŠ¸ë“¤ì„ ìƒì„±í•˜ê³  ìºì‹± ë³€ìˆ˜ë¡œ ë³´ìœ 
+ * - DataAsset(UPetBaseData)ì„ ì½ì–´ ì»´í¬ë„ŒíŠ¸ë“¤ì„ ì´ˆê¸°í™”
+ * - ì™¸ë¶€ì—ì„œ ì»´í¬ë„ŒíŠ¸ì— ì ‘ê·¼í•˜ëŠ” Getter ì œê³µ
  */
 UCLASS()
 class BORNTOENDURE_API APetCompanionCharacter : public ACharacter
@@ -31,15 +31,15 @@ protected:
 
 public:
 
-	/** * @brief AI Controller°¡ Å¸°Ù À§Ä¡¸¦ ³Ñ°ÜÁÙ ¶§ È£ÃâÇÏ¸ç PetCombatComponentÀÇ °ø°İ ÇÔ¼ö È£ÃâÀ» À§ÀÓÇÑ ÇüÅÂ */
+	/** * @brief AI Controllerê°€ íƒ€ê²Ÿ ìœ„ì¹˜ë¥¼ ë„˜ê²¨ì¤„ ë•Œ í˜¸ì¶œí•˜ë©° PetCombatComponentì˜ ê³µê²© í•¨ìˆ˜ í˜¸ì¶œì„ ìœ„ì„í•œ í˜•íƒœ */
 	void OnAttack(const FVector& TargetLocation);
 
-	/** * @brief PetManagerComponent°¡ ½ºÆù Á÷ÈÄ ¿À³Ê¸¦ ¼³Á¤ÇÒ ¶§ È£Ãâ */
+	/** * @brief PetManagerComponentê°€ ìŠ¤í° ì§í›„ ì˜¤ë„ˆë¥¼ ì„¤ì •í•  ë•Œ í˜¸ì¶œ */
 	void SetFollowOwner(APawn* PlayerPawn);
 
 private:
 
-	// ÄÄÆ÷³ÍÆ® Ä³½Ì
+	// ì»´í¬ë„ŒíŠ¸ ìºì‹±
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pet|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPetStatComponent> PetStatComp;
 
@@ -50,35 +50,35 @@ private:
 	TObjectPtr<UPetCombatComponent> PetCombatComp;
 
 	/**
-	 * @brief Àû Å½Áö Ãæµ¹Ã¼ ÄÄÆ÷³ÍÆ®·Î PetÀÇ °ø°İ ¹üÀ§¸¦ °áÁ¤ÇÔ
-	 * @note ÇöÀç´Â »ç¿ëÇÒ ¼ö ÀÖÀ¸³ª ÃßÈÄ¿¡´Â ´Ù¸¥ ¹æ½ÄÀ¸·Î º¯°æÇÒ ¿¹Á¤
+	 * @brief ì  íƒì§€ ì¶©ëŒì²´ ì»´í¬ë„ŒíŠ¸ë¡œ Petì˜ ê³µê²© ë²”ìœ„ë¥¼ ê²°ì •í•¨
+	 * @note í˜„ì¬ëŠ” ì‚¬ìš©í•  ìˆ˜ ìˆìœ¼ë‚˜ ì¶”í›„ì—ëŠ” ë‹¤ë¥¸ ë°©ì‹ìœ¼ë¡œ ë³€ê²½í•  ì˜ˆì •
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pet|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USphereComponent> DetectionSphere;
 
 	/**
-	 * @brief PetÀÇ ±âº» µ¥ÀÌÅÍ ¿¡¼ÂÀ¸·Î °¢Á¾ ±âº» ½ºÅÈ, ¼öÄ¡¸¦ ÃÊ±âÈ­ÇÑ´Ù
-	 * @note PetBaseDataAsset¿¡¼­ È®ÀåµÈ DataAssetÀ¸·Î ¿¡µğÅÍ Detail¿¡¼­ Àû¿ëÇÏ¿© »ç¿ëÇÔ
+	 * @brief Petì˜ ê¸°ë³¸ ë°ì´í„° ì—ì…‹ìœ¼ë¡œ ê°ì¢… ê¸°ë³¸ ìŠ¤íƒ¯, ìˆ˜ì¹˜ë¥¼ ì´ˆê¸°í™”í•œë‹¤
+	 * @note PetBaseDataAssetì—ì„œ í™•ì¥ëœ DataAssetìœ¼ë¡œ ì—ë””í„° Detailì—ì„œ ì ìš©í•˜ì—¬ ì‚¬ìš©í•¨
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pet|Data", meta = (AllowPrivateAccess = "true", AllowedTypes = "PetBaseDataAsset"))
 	TObjectPtr<UPetBaseDataAsset> PetBaseData;
 
 	/** 
-	* @brief PetBaseData¸¦ ÀĞ¾î °¢ ÄÄÆ÷³ÍÆ®¸¦ ÃÊ±âÈ­ÇÑ´Ù 
-	* - StatComponent·Î PetBaseDataÀÇ StatÀ» Àü´ŞÇÏ¿© ÃÊ±âÈ­
+	* @brief PetBaseDataë¥¼ ì½ì–´ ê° ì»´í¬ë„ŒíŠ¸ë¥¼ ì´ˆê¸°í™”í•œë‹¤ 
+	* - StatComponentë¡œ PetBaseDataì˜ Statì„ ì „ë‹¬í•˜ì—¬ ì´ˆê¸°í™”
 	*/
 	void InitializeFromDataAsset();
 
 	/** 
-	* @brief StatComponent¿Í CombatComponent¸¦ ¿¬°áÇÑ´Ù 
-	* - °¢Á¾ ComponentÀÇ Delegate Bind µîÀ» ÇÑ °÷¿¡¼­ Ã³¸®ÇÏ¿© ÄÄÆ÷³ÍÆ® °£ÀÇ ÀÇÁ¸¼ºÀ» ÁÙÀÌ°í À¯Áöº¸¼ö¼ºÀ» ³ôÀÓ
+	* @brief StatComponentì™€ CombatComponentë¥¼ ì—°ê²°í•œë‹¤ 
+	* - ê°ì¢… Componentì˜ Delegate Bind ë“±ì„ í•œ ê³³ì—ì„œ ì²˜ë¦¬í•˜ì—¬ ì»´í¬ë„ŒíŠ¸ ê°„ì˜ ì˜ì¡´ì„±ì„ ì¤„ì´ê³  ìœ ì§€ë³´ìˆ˜ì„±ì„ ë†’ì„
 	*/
 	void BindComponentDelegates();
 
 
 public:
 
-	// Getter ÇÔ¼ö
+	// Getter í•¨ìˆ˜
 	UPetStatComponent* GetStatComponent() const { return PetStatComp; }
 	UPetItemComponent* GetItemComponent() const { return PetItemComp; }
 	UPetCombatComponent* GetCombatComponent() const { return PetCombatComp; }
@@ -89,12 +89,12 @@ public:
 	//FText GetPetName() const { return PetBaseData ? PetBaseData->GetPetName() : FText::FromName(NAME_None); }
 
 	/**
-	 * @brief BTService_PetRadar¿¡¼­ PetÀÇ °ø°İ ¹üÀ§¸¦ °¡Á®°¡ »ç¿ëÇÑ´Ù
-	 * @return PetÀÇ °ø°İ ¹üÀ§
+	 * @brief BTService_PetRadarì—ì„œ Petì˜ ê³µê²© ë²”ìœ„ë¥¼ ê°€ì ¸ê°€ ì‚¬ìš©í•œë‹¤
+	 * @return Petì˜ ê³µê²© ë²”ìœ„
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	float GetAttackRange() const { return 500.0f; }
 
-	// µğ¹ö±× À©µµ¿ì¿¡¼­ Pet ÀÌ¸§ Ç¥½Ã¿ë Getter
+	// ë””ë²„ê·¸ ìœˆë„ìš°ì—ì„œ Pet ì´ë¦„ í‘œì‹œìš© Getter
 	FName GetPetName() const;
 };

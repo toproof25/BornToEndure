@@ -1,4 +1,4 @@
-#include "Component/PetManagerComponent.h"
+ï»¿#include "Component/PetManagerComponent.h"
 
 #include "Character/Pet/PetCompanionCharacter.h"
 #include "Data/PetItemDataAsset.h"
@@ -20,7 +20,7 @@ void UPetManagerComponent::BeginPlay()
 
 	UE_LOG(LogPetManager, Display, TEXT("PetManager BeginPlay called. Attempting to spawn pet."));
 
-    // DefaultPetClass°¡ ¼³Á¤µÇ¾î ÀÖÀ¸¸é °ÔÀÓ ½ÃÀÛ ½Ã ÀÚµ¿ ½ºÆù
+    // DefaultPetClassê°€ ì„¤ì •ë˜ì–´ ìˆìœ¼ë©´ ê²Œì„ ì‹œì‘ ì‹œ ìë™ ìŠ¤í°
     if (DefaultPetClass)
     {
         SpawnAndAddPet(DefaultPetClass);
@@ -35,7 +35,7 @@ void UPetManagerComponent::BeginPlay()
 
 APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSubclassOf<APetCompanionCharacter> PetClassOverride)
 {
-    // ÆÄ¶ó¹ÌÅÍ·Î µé¾î¿Â PetÀÌ À¯È¿ÇÏ¸é »ç¿ëÇÏ°í ¾Æ´Ï¸é ±âº» PetÀ» »ç¿ëÇÑ´Ù
+    // íŒŒë¼ë¯¸í„°ë¡œ ë“¤ì–´ì˜¨ Petì´ ìœ íš¨í•˜ë©´ ì‚¬ìš©í•˜ê³  ì•„ë‹ˆë©´ ê¸°ë³¸ Petì„ ì‚¬ìš©í•œë‹¤
     TSubclassOf<APetCompanionCharacter> ClassToSpawn = PetClassOverride ? PetClassOverride : DefaultPetClass;
 
     if (!ClassToSpawn)
@@ -47,7 +47,7 @@ APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSubclassOf<APetCom
     UWorld* World = GetWorld();
     if (!World) return nullptr;
 
-    // ÇÃ·¹ÀÌ¾î ±Ù¹æ¿¡ PetÀ» ½ºÆù
+    // í”Œë ˆì´ì–´ ê·¼ë°©ì— Petì„ ìŠ¤í°
     const FTransform SpawnTransform = CalculateSpawnTransform(PetList.Num());
     FActorSpawnParameters SpawnParams;
     SpawnParams.Owner = GetOwner();
@@ -60,16 +60,16 @@ APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSubclassOf<APetCom
         return nullptr;
     }
 
-    // Pet °ü¸® ¸ñ·Ï¿¡ Ãß°¡
+    // Pet ê´€ë¦¬ ëª©ë¡ì— ì¶”ê°€
     PetList.Add(NewPet);
 
-    // PetÀÇ ÁÖÀÎ(ÇÃ·¹ÀÌ¾î)À» ¼³Á¤
+    // Petì˜ ì£¼ì¸(í”Œë ˆì´ì–´)ì„ ì„¤ì •
     if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
     {
         NewPet->SetFollowOwner(OwnerPawn);
     }
 
-    // Pet Ãß°¡ ÀÌº¥Æ®¸¦ ¹æ¼Û
+    // Pet ì¶”ê°€ ì´ë²¤íŠ¸ë¥¼ ë°©ì†¡
     OnPetAdded.Broadcast(NewPet);
     UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Pet spawned: %s (Total: %d)"),*NewPet->GetName(), PetList.Num());
 
@@ -95,7 +95,7 @@ void UPetManagerComponent::RequestItemForPet(const FPrimaryAssetId& ItemAssetId)
 
     UAssetManager& AM = UAssetManager::Get();
 
-    // ¾ÆÀÌÅÛ DataAssetÀ» ºñµ¿±â ·ÎµåÇÏ¸ç, ·Îµå ÈÄ OnItemDataLoaded¿¡¼­ PetÀ» ¼±ÅÃ ¹× ¾ÆÀÌÅÛÀ» Àü´ŞÇÑ´Ù
+    // ì•„ì´í…œ DataAssetì„ ë¹„ë™ê¸° ë¡œë“œí•˜ë©°, ë¡œë“œ í›„ OnItemDataLoadedì—ì„œ Petì„ ì„ íƒ ë° ì•„ì´í…œì„ ì „ë‹¬í•œë‹¤
     AM.GetStreamableManager().RequestAsyncLoad(
         AM.GetPrimaryAssetPath(ItemAssetId),
         FStreamableDelegate::CreateUObject(this, &UPetManagerComponent::OnItemDataLoaded, ItemAssetId)
@@ -140,8 +140,8 @@ void UPetManagerComponent::RemoveItemFromPet(APetCompanionCharacter* TargetPet, 
 
 APetCompanionCharacter* UPetManagerComponent::GetActivePet() const
 {
-    // ÇöÀç ±¸Çö: Ã¹ ¹øÂ° PetÀÌ Active Pet
-    // ÃßÈÄ ´ÙÁß Pet ¼±ÅÃ ½Ã½ºÅÛÀ¸·Î È®Àå °¡´É
+    // í˜„ì¬ êµ¬í˜„: ì²« ë²ˆì§¸ Petì´ Active Pet
+    // ì¶”í›„ ë‹¤ì¤‘ Pet ì„ íƒ ì‹œìŠ¤í…œìœ¼ë¡œ í™•ì¥ ê°€ëŠ¥
     return PetList.IsEmpty() ? nullptr : PetList[0].Get();
 }
 
@@ -150,7 +150,7 @@ FTransform UPetManagerComponent::CalculateSpawnTransform(int32 PetIndex) const
     AActor* Owner = GetOwner();
     if (!Owner) return FTransform::Identity;
 
-    // ÇÃ·¹ÀÌ¾î µÚÂÊ¿¡ Pet ÀÎµ¦½º ±â¹İÀ¸·Î ¾à°£¾¿ ¿·À¸·Î ¹èÄ¡
+    // í”Œë ˆì´ì–´ ë’¤ìª½ì— Pet ì¸ë±ìŠ¤ ê¸°ë°˜ìœ¼ë¡œ ì•½ê°„ì”© ì˜†ìœ¼ë¡œ ë°°ì¹˜
     const FVector OwnerLocation = Owner->GetActorLocation();
     const FVector BackDirection = -Owner->GetActorForwardVector();
     const FVector SideOffset = Owner->GetActorRightVector() * (PetIndex * 80.f);
@@ -158,7 +158,7 @@ FTransform UPetManagerComponent::CalculateSpawnTransform(int32 PetIndex) const
     const FVector SpawnLocation = OwnerLocation
         + BackDirection * SpawnOffsetDistance
         + SideOffset
-        + FVector(0.f, 0.f, 10.f); // ¹Ù´Ú¿¡¼­ ¾à°£ À§
+        + FVector(0.f, 0.f, 10.f); // ë°”ë‹¥ì—ì„œ ì•½ê°„ ìœ„
 
     return FTransform(Owner->GetActorRotation(), SpawnLocation);
 }
@@ -166,9 +166,9 @@ FTransform UPetManagerComponent::CalculateSpawnTransform(int32 PetIndex) const
 APetCompanionCharacter* UPetManagerComponent::SelectPetForItem(
     const UPetItemDataAsset* ItemData) const
 {
-    // [ÇöÀç ±¸Çö] ´Ü¼øÇÏ°Ô Ã¹ ¹øÂ° Pet ¼±ÅÃ
-    // [ÃßÈÄ È®Àå] Selection Policy ÀÎÅÍÆäÀÌ½º ÁÖÀÔÀ¸·Î Àü·« ±³Ã¼ °¡´É
-    // ¿¹: °¡Àå ¾ÆÀÌÅÛÀÌ ÀûÀº Pet, ÇÃ·¹ÀÌ¾î°¡ ¼±ÅÃÇÑ Pet µî
+    // [í˜„ì¬ êµ¬í˜„] ë‹¨ìˆœí•˜ê²Œ ì²« ë²ˆì§¸ Pet ì„ íƒ
+    // [ì¶”í›„ í™•ì¥] Selection Policy ì¸í„°í˜ì´ìŠ¤ ì£¼ì…ìœ¼ë¡œ ì „ëµ êµì²´ ê°€ëŠ¥
+    // ì˜ˆ: ê°€ì¥ ì•„ì´í…œì´ ì ì€ Pet, í”Œë ˆì´ì–´ê°€ ì„ íƒí•œ Pet ë“±
     return GetActivePet();
 }
 

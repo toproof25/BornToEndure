@@ -1,9 +1,9 @@
-/**
+ï»¿/**
 * @file EnemyDataRow.h
 * @date 2026-05-19
 * @modified 2026-05-23
 * @author toproof (kmnlmn123@gmail.com)
-* @brief ¸ğµç ¾ÆÀÌÅÛÀ» Å×ÀÌºí·Î °ü¸®ÇÏ±â À§ÇÚ ¾ÆÀÌÅÛ µ¥ÀÌÅÍ Å×ÀÌºí Çà ±¸°íÃ¼ (µ¥ÀÌÅÍ Å¸ÀÔ)À» Á¤ÀÇÇÏ´Â ÆÄÀÏ
+* @brief ëª¨ë“  ì•„ì´í…œì„ í…Œì´ë¸”ë¡œ ê´€ë¦¬í•˜ê¸° ìœ„í•¸ ì•„ì´í…œ ë°ì´í„° í…Œì´ë¸” í–‰ êµ¬ê³ ì²´ (ë°ì´í„° íƒ€ì…)ì„ ì •ì˜í•˜ëŠ” íŒŒì¼
 */
 
 #pragma once
@@ -43,7 +43,7 @@ struct FItemDataRow : public FTableRowBase
 
 public:
 
-	// ¾ÆÀÌÅÛ ID, ÀÌ¸§, ¼³¸í, ¾ÆÀÌÄÜ, DataAsset µî..
+	// ì•„ì´í…œ ID, ì´ë¦„, ì„¤ëª…, ì•„ì´ì½˜, DataAsset ë“±..
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	FName ItemID;
@@ -63,8 +63,8 @@ public:
 };
 
 /**
- * @brief ItemDataRowÀÇ UObject ¹öÀü, DataTable¿¡¼­ FItemDataRow ´ë½Å UItemDataObjectÀ» »ç¿ëÇÏ±â À§ÇÑ Å¬·¡½º
- * - ÀÎ½ºÅÏ½ºÈ­µÈ UObject·Î¼­ DataTable¿¡¼­ »ç¿ëÇÒ ¼ö ÀÖµµ·Ï FItemDataRowÀÇ µ¥ÀÌÅÍ¸¦ Æ÷ÇÔ
+ * @brief ItemDataRowì˜ UObject ë²„ì „, DataTableì—ì„œ FItemDataRow ëŒ€ì‹  UItemDataObjectì„ ì‚¬ìš©í•˜ê¸° ìœ„í•œ í´ë˜ìŠ¤
+ * - ì¸ìŠ¤í„´ìŠ¤í™”ëœ UObjectë¡œì„œ DataTableì—ì„œ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ FItemDataRowì˜ ë°ì´í„°ë¥¼ í¬í•¨
  */
 UCLASS(BlueprintType)
 class BORNTOENDURE_API UItemDataObject : public UObject

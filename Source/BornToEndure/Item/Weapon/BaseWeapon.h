@@ -1,20 +1,20 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Delegates/Delegate.h"
-#include "Interface/Interactable.h" // Interface »ó¼ÓÀ» À§ÇÑ Çì´õ
+#include "Interface/Interactable.h" // Interface ìƒì†ì„ ìœ„í•œ í—¤ë”
 #include "BaseWeapon.generated.h"
 
 class UStaticMeshComponent;
 
-// Delegate ¼±¾ğ
+// Delegate ì„ ì–¸
 DECLARE_DELEGATE_TwoParams(FSpawnSoundAtLocation, FName, FVector);
 DECLARE_DELEGATE_TwoParams(FSpawnNiagaraAtLocation, FName, FVector);
 
-// ·Î±× Ä«Å×°í¸® ¼±¾ğ
+// ë¡œê·¸ ì¹´í…Œê³ ë¦¬ ì„ ì–¸
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseWeapon, Log, All);
 
 
@@ -35,8 +35,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	/**
-	 * @brief ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ¿Í ¹«±â ¾×ÅÍÀÇ »óÈ£ÀÛ¿ë ±¸Çö
-	 * @param InstigatorCharacter »óÈ£ÀÛ¿ëÀ» ÇÑ ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ ÄÄÆ÷³ÍÆ®
+	 * @brief í”Œë ˆì´ì–´ ìºë¦­í„°ì™€ ë¬´ê¸° ì•¡í„°ì˜ ìƒí˜¸ì‘ìš© êµ¬í˜„
+	 * @param InstigatorCharacter ìƒí˜¸ì‘ìš©ì„ í•œ í”Œë ˆì´ì–´ ìºë¦­í„° ì»´í¬ë„ŒíŠ¸
 	 */
 	virtual void Interact_Implementation(APlayerCharacter* InstigatorCharacter) override;
 
@@ -44,45 +44,45 @@ protected:
 	virtual void BeginPlay() override;
 
 	/**
-	 * @brief ¹«±â ¸Ş½¬¸¦ ÂüÁ¶ÇÏ´Â Æ÷ÀÎÅÍ
-	 * @note »óÈ£ÀÛ¿ë ½Ã ÇØ´ç ¸Ş½¬¸¦ ÇÃ·¹ÀÌ¾î ¼ÒÄÏ¿¡ ¿¬°á
+	 * @brief ë¬´ê¸° ë©”ì‰¬ë¥¼ ì°¸ì¡°í•˜ëŠ” í¬ì¸í„°
+	 * @note ìƒí˜¸ì‘ìš© ì‹œ í•´ë‹¹ ë©”ì‰¬ë¥¼ í”Œë ˆì´ì–´ ì†Œì¼“ì— ì—°ê²°
 	 */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> WeaponStaticMesh;
 
 public:
 	/**
-	 * @brief UProjectilePoolSubsystem¿¡¼­ »ç¿ëÇÒ Ç® Å©±â¸¦ ¼³Á¤ÇÏ´Â º¯¼ö
+	 * @brief UProjectilePoolSubsystemì—ì„œ ì‚¬ìš©í•  í’€ í¬ê¸°ë¥¼ ì„¤ì •í•˜ëŠ” ë³€ìˆ˜
 	 */
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	int32 PoolSize;
 
-	/** * @brief ÇöÀç ¹«±âÀÇ Å¸ÀÔÀ» ÀúÀåÇÏ´Â ENUM º¯¼ö */
+	/** * @brief í˜„ì¬ ë¬´ê¸°ì˜ íƒ€ì…ì„ ì €ì¥í•˜ëŠ” ENUM ë³€ìˆ˜ */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	EWeaponType WeaponType;
 
 	/**
-	 * @brief ÇöÀç Å¬·¡½ºÀÎ ABaseWeapon °´Ã¼¸¦ ¹İÈ¯ÇÏ´Â Getter ÇÔ¼ö
-	 * @return ABaseWeapon °´Ã¼ÀÇ Æ÷ÀÎÅÍ
+	 * @brief í˜„ì¬ í´ë˜ìŠ¤ì¸ ABaseWeapon ê°ì²´ë¥¼ ë°˜í™˜í•˜ëŠ” Getter í•¨ìˆ˜
+	 * @return ABaseWeapon ê°ì²´ì˜ í¬ì¸í„°
 	 */
 	UFUNCTION(BlueprintPure)
 	ABaseWeapon* GetWeaponBase() { return this; }
 
 	/**
-	 * @brief ¹«±âÀÇ ¸Ş½¬ ÄÄÆ÷³ÍÆ®¸¦ ¹İÈ¯ÇÏ´Â Getter ÇÔ¼ö
-	 * @return USkeletalMeshComponent¸¦ °¡¸®Å°´Â Æ÷ÀÎÅÍ
+	 * @brief ë¬´ê¸°ì˜ ë©”ì‰¬ ì»´í¬ë„ŒíŠ¸ë¥¼ ë°˜í™˜í•˜ëŠ” Getter í•¨ìˆ˜
+	 * @return USkeletalMeshComponentë¥¼ ê°€ë¦¬í‚¤ëŠ” í¬ì¸í„°
 	 */
 	UFUNCTION(BlueprintPure)
 	UStaticMeshComponent* GetWeaponStaticMesh() const { return WeaponStaticMesh; }
 
 	/**
-	 * @brief Delegate ½Ã±×´ÏÃ³ ¼±¾ğÀ¸·Î, °ø°İ ½Ã »ç¿îµå¿Í ³ªÀÌ¾Æ°¡¶ó ½ºÆù È£Ãâ
+	 * @brief Delegate ì‹œê·¸ë‹ˆì²˜ ì„ ì–¸ìœ¼ë¡œ, ê³µê²© ì‹œ ì‚¬ìš´ë“œì™€ ë‚˜ì´ì•„ê°€ë¼ ìŠ¤í° í˜¸ì¶œ
 	 */
 	FSpawnSoundAtLocation SoundDelegate;
 	FSpawnNiagaraAtLocation NiagaraDelegate;
 
 	/**
-	 * @brief »ç¿îµå¿Í ³ªÀÌ¾Æ°¡¶ó ¾Ö¼ÂÀ» ÂüÁ¶ÇÏ´Â º¯¼ö
+	 * @brief ì‚¬ìš´ë“œì™€ ë‚˜ì´ì•„ê°€ë¼ ì• ì…‹ì„ ì°¸ì¡°í•˜ëŠ” ë³€ìˆ˜
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effect|Sound", meta = (AllowedTypes = "SoundDataAsset"))
 	FPrimaryAssetId AttackSoundId;
@@ -98,14 +98,14 @@ public:
 
 public:
 	/**
-	 * @brief °ø°İ ÇÔ¼ö·Î ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ°¡ °ø°İ ÀÔ·ÂÀ» ¹Ş¾ÒÀ» ¶§ È£ÃâµÇ´Â ÇÔ¼ö
-	 * @note ÀÚ½Ä Å¬·¡½º¿¡¼­ ÀÌ ÇÔ¼ö¸¦ ¿À¹ö¶óÀÌµåÇÏ¿© ½ÇÁ¦ °ø°İ ·ÎÁ÷À» ±¸ÇöÇÒ ¼ö ÀÖÀ½
+	 * @brief ê³µê²© í•¨ìˆ˜ë¡œ í”Œë ˆì´ì–´ ìºë¦­í„°ê°€ ê³µê²© ì…ë ¥ì„ ë°›ì•˜ì„ ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
+	 * @note ìì‹ í´ë˜ìŠ¤ì—ì„œ ì´ í•¨ìˆ˜ë¥¼ ì˜¤ë²„ë¼ì´ë“œí•˜ì—¬ ì‹¤ì œ ê³µê²© ë¡œì§ì„ êµ¬í˜„í•  ìˆ˜ ìˆìŒ
 	 */
 	UFUNCTION()
 	virtual void Attack() PURE_VIRTUAL(ABaseWeapon::Attack, );
 
 	/**
-	 * @brief UProjectilePoolSubsystemÀ¸·Î ¹ß»çÃ¼ Ç®À» ÃÊ±âÈ­ÇÏ´Â ÇÔ¼ö
+	 * @brief UProjectilePoolSubsystemìœ¼ë¡œ ë°œì‚¬ì²´ í’€ì„ ì´ˆê¸°í™”í•˜ëŠ” í•¨ìˆ˜
 	 */
 	virtual void InitializeProjectilePool() {};
 };

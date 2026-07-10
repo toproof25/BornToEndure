@@ -1,50 +1,55 @@
-/**
+ï»¿/**
  * @file PlayerHUDWidget.h
- * @brief ÇÃ·¹ÀÌ¾îÀÇ HUD¸¦ °ü¸®ÇÏ´Â À§Á¬ Çì´õ
- * @author toproof (kmnlmn123@gmail.com)
- * @date 2026-05-19
- * @details
- * - ÀÌ ÆÄÀÏÀº ÇÃ·¹ÀÌ¾îÀÇ Main HUD¸¦ °ü¸®¸¦ ¸ñÀûÀ¸·Î ±¸Çö
- * - °æÇèÄ¡ Bar°ú ·¹º§ ÅØ½ºÆ®¸¦ °ü¸®ÇÑ´Ù
+ * @brief í”Œë ˆì´ì–´ì˜ HUDë¥¼ ê´€ë¦¬í•˜ëŠ” ìœ„ì ¯ í—¤ë”
+ * 
+ * - ì´ íŒŒì¼ì€ í”Œë ˆì´ì–´ì˜ Main HUDë¥¼ ê´€ë¦¬ë¥¼ ëª©ì ìœ¼ë¡œ êµ¬í˜„
+ * - ê²½í—˜ì¹˜ Barê³¼ ë ˆë²¨ í…ìŠ¤íŠ¸ë¥¼ ê´€ë¦¬í•œë‹¤
  */
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Data/GameTypes.h"
+
 #include "PlayerHUDWidget.generated.h"
 
 class UCanvasPanel;
 class UTextBlock;
 class UProgressBar;
-
-
+class UPlayerHealthBarWidget;
+class APlayerCharacter;
+class UGameOverWidget;
+class UPlayerExpBarWidget;
+class UGameStatusWidget;
+class ULevelUpRewardWidget;
 
 UCLASS()
 class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
-protected:
 
-	virtual void NativeOnInitialized() override;
+public:
 
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* RootCanvasPanel;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* LevelText;
+	UPlayerHealthBarWidget* HealthBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UProgressBar* ExpBar;
+	UPlayerExpBarWidget* PlayerExpBarWidget;
 
-public:
+	UPROPERTY(meta = (BindWidget))
+	UGameOverWidget* GameOverWidget;
 
-	UFUNCTION()
-	void UpdateExpBar(float NewExp, float MaxExp);
+	UPROPERTY(meta = (BindWidget))
+	UGameStatusWidget* GameStatusWidget;
 
-	UFUNCTION()
-	void UpdateLevelText(int32 NewLevel);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
+	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;
 
+	void InitializeWidget(APlayerCharacter* PlayerCharacter);
 
+	void ShowLevelUpWidget(FLevelUpDataBundle LevelUpData);
 
 };
