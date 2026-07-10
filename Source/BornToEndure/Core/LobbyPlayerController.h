@@ -13,6 +13,7 @@
 
 class ULobbyWidget;
 class UInputMappingContext;
+class UUserWidget;
 
 UCLASS()
 class BORNTOENDURE_API ALobbyPlayerController : public APlayerController
@@ -22,25 +23,28 @@ class BORNTOENDURE_API ALobbyPlayerController : public APlayerController
 public:
 	ALobbyPlayerController();
 
+	void TravelToGameplayLevel();
+
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+private:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> UIMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true", AllowedClasses = "LobbyWidget"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true", AllowedClasses = "LobbyWidget"))
 	TSubclassOf<ULobbyWidget> LobbyWidgetClass;
 
-private:
+	UPROPERTY(EditDefaultsOnly, Category = "Lobby|Travel", meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UWorld> GameplayLevel;
 
 	UPROPERTY()
 	TObjectPtr<ULobbyWidget> LobbyWidgetInstance;
-
 
 	//void SetUpDelegates();
 	void SetUpLobbyInputMappingContext();
 	void SetUpLobbyInputMode();
 	void SetUpLobbyHUDWidget();
-
 
 };

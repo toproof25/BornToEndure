@@ -1,6 +1,7 @@
 ﻿#include "Core/LobbyPlayerController.h"
 #include "UI/LobbyWidget.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
 
 ALobbyPlayerController::ALobbyPlayerController()
 {
@@ -51,7 +52,25 @@ void ALobbyPlayerController::SetUpLobbyHUDWidget()
 		LobbyWidgetInstance = CreateWidget<ULobbyWidget>(this, LobbyWidgetClass);
 		if (LobbyWidgetInstance)
 		{
-			LobbyWidgetInstance.AddToViewport(0);
+			LobbyWidgetInstance->AddToViewport(0);
 		}
 	}
+}
+
+void ALobbyPlayerController::TravelToGameplayLevel()
+{
+	if (GameplayLevel.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameplayLevel is not set. Please set a valid level in the LobbyPlayerController."));
+		return;
+	}
+
+	UGameplayStatics::OpenLevelBySoftObjectPtr(
+		this,
+		GameplayLevel,
+		true,
+		FString()
+	);
+	UE_LOG(LogTemp, Log, TEXT("Traveling to Gameplay Level: %s"), *GameplayLevel.ToString());
+
 }
