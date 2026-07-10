@@ -29,9 +29,11 @@ public:
 	UTextBlock* StartButtonText;
 
 protected:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 private:
+
 	UFUNCTION()
 	void OnStartButtonClicked();
 
