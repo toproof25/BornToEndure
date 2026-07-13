@@ -40,7 +40,11 @@ void UGameOverWidget::NativeDestruct()
 
 void UGameOverWidget::OnExitButtonClicked()
 {
-	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true);
+	ADefaultPlayerController* PC = GetOwningPlayer<ADefaultPlayerController>();
+	if (PC)
+	{
+		PC->TravelToLobbyLevel();
+	}
 }
 
 void UGameOverWidget::OnGameOver()

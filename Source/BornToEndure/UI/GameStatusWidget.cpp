@@ -48,7 +48,3 @@ void UGameStatusWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UGameStatusWidget::ShowGameStatus()
-{
-
-}
