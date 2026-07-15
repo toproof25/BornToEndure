@@ -35,6 +35,8 @@ public:
 	);
 	void RestoreGameInputMode();
 
+	void TravelToLobbyLevel();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -53,7 +55,11 @@ private:
 	UPROPERTY()
 	TObjectPtr<UPlayerHUDWidget> PlayerHUDWidgetInstance;
 
+	UPROPERTY()
 	TObjectPtr<UPlayerExperienceComponent> PlayerExpComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level", meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UWorld> LobbyLevel;
 
 	void SetUpDelegates();
 	void SetUpPlayerInputMode();
@@ -63,6 +69,7 @@ private:
 
 	UFUNCTION()
 	void LevelUpHandler(int32 NewLevel);
+
 
 
 };
