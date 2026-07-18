@@ -8,6 +8,7 @@
 #include "UObject/PrimaryAssetId.h"
 #include "TimerManager.h"
 #include "AIController.h"
+#include "Data/CombatTypes.h"
 
 UPetCombatComponent::UPetCombatComponent()
 {

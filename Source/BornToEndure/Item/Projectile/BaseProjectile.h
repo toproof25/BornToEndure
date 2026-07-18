@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Interface/Poolable.h"
 #include "Delegates/Delegate.h"
+#include "Data/CombatTypes.h"
 #include "BaseProjectile.generated.h"
 
 class UProjectileMovementComponent;
@@ -99,6 +100,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile | Effects | Niagara", meta = (AllowedTypes = "NiagaraDataAsset"))
 	FPrimaryAssetId HitNiagaraId;
+
+	FPetAttackInfo CurrentAttackInfo;
 
 public:
 
