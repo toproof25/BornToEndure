@@ -32,6 +32,11 @@ struct FPetAttackInfo
 
 	// 속성
 	FGameplayTag ElementTag;
+	float FireDamageBonus = 0.f;
+	float IceDamageBonus = 0.f;
+	float WindDamageBonus = 0.f;
+	float PoisonDamageBonus = 0.f;
+	float BleedDamageBonus = 0.f;
 
 	// 발사체 구성
 	TSubclassOf<AActor> ProjectileClass;

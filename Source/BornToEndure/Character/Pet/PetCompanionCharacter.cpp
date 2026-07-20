@@ -9,6 +9,7 @@
 #include "Component/PetStatComponent.h"
 #include "Component/PetItemComponent.h"
 #include "Data/PetBaseDataAsset.h"
+#include "Data/PetProjectileItemDataAsset.h"
 
 APetCompanionCharacter::APetCompanionCharacter()
 {
@@ -67,10 +68,18 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 		PetStatComp->InitializeBaseStats(PetBaseData->BaseStats);
 	}
 
+	UPetProjectileItemDataAsset* DefaultProjectileClass = PetBaseData->DefaultProjectileClass.LoadSynchronous();
+
 	// CombatComponent에 기본 공격 클래스 설정 (BeginPlay에서는 로드하여 적용)
-	if (PetCombatComp && !PetBaseData->DefaultProjectileClass.IsNull())
+	if (PetCombatComp && DefaultProjectileClass)
 	{
-		PetCombatComp->DefaultProjectileClass = PetBaseData->DefaultProjectileClass.LoadSynchronous();
+		FProjectileModifierData ProjectileModifier = DefaultProjectileClass->ProjectileModifier;
+		PetCombatComp->DefaultProjectileClass = ProjectileModifier.OverrideProjectileClass.LoadSynchronous();
+	}
+
+	if (PetItemComp && DefaultProjectileClass)
+	{
+		PetItemComp->AddItem(DefaultProjectileClass);
 	}
 
 	// 이동 속도도 DataAsset 기반으로 설정

@@ -14,6 +14,7 @@
 #include "Interface/Poolable.h"
 #include "Data/GameTypes.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
+#include "Data/CombatTypes.h"
 
 #include "BaseEnemyCharacter.generated.h"
 
@@ -85,6 +86,9 @@ public:
 
 	UBehaviorTree* GetEnemyBehaviorTree() {	return BehaviorTreeAsset; }
 
+	void SetHitInfo(const FPetAttackInfo& HitInfo) { CurrentHitInfo = HitInfo; }
+
+
 
 protected:
     virtual void BeginPlay() override;
@@ -139,6 +143,8 @@ private:
 	bool bCanAttack = true;
 	float AttackCooldown = 3.0f; 
 	TWeakObjectPtr<APlayerCharacter> TargetPlayerCharacter = nullptr;
+
+	FPetAttackInfo CurrentHitInfo;
 
 	void DelegateBindng();
 	void DelegateUnbinding();

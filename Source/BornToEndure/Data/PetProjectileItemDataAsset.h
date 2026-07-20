@@ -62,7 +62,7 @@ struct BORNTOENDURE_API FProjectileModifierData
 	 * @brief 무기 아이템의 속성	
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Synergy")
-	FGameplayTagContainer ElementType;
+	FGameplayTag ElementType;
 };
 
 /**

@@ -167,6 +167,18 @@ float ABaseEnemyCharacter::TakeDamage(
 {
     const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+
+	// CurrentHitInfo에 대한 로그 출력
+	UE_LOG(
+		LogBaseEnemyCharacter,
+		Display,
+		TEXT("FinalDamage: %.1f - Critical: %s - ElementTag: %s - FireDamageBonus: %.1f"),
+		CurrentHitInfo.FinalDamage,
+		CurrentHitInfo.bIsCritical ? TEXT("True") : TEXT("False"), // <-- 여기에 있던 '*'를 제거해야 합니다.
+		*(CurrentHitInfo.ElementTag.ToString()), // <-- 여기는 FString이므로 '*'를 유지하는 것이 맞습니다.
+		CurrentHitInfo.FireDamageBonus
+	);
+
     // 이펙트 재생
     if (HitEnemySoundId.IsValid()) OnEnemyHitSound.ExecuteIfBound(HitEnemySoundId.PrimaryAssetName, GetActorLocation());
     if (HitEnemyNiagaraId.IsValid()) OnEnemyHitNiagara.ExecuteIfBound(HitEnemyNiagaraId.PrimaryAssetName, GetActorLocation());

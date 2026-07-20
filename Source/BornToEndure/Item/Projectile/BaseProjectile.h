@@ -91,6 +91,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
 	TObjectPtr<UAudioComponent> AudioComp;
 
+	FPetAttackInfo CurrentAttackInfo;
+
 private:
 	FOnProjectileHitSound OnProjectileHitSound;
 	FOnProjectileHitNiagara OnProjectileHitNiagara;
@@ -101,7 +103,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile | Effects | Niagara", meta = (AllowedTypes = "NiagaraDataAsset"))
 	FPrimaryAssetId HitNiagaraId;
 
-	FPetAttackInfo CurrentAttackInfo;
 
 public:
 

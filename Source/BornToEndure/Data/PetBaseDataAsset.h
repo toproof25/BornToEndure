@@ -17,6 +17,7 @@
 class USkeletalMesh;
 class UTexture2D;
 class UBehaviorTree;
+class UPetProjectileItemDataAsset;
 
 
 /**
@@ -44,8 +45,8 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
     TSoftObjectPtr<UBehaviorTree> BehaviorTree;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-    TSoftClassPtr<AActor> DefaultProjectileClass;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowClasses = "PetProjectileItemDataAsset"))
+    TSoftObjectPtr<UPetProjectileItemDataAsset> DefaultProjectileClass;
 
     virtual FPrimaryAssetId GetPrimaryAssetId() const override
     {
