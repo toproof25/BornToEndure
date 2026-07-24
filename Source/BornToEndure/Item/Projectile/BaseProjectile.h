@@ -76,6 +76,7 @@ public:
 	void SetHomingTarget(AActor* NewTarget);
 	void FireProjectile(FPetAttackInfo AtkInfo, const FVector& Direction);
 
+	const FPetAttackInfo& GetCurrentAttackInfo() const { return CurrentAttackInfo; }
 
 protected:
 

@@ -17,6 +17,7 @@
 #include "Components/BoxComponent.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
 #include "Character/Player/PlayerCharacter.h"
+#include "Item/Projectile/BaseProjectile.h"
 
 DEFINE_LOG_CATEGORY(LogBaseEnemyCharacter);
 
@@ -167,7 +168,25 @@ float ABaseEnemyCharacter::TakeDamage(
 {
     const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	// 발사체에 접근하여 데미지 정보를 가져옴
+	if (DamageCauser)
+	{
+		ABaseProjectile* Projectile = Cast<ABaseProjectile>(DamageCauser);
+		const FPetAttackInfo& PetAttackInfo = Projectile->GetCurrentAttackInfo();
 
+		UE_LOG(
+			LogBaseEnemyCharacter,
+			Display,
+			TEXT("FinalDamage: %.1f - Critical: %s - ElementTag: %s - FireDamageBonus: %.1f"),
+			PetAttackInfo.FinalDamage,
+			PetAttackInfo.bIsCritical ? TEXT("True") : TEXT("False"), // <-- 여기에 있던 '*'를 제거해야 합니다.
+			*(PetAttackInfo.ElementTag.ToString()), // <-- 여기는 FString이므로 '*'를 유지하는 것이 맞습니다.
+			PetAttackInfo.FireDamageBonus
+		);
+	}
+
+
+	/*
 	// CurrentHitInfo에 대한 로그 출력
 	UE_LOG(
 		LogBaseEnemyCharacter,
@@ -178,6 +197,7 @@ float ABaseEnemyCharacter::TakeDamage(
 		*(CurrentHitInfo.ElementTag.ToString()), // <-- 여기는 FString이므로 '*'를 유지하는 것이 맞습니다.
 		CurrentHitInfo.FireDamageBonus
 	);
+	*/
 
     // 이펙트 재생
     if (HitEnemySoundId.IsValid()) OnEnemyHitSound.ExecuteIfBound(HitEnemySoundId.PrimaryAssetName, GetActorLocation());
