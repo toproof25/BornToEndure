@@ -10,14 +10,11 @@
 #include "Data/GameTypes.h"
 #include "Character/Pet/PetCompanionCharacter.h"
 #include "Character/Player/PlayerCharacter.h"
-#include "Kismet/GameplayStatics.h"	
-#include "GameFramework/DamageType.h"
 #include "Components/CapsuleComponent.h"
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
-#include "Character/Player/PlayerCharacter.h"
-#include "Item/Projectile/BaseProjectile.h"
+#include "Component/ElementCombatComponent.h"
 
 DEFINE_LOG_CATEGORY(LogBaseEnemyCharacter);
 
@@ -31,7 +28,9 @@ ABaseEnemyCharacter::ABaseEnemyCharacter()
     // 이동 속도 초기화
     GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 
-	RootComponent = GetCapsuleComponent();
+	SetRootComponent(GetCapsuleComponent());
+
+	ElementCombatComp = CreateDefaultSubobject<UElementCombatComponent>(TEXT("ElementCombatComp"));
 
 	AttackRangeCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackRangeCollision"));
 	AttackRangeCollision->SetupAttachment(RootComponent);
@@ -48,6 +47,9 @@ void ABaseEnemyCharacter::InitializeEnemy(const FEnemyDataRow& EnemyData)
 
     EnemyRewardPayload.ExpReward = EnemyData.RewardExp;
     EnemyRewardPayload.GoldReward = EnemyData.RewardGold;
+
+	ElementCombatComp->InitializeElementResistance(EnemyData.ElementResistances);
+
 
     UE_LOG(LogBaseEnemyCharacter, Display, TEXT("ABaseEnemyCharacter::InitializeEnemy : %s | ExpReward: %.1f, GoldReward: %d"),
         *GetName(), EnemyRewardPayload.ExpReward, EnemyRewardPayload.GoldReward);
@@ -168,61 +170,45 @@ float ABaseEnemyCharacter::TakeDamage(
 {
     const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	// 발사체에 접근하여 데미지 정보를 가져옴
-	if (DamageCauser)
+	if (!IsValid(DamageCauser))
 	{
-		ABaseProjectile* Projectile = Cast<ABaseProjectile>(DamageCauser);
-		const FPetAttackInfo& PetAttackInfo = Projectile->GetCurrentAttackInfo();
-
-		UE_LOG(
-			LogBaseEnemyCharacter,
-			Display,
-			TEXT("FinalDamage: %.1f - Critical: %s - ElementTag: %s - FireDamageBonus: %.1f"),
-			PetAttackInfo.FinalDamage,
-			PetAttackInfo.bIsCritical ? TEXT("True") : TEXT("False"), // <-- 여기에 있던 '*'를 제거해야 합니다.
-			*(PetAttackInfo.ElementTag.ToString()), // <-- 여기는 FString이므로 '*'를 유지하는 것이 맞습니다.
-			PetAttackInfo.FireDamageBonus
-		);
+		UE_LOG(LogBaseEnemyCharacter, Warning, TEXT("DamageCauser is not valid."));
+		return ActualDamage;
 	}
 
+	if (!IsValid(EventInstigator))
+	{
+		UE_LOG(LogBaseEnemyCharacter, Warning, TEXT("EventInstigator is not valid."));
+		return ActualDamage;
+	}
 
-	/*
-	// CurrentHitInfo에 대한 로그 출력
-	UE_LOG(
-		LogBaseEnemyCharacter,
-		Display,
-		TEXT("FinalDamage: %.1f - Critical: %s - ElementTag: %s - FireDamageBonus: %.1f"),
-		CurrentHitInfo.FinalDamage,
-		CurrentHitInfo.bIsCritical ? TEXT("True") : TEXT("False"), // <-- 여기에 있던 '*'를 제거해야 합니다.
-		*(CurrentHitInfo.ElementTag.ToString()), // <-- 여기는 FString이므로 '*'를 유지하는 것이 맞습니다.
-		CurrentHitInfo.FireDamageBonus
-	);
-	*/
+	// 발사체에 접근하여 데미지 정보를 가져옴
+	ABaseProjectile* Projectile = Cast<ABaseProjectile>(DamageCauser);
+	if (!Projectile) return ActualDamage;
+
+	float FinalDamage = ResolveDamage(ActualDamage, Projectile->GetCurrentAttackInfo());
 
     // 이펙트 재생
     if (HitEnemySoundId.IsValid()) OnEnemyHitSound.ExecuteIfBound(HitEnemySoundId.PrimaryAssetName, GetActorLocation());
     if (HitEnemyNiagaraId.IsValid()) OnEnemyHitNiagara.ExecuteIfBound(HitEnemyNiagaraId.PrimaryAssetName, GetActorLocation());
 
     // 데미지 적용
-    CurrentHealth -= ActualDamage;
-    UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[%s] TakeDamage: %.1f → HP: %.1f / %.1f"),
-        *GetName(), ActualDamage, CurrentHealth, MaxHealth);
-    
-    // 데미지 정보 기록
-    if (EventInstigator)
-    {
-        APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(EventInstigator->GetPawn());
-        EnemyRewardPayload.RegisterDamage(Pet ? Pet->GetPetName() : NAME_None, ActualDamage); // 킬에 기여한 펫이 있을 경우 데미지 정보 기록
+    CurrentHealth -= FinalDamage;
 
-        // 사망하는 경우
-        if (CurrentHealth <= 0.f)
-        {
-            EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
-            HandleDeath();
-        }
-    }
+	// 데미지 정보 기록
+	APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(EventInstigator->GetPawn());
+	if (!Pet) return FinalDamage;
+	EnemyRewardPayload.RegisterDamage(Pet ? Pet->GetPetName() : NAME_None, FinalDamage); // 킬에 기여한 펫이 있을 경우 데미지 정보 기록
 
-    return ActualDamage;
+	// 사망하는 경우
+	if (CurrentHealth <= 0.f)
+	{
+		EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
+		HandleDeath();
+	}
+
+
+	return FinalDamage;
 }
 
 void ABaseEnemyCharacter::OnAttackBeginOverlap(
@@ -254,6 +240,26 @@ void ABaseEnemyCharacter::OnAttackEndOverlap(
     {
 		TargetPlayerCharacter = nullptr;
     }
+}
+
+float ABaseEnemyCharacter::ResolveDamage(float DamageAmount, const FPetAttackInfo& HitInfo)
+{
+	// 속성 데미지 보정
+	FGameplayTag ElementTag = HitInfo.ElementTag;
+	float FinalDamage = ElementCombatComp->CalculateDamageWithElementResistance(DamageAmount, ElementTag);
+	
+	//UE_LOG(
+	//	LogBaseEnemyCharacter,
+	//	Display,
+	//	TEXT("FinalDamage: %.1f - Critical: %s - ElementTag: %s - FireDamageBonus: %.1f"),
+	//	HitInfo.FinalDamage,
+	//	HitInfo.bIsCritical ? TEXT("True") : TEXT("False"), // <-- 여기에 있던 '*'를 제거해야 합니다.
+	//	*(HitInfo.ElementTag.ToString()), // <-- 여기는 FString이므로 '*'를 유지하는 것이 맞습니다.
+	//	HitInfo.FireDamageBonus
+	//);
+
+
+	return FinalDamage;
 }
 
 

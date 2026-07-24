@@ -11,7 +11,22 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "Engine/DataAsset.h"
+#include "GameplayTagContainer.h"
+
 #include "EnemyDataRow.generated.h"
+
+
+USTRUCT()
+struct FEnamyElementResistanceEntry
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Enemy Element Resistance")
+	FGameplayTag ElementTag;
+
+	UPROPERTY(EditAnywhere, Category = "Enemy Element Resistance")
+	float ResistanceValue;
+};
 
 
 USTRUCT(BlueprintType)
@@ -62,5 +77,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
 	int32 RewardGold;
 
+	UPROPERTY(EditAnywhere, Category = "Enemy Data")
+	TArray<FEnamyElementResistanceEntry> ElementResistances;
 };
 

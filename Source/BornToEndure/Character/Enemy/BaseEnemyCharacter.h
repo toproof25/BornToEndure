@@ -23,6 +23,7 @@ class APlayerCharacter;
 class UBehaviorTree;
 class ABaseEnemyCharacter;
 class UPrimitiveComponent;
+class UElementCombatComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseEnemyCharacter, Log, All);
 
@@ -128,6 +129,11 @@ protected:
     FPrimaryAssetId HitEnemyNiagaraId;
 
 private:
+
+	float ResolveDamage(float DamageAmount, const FPetAttackInfo& HitInfo);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UElementCombatComponent> ElementCombatComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBoxComponent> AttackRangeCollision;
