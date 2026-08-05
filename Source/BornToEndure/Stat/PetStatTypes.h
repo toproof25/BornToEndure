@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file PetStatTypes.h
  * @brief Pet의 모든 Stat 관련된 타입을 정의하는 헤더 파일
  * @author toproof (kmnlmn123@gmail.com)
@@ -33,6 +33,9 @@ enum class EPetStatType : uint8
     // 이동 / 공격 속도
     AttackSpeed     UMETA(DisplayName = "공격 속도"),     // 초당 공격 횟수
     MoveSpeed       UMETA(DisplayName = "이동 속도"),
+	DetectionRange  UMETA(DisplayName = "적 탐지 범위"),
+	AttackRange		UMETA(DisplayName = "공격 범위"),
+	Luck			UMETA(DisplayName = "행운"),
 
     // 속성 데미지 보너스 (0.0 = 보너스 없음, 0.5 = 50% 추가)
     FireDamageBonus     UMETA(DisplayName = "화염 데미지 보너스"),

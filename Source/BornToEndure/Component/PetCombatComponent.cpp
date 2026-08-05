@@ -8,6 +8,7 @@
 #include "UObject/PrimaryAssetId.h"
 #include "TimerManager.h"
 #include "AIController.h"
+#include "Data/CombatTypes.h"
 
 UPetCombatComponent::UPetCombatComponent()
 {
@@ -197,6 +198,13 @@ FPetAttackInfo UPetCombatComponent::BuildAttackInfo() const
         const float CritRate = StatProvider->GetFinalStat(EPetStatType::CriticalRate);
         const float CritDamage = StatProvider->GetFinalStat(EPetStatType::CriticalDamage);
 
+		// 현재 자기 속성에 맞는 보너스 스탯 가져오기
+		const float FireDamageBonus = StatProvider->GetFinalStat(EPetStatType::FireDamageBonus);
+		const float IceDamageBonus = StatProvider->GetFinalStat(EPetStatType::IceDamageBonus);
+		const float WindDamageBonus = StatProvider->GetFinalStat(EPetStatType::WindDamageBonus);
+		const float PoisonDamageBonus = StatProvider->GetFinalStat(EPetStatType::PoisonDamageBonus);
+		const float BleedDamageBonus = StatProvider->GetFinalStat(EPetStatType::BleedDamageBonus);
+
         // 크리티컬 판정 연산
         Info.bIsCritical = FMath::FRand() < CritRate;
         Info.CriticalMultiplier = Info.bIsCritical ? CritDamage : 1.f;
@@ -207,7 +215,8 @@ FPetAttackInfo UPetCombatComponent::BuildAttackInfo() const
     if (ItemProvider.GetObject())
     {
         const FProjectileModifierData Modifier = ItemProvider->GetAggregatedProjectileModifier();
-        Info.ElementTag = ItemProvider->GetDominantElementTag();
+        //Info.ElementTag = ItemProvider->GetDominantElementTag();
+		Info.ElementTag = Modifier.ElementType;
 
         // 아이템이 Override를 지정했으면 사용, 없으면 기본값
         if (!Modifier.OverrideProjectileClass.IsNull())
@@ -274,15 +283,6 @@ void UPetCombatComponent::SpawnProjectiles(
         // 발사체 발사
 		Projectile->SetHomingTarget(CurrentTarget.Get());
         Projectile->FireProjectile(AttackInfo, Dir);
-
-        //AActor* Projectile = World->SpawnActor<AActor>(AttackInfo.ProjectileClass, Origin, Dir.Rotation(), SpawnParams);
-
-        // 발사체 인터페이스를 통해 공격 정보 전달
-        // (IPetProjectileInterface는 추후 구현)
-        // if (IPetProjectileInterface* ProjInterface = Cast<IPetProjectileInterface>(Projectile))
-        // {
-        //     ProjInterface->InitializeWithAttackInfo(AttackInfo);
-        // }
     }
 }
 

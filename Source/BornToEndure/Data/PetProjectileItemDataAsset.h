@@ -57,6 +57,12 @@ struct BORNTOENDURE_API FProjectileModifierData
      */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     EProjectilePattern Pattern = EProjectilePattern::Single;
+
+	/**
+	 * @brief 무기 아이템의 속성	
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Synergy")
+	FGameplayTag ElementType;
 };
 
 /**

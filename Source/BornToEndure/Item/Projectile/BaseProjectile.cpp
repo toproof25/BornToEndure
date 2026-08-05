@@ -10,6 +10,7 @@
 #include "Delegates/Delegate.h"
 #include "UObject/PrimaryAssetId.h"
 #include "Component/PetCombatComponent.h"
+#include "Data/CombatTypes.h"
 
 DEFINE_LOG_CATEGORY(LogBaseProjectile);
 
@@ -257,6 +258,11 @@ void ABaseProjectile::SetHomingTarget(AActor* NewTarget)
 
 void ABaseProjectile::FireProjectile(FPetAttackInfo AtkInfo, const FVector& Direction)
 {
+	CurrentAttackInfo = AtkInfo;
+
+	// 게임플레이 태그와 데미지를 보여준다
+	UE_LOG(LogBaseProjectile, Display, TEXT("FireProjectile called. ElementTag: %s, FinalDamage: %f"), *AtkInfo.ElementTag.ToString(), AtkInfo.FinalDamage);
+
 	if (ProjectileMovementComp)
 	{
 		ProjectileDamage = AtkInfo.FinalDamage;
