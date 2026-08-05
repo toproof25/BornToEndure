@@ -14,6 +14,7 @@
 #include "Interface/Poolable.h"
 #include "Data/GameTypes.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
+#include "Data/CombatTypes.h"
 
 #include "BaseEnemyCharacter.generated.h"
 
@@ -22,6 +23,7 @@ class APlayerCharacter;
 class UBehaviorTree;
 class ABaseEnemyCharacter;
 class UPrimitiveComponent;
+class UElementCombatComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseEnemyCharacter, Log, All);
 
@@ -85,6 +87,9 @@ public:
 
 	UBehaviorTree* GetEnemyBehaviorTree() {	return BehaviorTreeAsset; }
 
+	void SetHitInfo(const FPetAttackInfo& HitInfo) { CurrentHitInfo = HitInfo; }
+
+
 
 protected:
     virtual void BeginPlay() override;
@@ -125,6 +130,11 @@ protected:
 
 private:
 
+	float ResolveDamage(float DamageAmount, const FPetAttackInfo& HitInfo);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UElementCombatComponent> ElementCombatComp;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy|Combat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBoxComponent> AttackRangeCollision;
 
@@ -139,6 +149,8 @@ private:
 	bool bCanAttack = true;
 	float AttackCooldown = 3.0f; 
 	TWeakObjectPtr<APlayerCharacter> TargetPlayerCharacter = nullptr;
+
+	FPetAttackInfo CurrentHitInfo;
 
 	void DelegateBindng();
 	void DelegateUnbinding();

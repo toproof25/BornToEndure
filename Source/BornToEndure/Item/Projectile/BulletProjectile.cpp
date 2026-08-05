@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 
-#include "Character/Enemy/BaseEnemy.h"
+#include "Character/Enemy/BaseEnemyCharacter.h"
 
 DEFINE_LOG_CATEGORY(LogBulletProjectile);
 
@@ -34,13 +34,14 @@ void ABulletProjectile::OnProjectileHit(
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
 
-		if (OtherActor->IsA(ABaseEnemy::StaticClass()))
+		// 디버그 체크용도들
+		if (OtherActor->IsA(ABaseEnemyCharacter::StaticClass()))
 		{
-			UE_LOG(LogBaseProjectile, Display, TEXT("Target is ABaseEnemy or child."));
+			UE_LOG(LogBaseProjectile, Display, TEXT("Target is ABaseEnemyCharacter or child."));
 		}
 		else
 		{
-			UE_LOG(LogBaseProjectile, Warning, TEXT("Target is NOT ABaseEnemy: %s"), *OtherActor->GetName());
+			UE_LOG(LogBaseProjectile, Warning, TEXT("Target is NOT ABaseEnemyCharacter: %s"), *OtherActor->GetName());
 		}
 
 		const AController* InstigatorCtrl = GetInstigatorController();
@@ -53,6 +54,12 @@ void ABulletProjectile::OnProjectileHit(
 
 		// OtherActor에 ProjectileDamage만큼 피해를 입히는 ApplyDamage 함수 호출
 		UE_LOG(LogBaseProjectile, Display, TEXT("Bullet hit: %s"), *OtherActor->GetName());
+		ABaseEnemyCharacter* HitEnemy = Cast<ABaseEnemyCharacter>(OtherActor);
+		if (HitEnemy)
+		{
+			HitEnemy->SetHitInfo(CurrentAttackInfo);
+		}
+
 		UGameplayStatics::ApplyDamage(
 			OtherActor,
 			ProjectileDamage,

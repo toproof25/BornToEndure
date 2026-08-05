@@ -75,8 +75,7 @@ void UPetItemComponent::RemoveItem(const FGuid& InstanceId)
     OnItemRemoved.Broadcast(InstanceId);
 }
 
-void UPetItemComponent::AddProjectileModifier(const FProjectileModifierData& Modifier,
-    const FGuid& InstanceId)
+void UPetItemComponent::AddProjectileModifier(const FProjectileModifierData& Modifier, const FGuid& InstanceId)
 {
     ProjectileModifiers.Add(InstanceId, Modifier);
     
@@ -129,6 +128,7 @@ FProjectileModifierData UPetItemComponent::GetAggregatedProjectileModifier() con
         Result.ProjectileCountAdd += Modifier.ProjectileCountAdd;
         Result.SizeMultiplier *= Modifier.SizeMultiplier;
         Result.SpeedMultiplier *= Modifier.SpeedMultiplier;
+		Result.ElementType = Modifier.ElementType;
 
         // 패턴: 가장 마지막(우선순위 높은) 것이 적용
         if (Modifier.Pattern != EProjectilePattern::Single)
@@ -142,6 +142,7 @@ FProjectileModifierData UPetItemComponent::GetAggregatedProjectileModifier() con
 
 FGameplayTag UPetItemComponent::GetDominantElementTag() const
 {
+
     // 현재 소유한 모든 아이템의 시너지 태그를 집계
     TMap<FGameplayTag, int32> TagCounts;
     for (const FPetItemInstance& Instance : OwnedItems)

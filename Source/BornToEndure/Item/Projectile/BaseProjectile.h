@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Interface/Poolable.h"
 #include "Delegates/Delegate.h"
+#include "Data/CombatTypes.h"
 #include "BaseProjectile.generated.h"
 
 class UProjectileMovementComponent;
@@ -75,6 +76,7 @@ public:
 	void SetHomingTarget(AActor* NewTarget);
 	void FireProjectile(FPetAttackInfo AtkInfo, const FVector& Direction);
 
+	const FPetAttackInfo& GetCurrentAttackInfo() const { return CurrentAttackInfo; }
 
 protected:
 
@@ -90,6 +92,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")
 	TObjectPtr<UAudioComponent> AudioComp;
 
+	FPetAttackInfo CurrentAttackInfo;
+
 private:
 	FOnProjectileHitSound OnProjectileHitSound;
 	FOnProjectileHitNiagara OnProjectileHitNiagara;
@@ -99,6 +103,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile | Effects | Niagara", meta = (AllowedTypes = "NiagaraDataAsset"))
 	FPrimaryAssetId HitNiagaraId;
+
 
 public:
 
