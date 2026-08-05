@@ -15,6 +15,7 @@
 #include "Components/BoxComponent.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
 #include "Component/ElementCombatComponent.h"
+#include "Item/Projectile/BaseProjectile.h"
 
 DEFINE_LOG_CATEGORY(LogBaseEnemyCharacter);
 
