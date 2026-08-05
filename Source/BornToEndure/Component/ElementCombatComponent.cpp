@@ -7,10 +7,10 @@ UElementCombatComponent::UElementCombatComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UElementCombatComponent::InitializeElementResistance(const TArray<FEnamyElementResistanceEntry>& ElementResistances)
+void UElementCombatComponent::InitializeElementResistance(const TArray<FEnemyElementResistanceEntry>& ElementResistances)
 {
 	// 각 배열을 순회하면서 TMap에 추가함
-	for (const FEnamyElementResistanceEntry& ElementEntry : ElementResistances)
+	for (const FEnemyElementResistanceEntry& ElementEntry : ElementResistances)
 	{
 		ElementResistanceMap.FindOrAdd(ElementEntry.ElementTag) = ElementEntry.ResistanceValue;
 	}

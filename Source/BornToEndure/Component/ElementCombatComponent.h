@@ -26,7 +26,7 @@ public:
 	 * @brief DataTable에서 가져온 ElementResistance 정보를 기반으로 ElementResistanceMap 초기화하는 함수
 	 * @param ElementResistances DataTable에 정의된 데이터
 	 */
-	void InitializeElementResistance(const TArray<FEnamyElementResistanceEntry>& ElementResistances);
+	void InitializeElementResistance(const TArray<FEnemyElementResistanceEntry>& ElementResistances);
 
 	/**
 	 * @brief 적이 가진 속성 저항력을 기본 데미지에 적용하여 반환하는 함수

@@ -17,7 +17,7 @@
 
 
 USTRUCT()
-struct FEnamyElementResistanceEntry
+struct FEnemyElementResistanceEntry
 {
 	GENERATED_BODY()
 
@@ -78,6 +78,6 @@ public:
 	int32 RewardGold;
 
 	UPROPERTY(EditAnywhere, Category = "Enemy Data")
-	TArray<FEnamyElementResistanceEntry> ElementResistances;
+	TArray<FEnemyElementResistanceEntry> ElementResistances;
 };
 
