@@ -3,7 +3,7 @@
 * @date 2026-05-19
 * @modified 2026-05-23
 * @author toproof (kmnlmn123@gmail.com)
-* @brief 모든 아이템을 테이블로 관리하기 위핸 아이템 데이터 테이블 행 구고체 (데이터 타입)을 정의하는 파일
+* @brief 모든 아이템을 테이블로 관리하기 위한 아이템 데이터 테이블 행 구조체 (데이터 타입)을 정의하는 파일
 */
 
 #pragma once
@@ -15,12 +15,12 @@
 class UPetItemDataAsset;
 class UTexture2D;
 
-UENUM(BlueprintType)
-enum class EItemType : uint8
-{
-	Stat		UMETA(DisplayName = "Stat Item"),
-	Projectile  UMETA(DisplayName = "Projectile Item")
-};
+//UENUM(BlueprintType)
+//enum class EItemType : uint8
+//{
+//	Stat		UMETA(DisplayName = "Stat Item"),
+//	Projectile  UMETA(DisplayName = "Projectile Item")
+//};
 
 USTRUCT(BlueprintType)
 struct FItemText
@@ -51,8 +51,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	FItemText ItemText;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
-	EItemType ItemType;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
+	//EItemType ItemType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	TSoftObjectPtr<UTexture2D> ItemIcon;
