@@ -12,6 +12,8 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Data/DataTableRow/ItemDataRow.h"
+#include "Data/DataTableRow/StatItemDataRow.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
 
 #include "ItemPoolSubsystem.generated.h"
 
@@ -26,8 +28,12 @@ class BORNTOENDURE_API UItemPoolSubsystem : public UGameInstanceSubsystem
 	
 public:
 	TArray<FItemDataRow*> ItemDataList;
+	TArray<FItemDataRow*> StatItemDataList;
+	TArray<FItemDataRow*> WeaponItemDataList;
 
-	void InitializeItemPoolSubsystem(UDataTable* ItemDataTable);
+	void InitializeItemPoolSubsystem(UDataTable* ItemDataTable, int32 DataType);
 
 	TArray<TObjectPtr<UObject>> GetRandomItemObjects(int32 Count);
+
+	TSoftObjectPtr<UPetItemDataAsset> GetItemDataAssetByID(const FName& ItemID);
 };

@@ -24,4 +24,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TObjectPtr<UDataTable> ItemDataTableClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TObjectPtr<UDataTable> StatItemDataTableClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TObjectPtr<UDataTable> WeaponItemDataTableClass;
 };
