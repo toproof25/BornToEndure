@@ -10,6 +10,7 @@
 #include "Component/PetItemComponent.h"
 #include "Data/PetBaseDataAsset.h"
 #include "Data/PetProjectileItemDataAsset.h"
+#include "Subsystem/ItemPoolSubsystem.h"
 
 APetCompanionCharacter::APetCompanionCharacter()
 {
@@ -62,24 +63,30 @@ void APetCompanionCharacter::BeginPlay()
 
 void APetCompanionCharacter::InitializeFromDataAsset()
 {
+	// Item Subsystem에서 StarWeaponID를 가져온 후 인스턴스화 하여 시작 아이템으로 적용
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UItemPoolSubsystem* ItemPoolSubsystem = World ? World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+	if (!ItemPoolSubsystem) return;
+	TSoftObjectPtr<UPetItemDataAsset> StartWeaponDataAsset = ItemPoolSubsystem->GetItemDataAssetByID(PetBaseData->StartWeaponID);
+	UPetProjectileItemDataAsset* StartWeaponInstance = Cast<UPetProjectileItemDataAsset>(StartWeaponDataAsset.LoadSynchronous());
+
 	// StatComponent 초기화
 	if (PetStatComp)
 	{
 		PetStatComp->InitializeBaseStats(PetBaseData->BaseStats);
 	}
 
-	UPetProjectileItemDataAsset* DefaultProjectileClass = PetBaseData->DefaultProjectileClass.LoadSynchronous();
-
 	// CombatComponent에 기본 공격 클래스 설정 (BeginPlay에서는 로드하여 적용)
-	if (PetCombatComp && DefaultProjectileClass)
+	if (PetCombatComp && StartWeaponInstance)
 	{
-		FProjectileModifierData ProjectileModifier = DefaultProjectileClass->ProjectileModifier;
+		FProjectileModifierData ProjectileModifier = StartWeaponInstance->ProjectileModifier;
 		PetCombatComp->DefaultProjectileClass = ProjectileModifier.OverrideProjectileClass.LoadSynchronous();
 	}
 
-	if (PetItemComp && DefaultProjectileClass)
+	if (PetItemComp && StartWeaponInstance)
 	{
-		PetItemComp->AddItem(DefaultProjectileClass);
+		PetItemComp->AddItem(StartWeaponInstance);
 	}
 
 	// 이동 속도도 DataAsset 기반으로 설정
