@@ -7,12 +7,14 @@
 #include "Data/PetStatItemDataAsset.h"
 #include "Data/PetProjectileItemDataAsset.h"
 
-#if !UE_BUILD_SHIPPING   
-#include "ImGuiDelegates.h" 
+#if !UE_BUILD_SHIPPING
+#include "ImGuiDelegates.h"
 #endif
 
 #include "Engine/DataTable.h"
 #include "Data/DataTableRow/ItemDataRow.h"
+#include "Data/DataTableRow/StatItemDataRow.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
 #include "PetItemDebugActor.generated.h"
 
 class UPetManagerComponent;
@@ -40,10 +42,14 @@ private:
 #endif
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
-	TObjectPtr<UDataTable> ItemDataTable; // 아이템 데이터 테이블 (FItemDataRow 구조체 사용)
+	TObjectPtr<UDataTable> StatItemDataTable;
 
-	TArray<FItemDataRow*> AllStatItemDataRows; // 데이터 테이블에서 로드된 모든 아이템 데이터 행
-	TArray<FItemDataRow*> AllProjectileItemDataRows; // 데이터 테이블에서 로드된 모든 아이템 데이터 행
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	TObjectPtr<UDataTable> WeaponItemDataTable;
+
+	// 각 DataTable은 이미 타입이 분리되어 있으므로 별도의 ItemType 구분이 필요하지 않음
+	TArray<FStatItemDataRow*> AllStatItemDataRows;
+	TArray<FWeaponItemDataRow*> AllWeaponItemDataRows;
 
 	// --- 윈도우 상태 관리 ---
 	bool bIsWindowOpen = true;
@@ -54,7 +60,7 @@ private:
 	TArray<UPetStatItemDataAsset*> LoadedStatItems;
 
 	UPROPERTY()
-	TArray<UPetProjectileItemDataAsset*> LoadedProjectileItems;
+	TArray<UPetProjectileItemDataAsset*> LoadedWeaponItems;
 
 	// --- 펫 선택 관리 ---
 	TWeakObjectPtr<APetCompanionCharacter> SelectedPet;
@@ -66,13 +72,13 @@ private:
 	// ImGui 그리기 헬퍼
 	void DrawPetSelectionCombo(UPetManagerComponent* PetManager);
 	void DrawStatItemsTab();
-	void DrawProjectileItemsTab();
+	void DrawWeaponItemsTab();
 
 	// Enum 문자열 파싱 헬퍼
 	template<typename TEnum>
 	FString GetEnumDisplayName(const FString& EnumPath, TEnum EnumValue);
 
-	// [추가] 로드된 텍스처가 가비지 컬렉터(GC)에 의해 삭제되는 것을 방지합니다.
+	// 로드된 텍스처가 가비지 컬렉터(GC)에 의해 삭제되는 것을 방지
 	UPROPERTY()
 	TArray<UTexture2D*> CachedIcons;
 };
@@ -82,21 +88,25 @@ inline FString APetItemDebugActor::GetEnumDisplayName(const FString& EnumPath, T
 {
 	if (const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, *EnumPath, true))
 	{
-		// 1. 메타데이터(DisplayName)가 있는지 먼저 확인합니다.
+		// 1. 메타데이터(DisplayName)가 있는지 먼저 확인
 		FString DisplayName = EnumPtr->GetMetaData(TEXT("DisplayName"), static_cast<int32>(EnumValue));
 		if (!DisplayName.IsEmpty())
 		{
-			return DisplayName; // "공격력", "고정값 추가" 반환
+			return DisplayName;
 		}
 
-		// 2. DisplayName이 없다면 일반 Enum 이름을 파싱해서 반환합니다.
+		// 2. DisplayName이 없다면 일반 Enum 이름을 파싱해서 반환
 		FString EnumString = EnumPtr->GetNameStringByValue(static_cast<int64>(EnumValue));
-		FString Left, Right;
+		FString Left;
+		FString Right;
+
 		if (EnumString.Split(TEXT("::"), &Left, &Right))
 		{
 			return Right;
 		}
+
 		return EnumString;
 	}
+
 	return TEXT("Unknown");
 }
