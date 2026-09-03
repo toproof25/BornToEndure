@@ -45,8 +45,11 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
     TSoftObjectPtr<UBehaviorTree> BehaviorTree;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowClasses = "PetProjectileItemDataAsset"))
-    TSoftObjectPtr<UPetProjectileItemDataAsset> DefaultProjectileClass;
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowClasses = "PetProjectileItemDataAsset"))
+    //TSoftObjectPtr<UPetProjectileItemDataAsset> DefaultProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	FName StartWeaponID;
 
     virtual FPrimaryAssetId GetPrimaryAssetId() const override
     {
