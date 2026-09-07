@@ -174,29 +174,3 @@ APetCompanionCharacter* UPetManagerComponent::SelectPetForItem(
     // 예: 가장 아이템이 적은 Pet, 플레이어가 선택한 Pet 등
     return GetActivePet();
 }
-
-/*
-void UPetManagerComponent::OnItemDataLoaded(FPrimaryAssetId ItemAssetId)
-{
-    UAssetManager& AM = UAssetManager::Get();
-    UPetItemDataAsset* ItemData = Cast<UPetItemDataAsset>(AM.GetPrimaryAssetObject(ItemAssetId));
-
-    if (!ItemData)
-    {
-        UE_LOG(LogPetManager, Error,
-            TEXT("[PetManagerComponent] Failed to load item data: %s"), *ItemAssetId.ToString());
-        return;
-    }
-
-    APetCompanionCharacter* SelectedPet = SelectPetForItem(ItemData);
-    if (!SelectedPet)
-    {
-        UE_LOG(LogPetManager, Warning, TEXT("[PetManagerComponent] No valid pet to receive item."));
-        return;
-    }
-
-    GiveItemToPet(SelectedPet, ItemData);
-
-    UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Item '%s' given to pet '%s'"), *ItemData->ItemName.ToString(), *SelectedPet->GetName());
-}
-*/
