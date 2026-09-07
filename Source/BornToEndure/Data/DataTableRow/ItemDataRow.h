@@ -15,12 +15,22 @@
 class UPetItemDataAsset;
 class UTexture2D;
 
-//UENUM(BlueprintType)
-//enum class EItemType : uint8
-//{
-//	Stat		UMETA(DisplayName = "Stat Item"),
-//	Projectile  UMETA(DisplayName = "Projectile Item")
-//};
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	Stat UMETA(DisplayName = "스탯 아이템"),
+	Weapon UMETA(DisplayName = "무기 아이템")
+};
+
+USTRUCT()
+struct FItemDataHandle
+{
+	GENERATED_BODY()
+
+	EItemType ItemType;
+	FName ItemRowName;
+};
+
 
 USTRUCT(BlueprintType)
 struct FItemText
@@ -44,35 +54,15 @@ struct FItemDataRow : public FTableRowBase
 public:
 
 	// 아이템 ID, 이름, 설명, 아이콘, DataAsset 등..
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	FName ItemID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	FItemText ItemText;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
-	//EItemType ItemType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
+	EItemType ItemType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	TSoftObjectPtr<UTexture2D> ItemIcon;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data", meta = (AllowedClasses = "PetItemDataAsset"))
-	TSoftObjectPtr<UPetItemDataAsset> ItemDataAsset;
-	
-};
-
-/**
- * @brief ItemDataRow의 UObject 버전, DataTable에서 FItemDataRow 대신 UItemDataObject을 사용하기 위한 클래스
- * - 인스턴스화된 UObject로서 DataTable에서 사용할 수 있도록 FItemDataRow의 데이터를 포함
- */
-UCLASS(BlueprintType)
-class BORNTOENDURE_API UItemDataObject : public UObject
-{
-	GENERATED_BODY()
-
-public:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
-	FItemDataRow ItemData;
 };
