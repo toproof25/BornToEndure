@@ -45,7 +45,7 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 
 		if (firstPet)
 		{
-			OnSelectedPetWidget(NewPetEntry);
+			NewPetEntry->OnPetSelectButtonClicked();
 			firstPet = false;
 		}
 	}
@@ -72,7 +72,7 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 
 		if (firstItem)
 		{
-			OnSelectedItemWidget(NewItemEntry);
+			NewItemEntry->OnItemSelectButtonClicked();
 			firstItem = false;
 		}
 	}
