@@ -21,19 +21,25 @@ class UDataTable;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogItemPoolSubsystem, Log, All);
 
+
 UCLASS()
 class BORNTOENDURE_API UItemPoolSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	
 public:
+	UDataTable* StatDataTable;
+	UDataTable* WeaponDataTable;
+
 	TArray<FItemDataRow*> ItemDataList;
 	TArray<FItemDataRow*> StatItemDataList;
 	TArray<FItemDataRow*> WeaponItemDataList;
 
 	void InitializeItemPoolSubsystem(UDataTable* ItemDataTable, int32 DataType);
 
-	TArray<TObjectPtr<UObject>> GetRandomItemObjects(int32 Count);
+	TArray<FItemDataHandle> GetRandomItemData(int32 Count);
 
-	TSoftObjectPtr<UPetItemDataAsset> GetItemDataAssetByID(const FName& ItemID);
+	const FItemDataRow* GetItemDataRowByID(const EItemType ItemType, const FName& ItemID);
+	const FStatItemDataRow* GetStatItemDataRowByID(const FName& ItemID);
+	const FWeaponItemDataRow* GetWeaponItemDataRowByID(const FName& ItemID);
 };
