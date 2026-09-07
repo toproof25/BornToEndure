@@ -1,22 +1,32 @@
-﻿
-/*
 #include "Item/PetItemDebugActor.h"
 
-#include "Component/PetManagerComponent.h"
-#include "Character/Pet/PetCompanionCharacter.h"
-#include "Character/Player/PlayerCharacter.h"
-#include "Stat/PetStatTypes.h"
-#include "Engine/AssetManager.h"
-#include "Engine/World.h"
-#include "Engine/DataTable.h"
-#include "Data/DataTableRow/ItemDataRow.h"
-#include "Data/DataTableRow/StatItemDataRow.h"
-#include "Data/DataTableRow/WeaponItemDataRow.h"
-
 #if !UE_BUILD_SHIPPING
-#include "imgui.h"
+#include "Character/Pet/PetCompanionCharacter.h"
+#include "Component/PetItemComponent.h"
+#include "Component/PetManagerComponent.h"
+#include "Component/PetStatComponent.h"
+#include "Data/PetProjectileItemDataAsset.h"
+#include "Engine/DataTable.h"
+#include "Engine/GameInstance.h"
+#include "Engine/World.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
+#include "Subsystem/ItemPoolSubsystem.h"
 #include "ImGuiModule.h"
-#include "ImGuiTextureHandle.h"
+#include "imgui.h"
+
+namespace PetItemDebug
+{
+	UDataTable* GetTable(UItemPoolSubsystem* Pool, EItemType Type)
+	{
+		if (!IsValid(Pool)) return nullptr;
+		UDataTable* Table = Type == EItemType::Stat ? Pool->StatDataTable : Pool->WeaponDataTable;
+		const UScriptStruct* Expected = Type == EItemType::Stat
+			? FStatItemDataRow::StaticStruct() : FWeaponItemDataRow::StaticStruct();
+		return IsValid(Table) && Table->GetRowStruct() && Table->GetRowStruct()->IsChildOf(Expected)
+			? Table : nullptr;
+	}
+}
 #endif
 
 APetItemDebugActor::APetItemDebugActor()
@@ -27,127 +37,13 @@ APetItemDebugActor::APetItemDebugActor()
 void APetItemDebugActor::BeginPlay()
 {
 	Super::BeginPlay();
-
 #if !UE_BUILD_SHIPPING
-	if (FImGuiModule::IsAvailable())
+	if (IsValid(GetWorld()) && FImGuiModule::IsAvailable())
 	{
-		FImGuiDelegate Delegate =
-			FImGuiDelegate::CreateUObject(this, &APetItemDebugActor::RenderImGui);
-
-		ImGuiDelegateHandle =
-			FImGuiModule::Get().AddWorldImGuiDelegate(Delegate);
+		ImGuiDelegateHandle = FImGuiModule::Get().AddWorldImGuiDelegate(
+			GetWorld(), FImGuiDelegate::CreateUObject(this, &APetItemDebugActor::RenderImGui));
 	}
 #endif
-
-	// LoadAllPetItemsAsync();
-
-	// ============================================================
-	// StatItem DataTable 테스트 및 초기화
-	// ============================================================
-
-	if (StatItemDataTable)
-	{
-		TArray<FName> RowNames = StatItemDataTable->GetRowNames();
-
-		UE_LOG(
-			LogTemp,
-			Warning,
-			TEXT("[PetItemDebug] --- StatItem 데이터 테이블 내부 행 목록 시작 (총 %d개) ---"),
-			RowNames.Num()
-		);
-
-		for (const FName& Name : RowNames)
-		{
-			UE_LOG(
-				LogTemp,
-				Log,
-				TEXT("[PetItemDebug][StatItem] 행 이름 발견: [%s]"),
-				*Name.ToString()
-			);
-		}
-
-		UE_LOG(
-			LogTemp,
-			Warning,
-			TEXT("[PetItemDebug] --- StatItem 데이터 테이블 내부 행 목록 끝 ---")
-		);
-
-		StatItemDataTable->GetAllRows<FStatItemDataRow>(
-			TEXT("Debug Actor StatItem DataTable"),
-			AllStatItemDataRows
-		);
-	}
-	else
-	{
-		UE_LOG(
-			LogTemp,
-			Error,
-			TEXT(
-				"[PetItemDebug] StatItemDataTable이 null입니다! "
-				"에디터에서 에셋이 할당되었는지 확인하세요."
-			)
-		);
-	}
-
-	// ============================================================
-	// WeaponItem DataTable 테스트 및 초기화
-	// ============================================================
-
-	if (WeaponItemDataTable)
-	{
-		TArray<FName> RowNames = WeaponItemDataTable->GetRowNames();
-
-		UE_LOG(
-			LogTemp,
-			Warning,
-			TEXT("[PetItemDebug] --- WeaponItem 데이터 테이블 내부 행 목록 시작 (총 %d개) ---"),
-			RowNames.Num()
-		);
-
-		for (const FName& Name : RowNames)
-		{
-			UE_LOG(
-				LogTemp,
-				Log,
-				TEXT("[PetItemDebug][WeaponItem] 행 이름 발견: [%s]"),
-				*Name.ToString()
-			);
-		}
-
-		UE_LOG(
-			LogTemp,
-			Warning,
-			TEXT("[PetItemDebug] --- WeaponItem 데이터 테이블 내부 행 목록 끝 ---")
-		);
-
-		WeaponItemDataTable->GetAllRows<FWeaponItemDataRow>(
-			TEXT("Debug Actor WeaponItem DataTable"),
-			AllWeaponItemDataRows
-		);
-	}
-	else
-	{
-		UE_LOG(
-			LogTemp,
-			Error,
-			TEXT(
-				"[PetItemDebug] WeaponItemDataTable이 null입니다! "
-				"에디터에서 에셋이 할당되었는지 확인하세요."
-			)
-		);
-	}
-
-	bIsLoadingAssets = false;
-
-	UE_LOG(
-		LogTemp,
-		Log,
-		TEXT(
-			"[PetItemDebug] DataTable 초기화 완료 - StatItem: %d개, WeaponItem: %d개"
-		),
-		AllStatItemDataRows.Num(),
-		AllWeaponItemDataRows.Num()
-	);
 }
 
 void APetItemDebugActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -156,635 +52,236 @@ void APetItemDebugActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (FImGuiModule::IsAvailable() && ImGuiDelegateHandle.IsValid())
 	{
 		FImGuiModule::Get().RemoveImGuiDelegate(ImGuiDelegateHandle);
-		ImGuiDelegateHandle.Reset();
 	}
+	ImGuiDelegateHandle.Reset();
+	SelectedPet.Reset();
+	ListedTable.Reset();
+	RowNames.Reset();
 #endif
-
+	LoadedWeaponItems.Reset();
 	Super::EndPlay(EndPlayReason);
 }
 
-void APetItemDebugActor::LoadAllPetItemsAsync()
-{
-	UAssetManager& AM = UAssetManager::Get();
-
-	TArray<FPrimaryAssetId> ItemIds;
-	AM.GetPrimaryAssetIdList(FPrimaryAssetType("PetItem"), ItemIds);
-
-	if (ItemIds.IsEmpty())
-	{
-		bIsLoadingAssets = false;
-
-		UE_LOG(
-			LogTemp,
-			Warning,
-			TEXT(
-				"[PetItemDebug] 발견된 펫 아이템 에셋이 없습니다. "
-				"DefaultGame.ini를 확인하세요."
-			)
-		);
-
-		return;
-	}
-
-	AM.LoadPrimaryAssets(
-		ItemIds,
-		TArray<FName>(),
-		FStreamableDelegate::CreateUObject(
-			this,
-			&APetItemDebugActor::OnItemsLoaded,
-			ItemIds
-		)
-	);
-}
-
-void APetItemDebugActor::OnItemsLoaded(TArray<FPrimaryAssetId> LoadedIds)
-{
-	UAssetManager& AM = UAssetManager::Get();
-
-	LoadedStatItems.Empty();
-	LoadedWeaponItems.Empty();
-
-	for (const FPrimaryAssetId& Id : LoadedIds)
-	{
-		UObject* LoadedObj = AM.GetPrimaryAssetObject(Id);
-
-		if (UPetStatItemDataAsset* StatItem =
-			Cast<UPetStatItemDataAsset>(LoadedObj))
-		{
-			LoadedStatItems.Add(StatItem);
-		}
-		else if (UPetProjectileItemDataAsset* WeaponItem =
-			Cast<UPetProjectileItemDataAsset>(LoadedObj))
-		{
-			LoadedWeaponItems.Add(WeaponItem);
-		}
-	}
-
-	bIsLoadingAssets = false;
-
-	UE_LOG(
-		LogTemp,
-		Log,
-		TEXT(
-			"[PetItemDebug] 아이템 로드 완료! StatItem: %d개, WeaponItem: %d개"
-		),
-		LoadedStatItems.Num(),
-		LoadedWeaponItems.Num()
-	);
-}
-
-
-#if !UE_BUILD_SHIPPING
-
 void APetItemDebugActor::RenderImGui()
 {
-	// 1. 미니 컨트롤 패널 (최소화 상태)
-	if (!bIsWindowOpen)
+#if !UE_BUILD_SHIPPING
+	if (!IsValid(GetWorld())) return;
+	const FString Title = FString::Printf(TEXT("펫 아이템 테스트###PetItemDebug_%s"), *GetPathName());
+	ImGui::SetNextWindowSize(ImVec2(760, 520), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin(TCHAR_TO_UTF8(*Title)))
 	{
-		ImGui::SetNextWindowBgAlpha(0.8f);
-
-		if (ImGui::Begin(
-			"Pet Debug Tools",
-			nullptr,
-			ImGuiWindowFlags_AlwaysAutoResize |
-			ImGuiWindowFlags_NoDecoration |
-			ImGuiWindowFlags_NoSavedSettings))
+		ImGui::TextDisabled("대상 선택 → 아이템 검색 → 1개 지급");
+		UPetManagerComponent* Manager = ResolvePetManager();
+		DrawPetSelection(Manager);
+		if (APetCompanionCharacter* Pet = SelectedPet.Get())
 		{
-			if (ImGui::Button(
-				"펫 아이템 툴 열기 (Open Debugger)",
-				ImVec2(250, 40)))
+			if (IsValid(Pet->GetItemComponent()))
 			{
-				bIsWindowOpen = true;
+				ImGui::TextDisabled("보유 인스턴스: %d", Pet->GetItemComponent()->GetOwnedItems().Num());
 			}
 		}
-
-		ImGui::End();
-		return;
-	}
-
-	// 2. 메인 디버거 윈도우
-	ImGui::SetNextWindowSize(
-		ImVec2(1000, 600),
-		ImGuiCond_FirstUseEver
-	);
-
-	if (ImGui::Begin(
-		"펫 아이템 실시간 관리자 (Pet Item Debugger)",
-		&bIsWindowOpen,
-		ImGuiWindowFlags_None))
-	{
-		APlayerCharacter* PlayerChar =
-			Cast<APlayerCharacter>(
-				GetWorld()->GetFirstPlayerController()->GetPawn()
-			);
-
-		UPetManagerComponent* PetManager =
-			PlayerChar
-			? PlayerChar->FindComponentByClass<UPetManagerComponent>()
-			: nullptr;
-
-		if (!PetManager)
+		if (!LastResult.IsEmpty())
 		{
-			ImGui::TextColored(
-				ImVec4(1.0f, 0.3f, 0.3f, 1.0f),
-				"[오류] 플레이어 캐릭터 또는 PetManagerComponent를 찾을 수 없습니다."
-			);
-
-			ImGui::End();
-			return;
+			ImGui::TextColored(bLastSucceeded ? ImVec4(0.4f, 0.85f, 0.5f, 1) : ImVec4(1, 0.7f, 0.3f, 1),
+				"%s", TCHAR_TO_UTF8(*LastResult));
 		}
-
-		// 상단 컨트롤
-		DrawPetSelectionCombo(PetManager);
-
 		ImGui::Separator();
-		ImGui::Spacing();
-
-		// 탭 바 구성
-		if (ImGui::BeginTabBar("ItemTypeTabs"))
+		ImGui::InputTextWithHint("##Search", "이름 / 행 이름 / ID 검색", SearchText, sizeof(SearchText));
+		UItemPoolSubsystem* Pool = ResolveItemPool();
+		if (!IsValid(Pool))
 		{
-			if (ImGui::BeginTabItem("스탯 아이템 (Stat Items)"))
+			ImGui::TextDisabled("ItemPool을 사용할 수 없습니다. GameInstance 초기화를 확인하세요.");
+		}
+		else if (ImGui::BeginTabBar("ItemTypes"))
+		{
+			if (ImGui::BeginTabItem("스탯"))
 			{
-				DrawStatItemsTab();
+				DrawCatalog(Pool, EItemType::Stat);
 				ImGui::EndTabItem();
 			}
-
-			if (ImGui::BeginTabItem("무기 아이템 (Weapon Items)"))
+			if (ImGui::BeginTabItem("무기"))
 			{
-				DrawWeaponItemsTab();
+				DrawCatalog(Pool, EItemType::Weapon);
 				ImGui::EndTabItem();
 			}
-
 			ImGui::EndTabBar();
 		}
 	}
-
 	ImGui::End();
+#endif
 }
 
-void APetItemDebugActor::DrawPetSelectionCombo(
-	UPetManagerComponent* PetManager)
+#if !UE_BUILD_SHIPPING
+UPetManagerComponent* APetItemDebugActor::ResolvePetManager() const
 {
-	const TArray<TObjectPtr<APetCompanionCharacter>>& OwnedPets =
-		PetManager->GetPetList();
+	UWorld* World = GetWorld();
+	APlayerController* Controller = IsValid(World) ? World->GetFirstPlayerController() : nullptr;
+	APawn* Pawn = IsValid(Controller) ? Controller->GetPawn() : nullptr;
+	return IsValid(Pawn) ? Pawn->FindComponentByClass<UPetManagerComponent>() : nullptr;
+}
 
-	ImGui::TextColored(
-		ImVec4(0.7f, 0.9f, 1.0f, 1.0f),
-		"타겟 펫 선택 (Target Pet) :"
-	);
+UItemPoolSubsystem* APetItemDebugActor::ResolveItemPool() const
+{
+	UWorld* World = GetWorld();
+	UGameInstance* Instance = IsValid(World) ? World->GetGameInstance() : nullptr;
+	return IsValid(Instance) ? Instance->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+}
 
-	ImGui::SameLine();
-
-	APetCompanionCharacter* CurrentPet = SelectedPet.Get();
-
-	if (CurrentPet && !OwnedPets.Contains(CurrentPet))
+void APetItemDebugActor::DrawPetSelection(UPetManagerComponent* Manager)
+{
+	if (!IsValid(Manager))
 	{
-		CurrentPet = nullptr;
 		SelectedPet.Reset();
+		ImGui::TextDisabled("플레이어 / PetManager를 기다리는 중입니다.");
+		return;
 	}
-
-	FString PreviewName =
-		CurrentPet
-		? CurrentPet->GetName()
-		: TEXT("--- 펫을 선택하세요 ---");
-
-	ImGui::PushItemWidth(350.0f);
-
-	if (ImGui::BeginCombo(
-		"##TargetPetCombo",
-		TCHAR_TO_UTF8(*PreviewName)))
+	const auto& Pets = Manager->GetPetList();
+	if (!SelectedPet.IsValid() || !Pets.Contains(SelectedPet.Get())) SelectedPet.Reset();
+	const FString Preview = SelectedPet.IsValid() ? SelectedPet->GetName() : TEXT("펫을 선택하세요");
+	if (ImGui::BeginCombo("대상", TCHAR_TO_UTF8(*Preview)))
 	{
-		if (OwnedPets.IsEmpty())
+		for (const auto& Entry : Pets)
 		{
-			ImGui::Selectable(
-				"소유 중인 펫이 없습니다.",
-				false,
-				ImGuiSelectableFlags_Disabled
-			);
-		}
-		else
-		{
-			for (int32 i = 0; i < OwnedPets.Num(); ++i)
+			APetCompanionCharacter* Pet = Entry.Get();
+			if (!IsValid(Pet) || Pet->IsActorBeingDestroyed()) continue;
+			ImGui::PushID(Pet);
+			if (ImGui::Selectable(TCHAR_TO_UTF8(*Pet->GetName()), SelectedPet.Get() == Pet))
 			{
-				APetCompanionCharacter* Pet = OwnedPets[i].Get();
-
-				if (!Pet)
-				{
-					continue;
-				}
-
-				bool bIsSelected = CurrentPet == Pet;
-
-				FString DisplayName =
-					FString::Printf(
-						TEXT("[%d] %s"),
-						i,
-						*Pet->GetName()
-					);
-
-				if (ImGui::Selectable(
-					TCHAR_TO_UTF8(*DisplayName),
-					bIsSelected))
-				{
-					SelectedPet = Pet;
-				}
-
-				if (bIsSelected)
-				{
-					ImGui::SetItemDefaultFocus();
-				}
+				SelectedPet = Pet;
+				LastResult.Reset();
 			}
+			ImGui::PopID();
 		}
-
+		if (Pets.IsEmpty()) ImGui::TextDisabled("소유한 펫이 없습니다.");
 		ImGui::EndCombo();
 	}
-
-	ImGui::PopItemWidth();
 }
 
-void APetItemDebugActor::DrawStatItemsTab()
+void APetItemDebugActor::DrawCatalog(UItemPoolSubsystem* Pool, EItemType Type)
 {
-	if (AllStatItemDataRows.IsEmpty())
+	UDataTable* Table = PetItemDebug::GetTable(Pool, Type);
+	if (!Table)
 	{
-		ImGui::TextDisabled("로드된 스탯 아이템이 없습니다.");
+		ImGui::TextDisabled("ItemPool 테이블이 없거나 행 타입이 맞지 않습니다.");
+		ImGui::TextWrapped("GameInstance의 해당 아이템 테이블 설정을 확인하세요.");
 		return;
 	}
-
-	const ImGuiTableFlags TableFlags =
-		ImGuiTableFlags_Borders |
-		ImGuiTableFlags_RowBg |
-		ImGuiTableFlags_Resizable |
-		ImGuiTableFlags_SizingStretchProp |
-		ImGuiTableFlags_PadOuterX;
-
-	if (ImGui::BeginTable("StatItemsTable", 5, TableFlags))
+	const bool bRefresh = ImGui::SmallButton("목록 새로고침");
+	if (ListedTable.Get() != Table || bRefresh)
 	{
-		ImGui::TableSetupColumn(
-			"아이템 ID",
-			ImGuiTableColumnFlags_WidthStretch,
-			1.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"Item Name",
-			ImGuiTableColumnFlags_WidthStretch,
-			2.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"Item Description",
-			ImGuiTableColumnFlags_WidthStretch,
-			1.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"Item Type",
-			ImGuiTableColumnFlags_WidthStretch,
-			3.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"액션",
-			ImGuiTableColumnFlags_WidthFixed,
-			100.0f
-		);
-
+		ListedTable = Table;
+		RowNames = Table->GetRowNames();
+		RowNames.Sort(FNameLexicalLess());
+	}
+	ImGui::SameLine();
+	ImGui::TextDisabled("%s · %d개", TCHAR_TO_UTF8(*Table->GetName()), RowNames.Num());
+	UDataTable* LegacyTable = Type == EItemType::Stat ? StatItemDataTable.Get() : WeaponItemDataTable.Get();
+	if (IsValid(LegacyTable) && LegacyTable != Table)
+	{
+		ImGui::TextDisabled("Actor에 지정된 이전 테이블 대신 실제 ItemPool 테이블을 표시합니다.");
+	}
+	const FString Filter = UTF8_TO_TCHAR(SearchText);
+	FName RequestedRow = NAME_None;
+	int32 VisibleCount = 0;
+	if (ImGui::BeginTable("Catalog", 3, ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerH |
+		ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable, ImVec2(0, 0)))
+	{
+		ImGui::TableSetupColumn("아이템", ImGuiTableColumnFlags_WidthStretch, 2);
+		ImGui::TableSetupColumn("행 이름", ImGuiTableColumnFlags_WidthStretch, 1);
+		ImGui::TableSetupColumn("지급", ImGuiTableColumnFlags_WidthFixed, 85);
+		ImGui::TableSetupScrollFreeze(0, 1);
 		ImGui::TableHeadersRow();
-
-		for (FStatItemDataRow* DataRow : AllStatItemDataRows)
+		for (FName RowName : RowNames)
 		{
-			if (!DataRow)
-			{
-				continue;
-			}
-
-			ImGui::PushID(DataRow);
+			const FItemDataRow* Row = Type == EItemType::Stat
+				? static_cast<const FItemDataRow*>(Table->FindRow<FStatItemDataRow>(RowName, TEXT("PetItemDebug"), false))
+				: static_cast<const FItemDataRow*>(Table->FindRow<FWeaponItemDataRow>(RowName, TEXT("PetItemDebug"), false));
+			if (!Row) continue;
+			const FString Name = Row->ItemText.Name.ToString();
+			if (!Filter.IsEmpty() && !Name.Contains(Filter) && !RowName.ToString().Contains(Filter)
+				&& !Row->ItemID.ToString().Contains(Filter)) continue;
+			++VisibleCount;
+			ImGui::PushID(TCHAR_TO_UTF8(*RowName.ToString()));
 			ImGui::TableNextRow();
-
-			// ----------------------------------------------------
-			// 1. 아이템 ID
-			// ----------------------------------------------------
-
 			ImGui::TableSetColumnIndex(0);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextColored(
-				ImVec4(0.5f, 1.0f, 0.5f, 1.0f),
-				"%s",
-				TCHAR_TO_UTF8(*DataRow->ItemID.ToString())
-			);
-
-			// ----------------------------------------------------
-			// 2. 아이템 이름
-			// ----------------------------------------------------
-
+			ImGui::TextUnformatted(TCHAR_TO_UTF8(*(Name.IsEmpty() ? RowName.ToString() : Name)));
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 28);
+				ImGui::TextUnformatted(TCHAR_TO_UTF8(*Row->ItemText.Description.ToString()));
+				ImGui::TextDisabled("ID: %s", TCHAR_TO_UTF8(*Row->ItemID.ToString()));
+				ImGui::PopTextWrapPos();
+				ImGui::EndTooltip();
+			}
 			ImGui::TableSetColumnIndex(1);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextColored(
-				ImVec4(0.5f, 1.0f, 0.5f, 1.0f),
-				"%s",
-				TCHAR_TO_UTF8(*DataRow->ItemText.Name.ToString())
-			);
-
-			// ----------------------------------------------------
-			// 3. 설명
-			// ----------------------------------------------------
-
+			ImGui::TextDisabled("%s", TCHAR_TO_UTF8(*RowName.ToString()));
 			ImGui::TableSetColumnIndex(2);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextWrapped(
-				"%s",
-				TCHAR_TO_UTF8(*DataRow->ItemText.Description.ToString())
-			);
-
-			// ----------------------------------------------------
-			// 4. 아이템 타입
-			// DataTable 자체가 StatItem 전용이므로 enum 판별 불필요
-			// ----------------------------------------------------
-
-			ImGui::TableSetColumnIndex(3);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextWrapped("Stat Item");
-
-			// ----------------------------------------------------
-			// 5. 지급 버튼
-			// ----------------------------------------------------
-
-			ImGui::TableSetColumnIndex(4);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-
-			bool bIsPetValid = SelectedPet.IsValid();
-
-			if (!bIsPetValid)
-			{
-				ImGui::BeginDisabled();
-			}
-
-			ImGui::PushStyleColor(
-				ImGuiCol_Button,
-				ImVec4(0.15f, 0.5f, 0.7f, 1.0f)
-			);
-
-			ImGui::PushStyleColor(
-				ImGuiCol_ButtonHovered,
-				ImVec4(0.2f, 0.6f, 0.85f, 1.0f)
-			);
-
-			ImGui::PushStyleColor(
-				ImGuiCol_ButtonActive,
-				ImVec4(0.1f, 0.4f, 0.6f, 1.0f)
-			);
-
-			if (ImGui::Button(
-				"지급 (Give)",
-				ImVec2(-FLT_MIN, 36.0f)))
-			{
-				UPetStatItemDataAsset* ItemAsset =
-					Cast<UPetStatItemDataAsset>(
-						DataRow->ItemDataAsset.LoadSynchronous()
-					);
-
-				if (ItemAsset)
-				{
-					APlayerCharacter* PlayerChar =
-						Cast<APlayerCharacter>(
-							GetWorld()
-							->GetFirstPlayerController()
-							->GetPawn()
-						);
-
-					UPetManagerComponent* PetManager =
-						PlayerChar
-						? PlayerChar->FindComponentByClass<
-						UPetManagerComponent>()
-						: nullptr;
-
-					if (PetManager)
-					{
-						PetManager->GiveItemToPet(
-							SelectedPet.Get(),
-							ItemAsset
-						);
-
-						UE_LOG(
-							LogTemp,
-							Log,
-							TEXT("[Debug] %s 지급 완료"),
-							*ItemAsset->ItemName.ToString()
-						);
-					}
-				}
-			}
-
-			ImGui::PopStyleColor(3);
-
-			if (!bIsPetValid)
-			{
-				ImGui::EndDisabled();
-			}
-
+			APetCompanionCharacter* Pet = SelectedPet.Get();
+			const bool bReady = IsValid(Pet) && !Pet->IsActorBeingDestroyed()
+				&& IsValid(Pet->GetItemComponent()) && IsValid(Pet->GetStatComponent());
+			ImGui::BeginDisabled(!bReady);
+			if (ImGui::SmallButton("1개 지급")) RequestedRow = RowName;
+			ImGui::EndDisabled();
 			ImGui::PopID();
 		}
-
+		if (VisibleCount == 0)
+		{
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::TextDisabled("표시할 아이템이 없습니다.");
+		}
 		ImGui::EndTable();
 	}
+	// Production callbacks can mutate runtime state. Invoke only after row iteration ends.
+	if (!RequestedRow.IsNone()) GiveItem(Type, RequestedRow);
 }
 
-void APetItemDebugActor::DrawWeaponItemsTab()
+void APetItemDebugActor::GiveItem(EItemType Type, FName RowName)
 {
-	if (AllWeaponItemDataRows.IsEmpty())
+	bLastSucceeded = false;
+	UPetManagerComponent* Manager = ResolvePetManager();
+	APetCompanionCharacter* Pet = SelectedPet.Get();
+	UItemPoolSubsystem* Pool = ResolveItemPool();
+	UDataTable* Table = PetItemDebug::GetTable(Pool, Type);
+	if (!IsValid(Manager) || !IsValid(Pet) || Pet->IsActorBeingDestroyed()
+		|| !Manager->GetPetList().Contains(Pet) || !IsValid(Pet->GetItemComponent())
+		|| !IsValid(Pet->GetStatComponent()) || !Table)
 	{
-		ImGui::TextDisabled("로드된 무기 아이템이 없습니다.");
+		LastResult = TEXT("지급 취소: 대상 또는 ItemPool을 다시 확인하세요.");
 		return;
 	}
-
-	const ImGuiTableFlags TableFlags =
-		ImGuiTableFlags_Borders |
-		ImGuiTableFlags_RowBg |
-		ImGuiTableFlags_Resizable |
-		ImGuiTableFlags_SizingStretchProp |
-		ImGuiTableFlags_PadOuterX;
-
-	if (ImGui::BeginTable("WeaponItemsTable", 5, TableFlags))
+	if (Type == EItemType::Stat)
 	{
-		ImGui::TableSetupColumn(
-			"아이템 ID",
-			ImGuiTableColumnFlags_WidthStretch,
-			1.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"Item Name",
-			ImGuiTableColumnFlags_WidthStretch,
-			2.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"Item Description",
-			ImGuiTableColumnFlags_WidthStretch,
-			1.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"Item Type",
-			ImGuiTableColumnFlags_WidthStretch,
-			3.0f
-		);
-
-		ImGui::TableSetupColumn(
-			"액션",
-			ImGuiTableColumnFlags_WidthFixed,
-			100.0f
-		);
-
-		ImGui::TableHeadersRow();
-
-		for (FWeaponItemDataRow* DataRow : AllWeaponItemDataRows)
+		if (!Pool->GetStatItemDataRowByID(RowName))
 		{
-			if (!DataRow)
-			{
-				continue;
-			}
-
-			ImGui::PushID(DataRow);
-			ImGui::TableNextRow();
-
-			// ----------------------------------------------------
-			// 1. 아이템 ID
-			// ----------------------------------------------------
-
-			ImGui::TableSetColumnIndex(0);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextColored(
-				ImVec4(0.5f, 1.0f, 0.5f, 1.0f),
-				"%s",
-				TCHAR_TO_UTF8(*DataRow->ItemID.ToString())
-			);
-
-			// ----------------------------------------------------
-			// 2. 아이템 이름
-			// ----------------------------------------------------
-
-			ImGui::TableSetColumnIndex(1);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextColored(
-				ImVec4(0.5f, 1.0f, 0.5f, 1.0f),
-				"%s",
-				TCHAR_TO_UTF8(*DataRow->ItemText.Name.ToString())
-			);
-
-			// ----------------------------------------------------
-			// 3. 설명
-			// ----------------------------------------------------
-
-			ImGui::TableSetColumnIndex(2);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextWrapped(
-				"%s",
-				TCHAR_TO_UTF8(*DataRow->ItemText.Description.ToString())
-			);
-
-			// ----------------------------------------------------
-			// 4. 아이템 타입
-			// DataTable 자체가 WeaponItem 전용이므로 enum 판별 불필요
-			// ----------------------------------------------------
-
-			ImGui::TableSetColumnIndex(3);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
-
-			ImGui::TextWrapped("Weapon Item");
-
-			// ----------------------------------------------------
-			// 5. 지급 버튼
-			// ----------------------------------------------------
-
-			ImGui::TableSetColumnIndex(4);
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-
-			bool bIsPetValid = SelectedPet.IsValid();
-
-			if (!bIsPetValid)
-			{
-				ImGui::BeginDisabled();
-			}
-
-			ImGui::PushStyleColor(
-				ImGuiCol_Button,
-				ImVec4(0.15f, 0.5f, 0.7f, 1.0f)
-			);
-
-			ImGui::PushStyleColor(
-				ImGuiCol_ButtonHovered,
-				ImVec4(0.2f, 0.6f, 0.85f, 1.0f)
-			);
-
-			ImGui::PushStyleColor(
-				ImGuiCol_ButtonActive,
-				ImVec4(0.1f, 0.4f, 0.6f, 1.0f)
-			);
-
-			if (ImGui::Button(
-				"지급 (Give)",
-				ImVec2(-FLT_MIN, 36.0f)))
-			{
-				UPetProjectileItemDataAsset* ItemAsset =
-					Cast<UPetProjectileItemDataAsset>(
-						DataRow->ItemDataAsset.LoadSynchronous()
-					);
-
-				if (ItemAsset)
-				{
-					APlayerCharacter* PlayerChar =
-						Cast<APlayerCharacter>(
-							GetWorld()
-							->GetFirstPlayerController()
-							->GetPawn()
-						);
-
-					UPetManagerComponent* PetManager =
-						PlayerChar
-						? PlayerChar->FindComponentByClass<
-						UPetManagerComponent>()
-						: nullptr;
-
-					if (PetManager)
-					{
-						PetManager->GiveItemToPet(
-							SelectedPet.Get(),
-							ItemAsset
-						);
-
-						UE_LOG(
-							LogTemp,
-							Log,
-							TEXT("[Debug] %s 지급 완료"),
-							*ItemAsset->ItemName.ToString()
-						);
-					}
-				}
-			}
-
-			ImGui::PopStyleColor(3);
-
-			if (!bIsPetValid)
-			{
-				ImGui::EndDisabled();
-			}
-
-			ImGui::PopID();
+			LastResult = TEXT("지급 취소: 스탯 행을 찾을 수 없습니다.");
+			return;
 		}
-
-		ImGui::EndTable();
 	}
+	else
+	{
+		const FWeaponItemDataRow* Row = Pool->GetWeaponItemDataRowByID(RowName);
+		// Explicit button action only; never load assets in the per-frame catalog.
+		UPetProjectileItemDataAsset* Asset = Row
+			? Cast<UPetProjectileItemDataAsset>(Row->WeaponItemDataAsset.LoadSynchronous()) : nullptr;
+		if (!IsValid(Asset))
+		{
+			LastResult = TEXT("지급 취소: 무기 에셋이 없거나 타입이 맞지 않습니다.");
+			return;
+		}
+		LoadedWeaponItems.AddUnique(Asset);
+	}
+	TWeakObjectPtr<UPetItemComponent> ItemComponent = Pet->GetItemComponent();
+	const int32 Before = ItemComponent->GetOwnedItems().Num();
+	const FString PetName = Pet->GetName();
+	FItemDataHandle Handle;
+	Handle.ItemType = Type;
+	// FindRow resolves table row keys, not the optional ItemID field.
+	Handle.ItemRowName = RowName;
+	Manager->GiveItemToPet(Pet, Handle);
+	bLastSucceeded = ItemComponent.IsValid() && ItemComponent->GetOwnedItems().Num() == Before + 1;
+	LastResult = FString::Printf(TEXT("%s · %s → %s"),
+		bLastSucceeded ? TEXT("인스턴스 추가 확인") : TEXT("추가 미확인"), *RowName.ToString(), *PetName);
 }
-
 #endif
-
-
-*/
