@@ -213,10 +213,8 @@ void ADefaultPlayerController::LevelUpHandler(int32 NewLevel)
 	if (!World) return;
 	UItemPoolSubsystem* ItemPool = World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>(); /// GameInstance에서 ItemPoolSubsystem을 가져옴
 	if (!ItemPool) return;
-	TArray<TObjectPtr<UObject>> RandomItems = ItemPool->GetRandomItemObjects(3); /// 레벨업 보상으로 3개의 랜덤 아이템을 가져옴
-	LevelUpData.RandomItemList = RandomItems;
-
-	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 가져온 랜덤 아이템 개수 - %d"), RandomItems.Num());
+	LevelUpData.RandomItemHandles = ItemPool->GetRandomItemData(3); /// 레벨업 보상으로 3개의 랜덤 아이템을 가져옴
+	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 가져온 랜덤 아이템 개수 - %d"), LevelUpData.RandomItemHandles.Num());
 
 	PlayerHUDWidgetInstance->ShowLevelUpWidget(LevelUpData); /// PlayerHUDWidget에 레벨업 보상 창 활성화 요청
 }

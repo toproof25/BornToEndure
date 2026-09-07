@@ -40,20 +40,6 @@ public:
     void InitializeBaseStats(const FPetBaseStatSheet& BaseStatSheet);
 
     /**
-     * @brief Stat Modifier를 추가하고 해당 스탯을 재계산 후 최종 스탯 캐싱
-	 * @param Modifier StatModifier 구조체로, 어떤 스탯에 어떤 방식으로 얼마만큼의 증감할 지 정의함 (AttackPower +10% 등)
-     * @details
-     * - UPetStatItemDataAsset::ApplyToComponent에서 아이템이 추가될 때 호출된다
-     */
-    void AddModifier(const FStatModifier& Modifier);
-
-    /**
-     * @brief SourceId에 해당하는 Modifier를 모두 제거하고 재계산 후 최종 스탯 캐싱
-     * @param SourceId 제거하고자 하는 Stat Item의 고유 ID
-     */
-    void RemoveModifiersBySource(const FGuid& SourceId);
-
-    /**
      * @brief 스탯이 변경될 때 마다 방송하는 Delegate
      * @param Delegate 타입 함수
      * @param 번경된 Stat에 대한 EPetStatType
@@ -68,15 +54,10 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-private:
+public:
 
     UPROPERTY()
     TMap<EPetStatType, float> BaseStats;
-
-    /**
-     * @brief 현재 적용이 되는 모든 Stat 증감 아이템 수치 리스트
-     */
-    TArray<FStatModifier> ActiveModifiers;
 
     /**
      * @brief 최종 Stat 계산값을 캐싱해두는 멤버 변수

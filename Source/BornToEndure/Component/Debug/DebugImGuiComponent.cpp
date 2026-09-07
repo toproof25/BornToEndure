@@ -150,8 +150,10 @@ void UDebugImGuiComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (FImGuiModule::IsAvailable() && ImGuiDelegateHandle.IsValid())
 	{
 		FImGuiModule::Get().RemoveImGuiDelegate(ImGuiDelegateHandle);
-		ImGuiDelegateHandle.Reset();
 	}
+	ImGuiDelegateHandle.Reset();
+	InspectedPet.Reset();
+	PetActionResult.Reset();
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -184,9 +186,13 @@ void UDebugImGuiComponent::LoadKoreanFontToImGui()
 void UDebugImGuiComponent::DebugDrawPlayerInfo()
 {
 	ImGui::SetNextWindowBgAlpha(0.85f);
-	ImGui::SetNextWindowSize(ImVec2(500, 700), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(760, 700), ImGuiCond_FirstUseEver);
 
-	ImGui::Begin("종합 디버그 패널 (System Debug Panel)");
+	if (!ImGui::Begin("종합 디버그 패널 (System Debug Panel)"))
+	{
+		ImGui::End();
+		return;
+	}
 
 	ImGui::Text("게임 내 다양한 시스템과 플레이어 상태를 실시간으로 모니터링합니다.");
 	ImGui::Separator();
@@ -232,15 +238,15 @@ void UDebugImGuiComponent::DebugDrawPlayerInfo()
 	// ==============================================
 	if (ImGui::BeginTabBar("MainDebugTabBar"))
 	{
-		if (ImGui::BeginTabItem("월드 & 메모리 (World & Memory)"))
-		{
-			DrawSystemAndMemoryInfo();
-			ImGui::EndTabItem();
-		}
-
 		if (ImGui::BeginTabItem("펫 & 동료 (Pets)"))
 		{
 			DrawPetInfo();
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("월드 & 메모리 (World & Memory)"))
+		{
+			DrawSystemAndMemoryInfo();
 			ImGui::EndTabItem();
 		}
 
@@ -777,373 +783,355 @@ void UDebugImGuiComponent::DrawSystemAndMemoryInfo()
 	}
 }
 
+namespace PetDashboard
+{
+	constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerH
+		| ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
+
+	bool IsUsable(const APetCompanionCharacter* Pet)
+	{
+		return IsValid(Pet) && !Pet->IsActorBeingDestroyed();
+	}
+
+	FString StatName(EPetStatType Type)
+	{
+		return StaticEnum<EPetStatType>()->GetDisplayNameTextByValue(static_cast<int64>(Type)).ToString();
+	}
+
+	void DrawModifier(const FStatModifier& Modifier)
+	{
+		const FString Name = StatName(Modifier.StatType);
+		switch (Modifier.ModType)
+		{
+		case EStatModifierType::Additive:
+			ImGui::Text("%s: 고정 %+.3f", TCHAR_TO_UTF8(*Name), Modifier.Value);
+			break;
+		case EStatModifierType::Multiplicative:
+			ImGui::Text("%s: 곱연산 %+.1f%%", TCHAR_TO_UTF8(*Name), Modifier.Value * 100.f);
+			break;
+		case EStatModifierType::Override:
+			ImGui::Text("%s: 덮어쓰기 %.3f", TCHAR_TO_UTF8(*Name), Modifier.Value);
+			break;
+		default:
+			ImGui::TextDisabled("알 수 없는 연산: %d", static_cast<int32>(Modifier.ModType));
+			break;
+		}
+	}
+}
+
 void UDebugImGuiComponent::DrawPetInfo()
 {
-	if (!PetManagerComponent)
+	AActor* Owner = GetOwner();
+	UPetManagerComponent* Manager = IsValid(Owner) && IsValid(GetWorld())
+		? Owner->FindComponentByClass<UPetManagerComponent>() : nullptr;
+	if (!IsValid(Manager))
 	{
-		ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "[오류] 플레이어에게 PetManagerComponent가 없습니다.");
+		InspectedPet.Reset();
+		ImGui::TextDisabled("펫 관리 컴포넌트를 사용할 수 없습니다.");
 		return;
 	}
-
-	// ---------------------------------------------------------
-		// [ 🌟 신규: Pet별 누적 데미지 통계 테이블 ]
-		// ---------------------------------------------------------
-	APawn* OwningPawn = Cast<APawn>(GetOwner());
-	TObjectPtr<ACombatPlayerState> PS = OwningPawn ? OwningPawn->GetPlayerState<ACombatPlayerState>() : nullptr;
-	if (PS)
+	const auto& Pets = Manager->GetPetList();
+	APawn* Pawn = Cast<APawn>(Owner);
+	ACombatPlayerState* PlayerState = IsValid(Pawn) ? Pawn->GetPlayerState<ACombatPlayerState>() : nullptr;
+	if (!PetDashboard::IsUsable(InspectedPet.Get()) || !Pets.Contains(InspectedPet.Get()))
 	{
-		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 1.0f, 0.4f, 1.0f));
-		bool bStatsOpen = ImGui::TreeNodeEx("[ 펫별 전투 통계 ] (Total Combat Stats)", ImGuiTreeNodeFlags_DefaultOpen);
-		ImGui::PopStyleColor();
-
-		if (bStatsOpen)
+		InspectedPet.Reset();
+		PetActionResult.Reset();
+		for (const auto& Entry : Pets)
 		{
-			// 통계 데이터 가져오기 (ACombatPlayerState에 GetPetDamageStats()가 있다고 가정)
-			const TMap<FName, float>& StatsMap = PS->GetPetDamageStats();
-
-			if (StatsMap.IsEmpty())
+			if (PetDashboard::IsUsable(Entry.Get()))
 			{
-				ImGui::TextDisabled("  누적된 전투 데이터가 없습니다.");
+				InspectedPet = Entry.Get();
+				break;
 			}
-			else
-			{
-				if (ImGui::BeginTable("PetTotalDamageTable", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
-				{
-					// 테이블 헤더 설정
-					ImGui::TableSetupColumn("펫 이름 (Display Name)", ImGuiTableColumnFlags_WidthStretch, 0.4f);
-					ImGui::TableSetupColumn("ID (FName)", ImGuiTableColumnFlags_WidthStretch, 0.3f);
-					ImGui::TableSetupColumn("누적 데미지 (Total Damage)", ImGuiTableColumnFlags_WidthStretch, 0.3f);
-					ImGui::TableHeadersRow();
-
-					for (const auto& Pair : StatsMap)
-					{
-						ImGui::TableNextRow();
-
-						// 1. 펫 이름 (현재 활성화된 펫이 있다면 이름을 찾고, 없으면 ID 출력)
-						ImGui::TableSetColumnIndex(0);
-						FString DisplayName = Pair.Key.ToString();
-						// PetManager를 통해 실제 존재하는 펫의 가독성 좋은 이름을 찾으려는 시도
-						for (auto& PetPtr : PetManagerComponent->GetPetList())
-						{
-							if (PetPtr && PetPtr->GetFName() == Pair.Key)
-							{
-								DisplayName = PetPtr->GetName();
-								break;
-							}
-						}
-						ImGui::Text("%s", TCHAR_TO_UTF8(*DisplayName));
-
-						// 2. FName (고유 ID)
-						ImGui::TableSetColumnIndex(1);
-						ImGui::TextDisabled("%s", TCHAR_TO_UTF8(*Pair.Key.ToString()));
-
-						// 3. 누적 데미지 (강조 색상)
-						ImGui::TableSetColumnIndex(2);
-						ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%.1f", Pair.Value);
-					}
-					ImGui::EndTable();
-				}
-			}
-			ImGui::TreePop();
 		}
-		ImGui::Spacing();
-		ImGui::Separator();
-		ImGui::Spacing();
 	}
-	else
+	int32 ValidCount = 0;
+	for (const auto& Entry : Pets) ValidCount += PetDashboard::IsUsable(Entry.Get()) ? 1 : 0;
+	ImGui::Text("보유 펫 %d", ValidCount);
+	ImGui::SameLine();
+	ImGui::TextDisabled("행을 선택하면 아래에 상세 정보가 표시됩니다.");
+	if (ImGui::BeginTable("PetOverview", 4, PetDashboard::TableFlags))
 	{
-		ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "[경고] 플레이어 상태에서 전투 통계 데이터를 찾을 수 없습니다.");
+		ImGui::TableSetupColumn("펫", ImGuiTableColumnFlags_WidthStretch, 2);
+		ImGui::TableSetupColumn("체력");
+		ImGui::TableSetupColumn("아이템");
+		ImGui::TableSetupColumn("기록 피해");
+		ImGui::TableHeadersRow();
+		for (const auto& Entry : Pets)
+		{
+			APetCompanionCharacter* Pet = Entry.Get();
+			if (!PetDashboard::IsUsable(Pet)) continue;
+			ImGui::PushID(Pet);
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			if (ImGui::Selectable(TCHAR_TO_UTF8(*Pet->GetName()), InspectedPet.Get() == Pet,
+				ImGuiSelectableFlags_SpanAllColumns))
+			{
+				InspectedPet = Pet;
+				PetActionResult.Reset();
+			}
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", TCHAR_TO_UTF8(*Pet->GetPathName()));
+			UPetStatComponent* Stats = Pet->GetStatComponent();
+			UPetItemComponent* Items = Pet->GetItemComponent();
+			ImGui::TableSetColumnIndex(1);
+			// GetFinalStat internally reads the item component, so both must exist.
+			if (IsValid(Stats) && IsValid(Items))
+			{
+				ImGui::Text("%.0f / %.0f", Stats->GetFinalStat(EPetStatType::CurrentHealth),
+					Stats->GetFinalStat(EPetStatType::MaxHealth));
+			}
+			else ImGui::TextDisabled("확인 불가");
+			ImGui::TableSetColumnIndex(2);
+			if (IsValid(Items)) ImGui::Text("%d", Items->GetOwnedItems().Num());
+			else ImGui::TextDisabled("없음");
+			ImGui::TableSetColumnIndex(3);
+			if (IsValid(PlayerState)) ImGui::Text("%.1f", PlayerState->GetPetDamageStats().FindRef(Pet->GetFName()));
+			else ImGui::TextDisabled("대기 중");
+			ImGui::PopID();
+		}
+		ImGui::EndTable();
 	}
-
-	const TArray<TObjectPtr<APetCompanionCharacter>>& PetList = PetManagerComponent->GetPetList();
-
-	// ---------------------------------------------------------
-	// [상단 대시보드 요약]
-	// ---------------------------------------------------------
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.9f, 1.0f, 1.0f));
-	ImGui::TextWrapped("총 보유 펫: %d 마리", PetList.Num());
-	ImGui::PopStyleColor();
-	ImGui::Separator();
-	ImGui::Spacing();
-
-	if (PetList.IsEmpty())
+	if (ImGui::CollapsingHeader("전체 피해 기록 (이전 펫 포함)"))
 	{
-		ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "소유 중인 펫이 없습니다. (아이템 획득 또는 펫 스폰 대기 중)");
+		ImGui::TextDisabled("PlayerState 누적 기록입니다. 실시간 DPS가 아닙니다.");
+		if (!IsValid(PlayerState)) ImGui::TextDisabled("PlayerState를 기다리는 중입니다.");
+		else if (PlayerState->GetPetDamageStats().IsEmpty()) ImGui::TextDisabled("기록이 없습니다.");
+		else if (ImGui::BeginTable("PetDamageHistory", 2, PetDashboard::TableFlags))
+		{
+			ImGui::TableSetupColumn("펫 ID");
+			ImGui::TableSetupColumn("기록 피해");
+			ImGui::TableHeadersRow();
+			for (const auto& Pair : PlayerState->GetPetDamageStats())
+				ImGuiUtils::DrawRowText(TCHAR_TO_UTF8(*Pair.Key.ToString()), "%.1f", Pair.Value);
+			ImGui::EndTable();
+		}
+	}
+	APetCompanionCharacter* Pet = InspectedPet.Get();
+	if (!PetDashboard::IsUsable(Pet))
+	{
+		ImGui::TextDisabled("소유 중인 펫이 없습니다.");
 		return;
 	}
-
-	// ---------------------------------------------------------
-	// [개별 펫 정보 순회]
-	// ---------------------------------------------------------
-	for (int32 i = 0; i < PetList.Num(); ++i)
+	ImGui::Separator();
+	ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.f, 1.f), "%s", TCHAR_TO_UTF8(*Pet->GetName()));
+	if (!PetActionResult.IsEmpty()) ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*PetActionResult));
+	FGuid RemoveId;
+	ImGui::PushID(Pet);
+	if (ImGui::BeginTabBar("PetDetails"))
 	{
-		APetCompanionCharacter* Pet = PetList[i].Get();
-		if (!Pet) continue;
-
-		ImGui::PushID(i); // 다중 펫 UI 충돌 방지 고유 ID
-
-		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.15f, 0.5f, 0.35f, 1.0f));
-		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.2f, 0.6f, 0.45f, 1.0f));
-		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.25f, 0.7f, 0.55f, 1.0f));
-
-		FString PetHeaderName = FString::Printf(TEXT("[ Pet %d ] : %s"), i, *Pet->GetName());
-		bool bPetNodeOpen = ImGui::CollapsingHeader(TCHAR_TO_UTF8(*PetHeaderName), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed);
-
-		ImGui::PopStyleColor(3);
-
-		if (bPetNodeOpen)
+		if (ImGui::BeginTabItem("상태"))
 		{
-			ImGui::Indent(15.0f);
-			ImGui::Spacing();
+			DrawPetStatus(Pet);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("아이템"))
+		{
+			RemoveId = DrawPetInventory(Pet);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("공격"))
+		{
+			DrawPetCombat(Pet);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("시너지"))
+		{
+			DrawPetSynergies(Pet->GetItemComponent());
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+	ImGui::PopID();
+	// No pet/item array is being iterated when production delegates execute.
+	if (RemoveId.IsValid() && IsValid(Manager) && PetDashboard::IsUsable(Pet)
+		&& Manager->GetPetList().Contains(Pet) && IsValid(Pet->GetItemComponent())
+		&& IsValid(Pet->GetStatComponent()))
+	{
+		TWeakObjectPtr<UPetItemComponent> Items = Pet->GetItemComponent();
+		Manager->RemoveItemFromPet(Pet, RemoveId);
+		const bool bRemoved = Items.IsValid() && !Items->GetOwnedItems().ContainsByPredicate(
+			[RemoveId](const FPetItemInstance& Item) { return Item.InstanceId == RemoveId; });
+		PetActionResult = bRemoved ? TEXT("선택한 인스턴스 제거를 확인했습니다.") : TEXT("제거 결과를 확인하지 못했습니다.");
+	}
+}
 
-			// ==========================================
-			// 1. 기본 정보 (이모티콘 제거 및 표준 기호 사용)
-			// ==========================================
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
-			bool bBasicOpen = ImGui::TreeNodeEx("[ 기본 정보 ] (Actor Basic)", ImGuiTreeNodeFlags_DefaultOpen);
-			ImGui::PopStyleColor();
-			if (bBasicOpen)
+void UDebugImGuiComponent::DrawPetStatus(APetCompanionCharacter* Pet)
+{
+	UPetStatComponent* Stats = Pet->GetStatComponent();
+	if (IsValid(Stats) && IsValid(Pet->GetItemComponent()))
+	{
+		const float Health = Stats->GetFinalStat(EPetStatType::CurrentHealth);
+		const float MaxHealth = Stats->GetFinalStat(EPetStatType::MaxHealth);
+		const FString Overlay = FString::Printf(TEXT("체력 %.1f / %.1f"), Health, MaxHealth);
+		ImGui::ProgressBar(MaxHealth > 0.f ? FMath::Clamp(Health / MaxHealth, 0.f, 1.f) : 0.f,
+			ImVec2(-1, 0), TCHAR_TO_UTF8(*Overlay));
+		if (ImGui::BeginTable("FinalStats", 2, PetDashboard::TableFlags))
+		{
+			ImGui::TableSetupColumn("스탯");
+			ImGui::TableSetupColumn("현재 최종값");
+			ImGui::TableHeadersRow();
+			const EPetStatType Types[] = { EPetStatType::AttackPower, EPetStatType::Defense,
+				EPetStatType::AttackSpeed, EPetStatType::MoveSpeed, EPetStatType::CriticalRate,
+				EPetStatType::CriticalDamage, EPetStatType::DetectionRange, EPetStatType::AttackRange,
+				EPetStatType::Luck, EPetStatType::FireDamageBonus, EPetStatType::IceDamageBonus,
+				EPetStatType::WindDamageBonus, EPetStatType::PoisonDamageBonus, EPetStatType::BleedDamageBonus };
+			for (EPetStatType Type : Types)
 			{
-				if (ImGui::BeginTable("PetBasicTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+				const float Value = Stats->GetFinalStat(Type);
+				const bool bPercent = Type == EPetStatType::CriticalRate || Type == EPetStatType::FireDamageBonus
+					|| Type == EPetStatType::IceDamageBonus || Type == EPetStatType::WindDamageBonus
+					|| Type == EPetStatType::PoisonDamageBonus || Type == EPetStatType::BleedDamageBonus;
+				const char* Format = bPercent ? "%.1f%%" : Type == EPetStatType::CriticalDamage ? "%.2f 배"
+					: Type == EPetStatType::AttackSpeed ? "%.2f 회/초" : "%.2f";
+				ImGuiUtils::DrawRowText(TCHAR_TO_UTF8(*PetDashboard::StatName(Type)), Format, bPercent ? Value * 100.f : Value);
+			}
+			ImGui::EndTable();
+		}
+	}
+	else ImGui::TextDisabled("스탯 또는 아이템 컴포넌트가 없어 최종값을 확인할 수 없습니다.");
+	if (ImGui::CollapsingHeader("위치 / AI / 컴포넌트"))
+	{
+		if (ImGui::BeginTable("PetActor", 2, PetDashboard::TableFlags))
+		{
+			const FVector Location = Pet->GetActorLocation();
+			ImGuiUtils::DrawRowText("위치", "%.1f, %.1f, %.1f", Location.X, Location.Y, Location.Z);
+			ImGuiUtils::DrawRowText("AI 컨트롤러", "%s", IsValid(Pet->GetController()) ? TCHAR_TO_UTF8(*Pet->GetController()->GetName()) : "없음");
+			ImGuiUtils::DrawRowBool("StatComponent", IsValid(Stats));
+			ImGuiUtils::DrawRowBool("ItemComponent", IsValid(Pet->GetItemComponent()));
+			ImGuiUtils::DrawRowBool("CombatComponent", IsValid(Pet->GetCombatComponent()));
+			ImGui::EndTable();
+		}
+	}
+}
+
+FGuid UDebugImGuiComponent::DrawPetInventory(APetCompanionCharacter* Pet)
+{
+	FGuid RemoveId;
+	UPetItemComponent* Items = Pet->GetItemComponent();
+	if (!IsValid(Items))
+	{
+		ImGui::TextDisabled("아이템 컴포넌트가 없습니다.");
+		return RemoveId;
+	}
+	ImGui::Text("보유 %d개", Items->GetOwnedItems().Num());
+	ImGui::TextDisabled("아이템을 펼치면 태그와 적용 Modifier를 확인할 수 있습니다.");
+	if (ImGui::BeginTable("Inventory", 3, PetDashboard::TableFlags))
+	{
+		ImGui::TableSetupColumn("아이템 / 효과", ImGuiTableColumnFlags_WidthStretch, 3);
+		ImGui::TableSetupColumn("인스턴스", ImGuiTableColumnFlags_WidthStretch, 1);
+		ImGui::TableSetupColumn("액션", ImGuiTableColumnFlags_WidthFixed, 65);
+		ImGui::TableHeadersRow();
+		for (const FPetItemInstance& Item : Items->GetOwnedItems())
+		{
+			const FString Id = Item.InstanceId.ToString();
+			ImGui::PushID(TCHAR_TO_UTF8(*Id));
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			const bool bHasAsset = IsValid(Item.LoadedData.Get());
+			const FString Name = bHasAsset ? Item.LoadedData->ItemName.ToString() : TEXT("이름 미제공 (DataAsset 없음)");
+			const bool bOpen = ImGui::TreeNodeEx("Details", ImGuiTreeNodeFlags_SpanAvailWidth,
+				"%s", TCHAR_TO_UTF8(*Name));
+			if (bOpen)
+			{
+				if (bHasAsset)
 				{
-					ImGuiUtils::DrawRowVector("월드 위치 (Location)", Pet->GetActorLocation());
-					ImGuiUtils::DrawRowText("컨트롤러 (AI)", "%s", Pet->GetController() ? TCHAR_TO_UTF8(*Pet->GetController()->GetName()) : "None");
-					ImGui::EndTable();
+					ImGui::TextWrapped("태그: %s", TCHAR_TO_UTF8(*Item.LoadedData->SynergyTags.ToStringSimple()));
 				}
+				else ImGui::TextWrapped("현재 스탯 아이템은 원본 이름/행 정보가 저장되지 않습니다.");
+				bool bFound = false;
+				for (const FStatModifier& Modifier : Items->GetStatModifiers())
+				{
+					if (Modifier.SourceId == Item.InstanceId)
+					{
+						PetDashboard::DrawModifier(Modifier);
+						bFound = true;
+					}
+				}
+				if (!bFound) ImGui::TextDisabled("이 인스턴스의 스탯 Modifier 없음");
 				ImGui::TreePop();
 			}
-			ImGui::Spacing();
-
-			// ==========================================
-			// 2. 스탯 정보 (이모티콘 제거 및 표준 기호 사용)
-			// ==========================================
-			UPetStatComponent* StatComp = Pet->GetStatComponent();
-			if (StatComp)
-			{
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.8f, 1.0f, 1.0f));
-				bool bStatOpen = ImGui::TreeNodeEx("[ 핵심 스탯 ] (Status)", ImGuiTreeNodeFlags_DefaultOpen);
-				ImGui::PopStyleColor();
-				if (bStatOpen)
-				{
-					if (ImGui::BeginTable("PetStatTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
-					{
-						ImGuiUtils::DrawRowText("공격력 (AttackPower)", "%.1f", StatComp->GetFinalStat(EPetStatType::AttackPower));
-						ImGuiUtils::DrawRowText("체력 (Health)", "%.1f / %.1f", StatComp->GetFinalStat(EPetStatType::CurrentHealth), StatComp->GetFinalStat(EPetStatType::MaxHealth));
-						ImGuiUtils::DrawRowText("방어력 (Defense)", "%.1f", StatComp->GetFinalStat(EPetStatType::Defense));
-						ImGuiUtils::DrawRowText("공격 속도 (AttackSpeed)", "%.2f 회/초", StatComp->GetFinalStat(EPetStatType::AttackSpeed));
-						ImGuiUtils::DrawRowText("이동 속도 (MoveSpeed)", "%.1f", StatComp->GetFinalStat(EPetStatType::MoveSpeed));
-
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("치명타 확률 (Crit Rate)");
-						ImGui::TableSetColumnIndex(1); ImGui::TextColored(ImVec4(1.0f, 0.9f, 0.2f, 1.0f), "%.1f%%", StatComp->GetFinalStat(EPetStatType::CriticalRate) * 100.f);
-
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("치명타 데미지 (Crit Dmg)");
-						ImGui::TableSetColumnIndex(1); ImGui::TextColored(ImVec4(1.0f, 0.9f, 0.2f, 1.0f), "%.2f 배", StatComp->GetFinalStat(EPetStatType::CriticalDamage));
-
-						auto DrawElementBonus = [](const char* Name, float Value, ImVec4 Color) {
-							if (Value > 0.f) {
-								ImGui::TableNextRow();
-								ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("%s", Name);
-								ImGui::TableSetColumnIndex(1); ImGui::TextColored(Color, "+%.1f%%", Value * 100.f);
-							}
-							};
-						DrawElementBonus("화염 뎀증 (Fire)", StatComp->GetFinalStat(EPetStatType::FireDamageBonus), ImVec4(1.0f, 0.4f, 0.2f, 1.0f));
-						DrawElementBonus("냉기 뎀증 (Ice)", StatComp->GetFinalStat(EPetStatType::IceDamageBonus), ImVec4(0.2f, 0.8f, 1.0f, 1.0f));
-						DrawElementBonus("바람 뎀증 (Wind)", StatComp->GetFinalStat(EPetStatType::WindDamageBonus), ImVec4(0.5f, 1.0f, 0.6f, 1.0f));
-						DrawElementBonus("독 뎀증 (Poison)", StatComp->GetFinalStat(EPetStatType::PoisonDamageBonus), ImVec4(0.6f, 0.2f, 0.8f, 1.0f));
-						DrawElementBonus("출혈 뎀증 (Bleed)", StatComp->GetFinalStat(EPetStatType::BleedDamageBonus), ImVec4(0.9f, 0.1f, 0.1f, 1.0f));
-
-						ImGui::EndTable();
-					}
-					ImGui::TreePop();
-				}
-			}
-			ImGui::Spacing();
-
-			// ==========================================
-			// 3. 인벤토리 및 시너지 (이모티콘 제거 및 제거 액션 버튼 추가)
-			// ==========================================
-			UPetItemComponent* ItemComp = Pet->GetItemComponent();
-			if (ItemComp)
-			{
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.85f, 0.2f, 1.0f));
-				bool bItemOpen = ImGui::TreeNodeEx("[ 보유 아이템 ] (Inventory)", ImGuiTreeNodeFlags_DefaultOpen);
-				ImGui::PopStyleColor();
-
-				if (bItemOpen)
-				{
-					const TArray<FPetItemInstance>& Items = ItemComp->GetOwnedItems();
-
-					if (Items.IsEmpty())
-					{
-						ImGui::TextDisabled("  장착 중인 아이템이 없습니다.");
-					}
-					else
-					{
-						// 지연 제거를 위한 변수
-						FGuid ItemInstanceToRemove;
-
-						// 🌟 4열(액션 버튼 추가)로 확장
-						if (ImGui::BeginTable("PetInventoryTable", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
-						{
-							ImGui::TableSetupColumn("아이템 이름", ImGuiTableColumnFlags_WidthStretch, 0.35f);
-							ImGui::TableSetupColumn("시너지 태그", ImGuiTableColumnFlags_WidthStretch, 0.35f);
-							ImGui::TableSetupColumn("고유 ID", ImGuiTableColumnFlags_WidthStretch, 0.15f);
-							ImGui::TableSetupColumn("액션", ImGuiTableColumnFlags_WidthFixed, 75.0f); // 버튼 열 추가
-							ImGui::TableHeadersRow();
-
-							for (int32 ItemIdx = 0; ItemIdx < Items.Num(); ++ItemIdx)
-							{
-								const FPetItemInstance& Inst = Items[ItemIdx];
-								if (Inst.LoadedData)
-								{
-									// 고유 ID 푸시 (아이템 삭제 버튼 식별용)
-									ImGui::PushID(Inst.InstanceId.A);
-									ImGui::TableNextRow();
-
-									// 이름
-									ImGui::TableSetColumnIndex(0);
-									ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-									ImGui::Text("%s", TCHAR_TO_UTF8(*Inst.LoadedData->ItemName.ToString()));
-
-									// 태그
-									ImGui::TableSetColumnIndex(1);
-									ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-									FString TagsStr = Inst.LoadedData->SynergyTags.ToStringSimple();
-									if (TagsStr.IsEmpty()) ImGui::TextDisabled("-");
-									else ImGui::TextColored(ImVec4(1.0f, 0.9f, 0.5f, 1.0f), "%s", TCHAR_TO_UTF8(*TagsStr));
-
-									// 디버그용 ID
-									ImGui::TableSetColumnIndex(2);
-									ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
-									ImGui::TextDisabled("%s...", TCHAR_TO_UTF8(*Inst.InstanceId.ToString().Left(8)));
-									if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", TCHAR_TO_UTF8(*Inst.InstanceId.ToString()));
-
-									// 🌟 액션 (제거 버튼)
-									ImGui::TableSetColumnIndex(3);
-									ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
-									ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
-									ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
-
-									if (ImGui::Button("제거 (Remove)", ImVec2(-FLT_MIN, 28.0f)))
-									{
-										ItemInstanceToRemove = Inst.InstanceId; // 루프 도중 배열이 깨지지 않도록 ID만 저장
-									}
-
-									ImGui::PopStyleColor(3);
-									ImGui::PopID();
-								}
-							}
-							ImGui::EndTable();
-						}
-
-						// 🌟 루프 밖에서 안전하게 아이템 제거 실행 (Access Violation 크래시 방지)
-						if (ItemInstanceToRemove.IsValid())
-						{
-							PetManagerComponent->RemoveItemFromPet(Pet, ItemInstanceToRemove);
-							UE_LOG(LogTemp, Log, TEXT("[Debug] Pet(%s)에서 아이템(ID:%s) 강제 제거됨"), *Pet->GetName(), *ItemInstanceToRemove.ToString());
-						}
-					}
-					ImGui::TreePop();
-				}
-				ImGui::Spacing();
-
-				// 활성화된 시너지 (이모티콘 제거 및 표준 기호 사용)
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.4f, 1.0f, 1.0f));
-				bool bSynergyOpen = ImGui::TreeNodeEx("[ 활성화된 시너지 ] (Active Synergies)", ImGuiTreeNodeFlags_DefaultOpen);
-				ImGui::PopStyleColor();
-
-				if (bSynergyOpen)
-				{
-					const TArray<TObjectPtr<UPetSynergyDataAsset>>& Synergies = ItemComp->GetActiveSynergies();
-					if (Synergies.IsEmpty())
-					{
-						ImGui::TextDisabled("  발동 중인 시너지가 없습니다.");
-					}
-					else
-					{
-						for (const UPetSynergyDataAsset* Synergy : Synergies)
-						{
-							if (Synergy)
-							{
-								ImGui::TextColored(ImVec4(0.8f, 0.4f, 1.0f, 1.0f), "  - [ON] %s", TCHAR_TO_UTF8(*Synergy->SynergyName.ToString()));
-
-								if (ImGui::IsItemHovered())
-								{
-									ImGui::BeginTooltip();
-									ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "[ 시너지 요구 조건 ]");
-									for (const auto& Pair : Synergy->RequiredTagCounts)
-									{
-										ImGui::BulletText("%s : %d개 필요", TCHAR_TO_UTF8(*Pair.Key.ToString()), Pair.Value);
-									}
-									ImGui::EndTooltip();
-								}
-							}
-						}
-					}
-					ImGui::TreePop();
-				}
-			}
-			ImGui::Spacing();
-
-			// ==========================================
-			// 4. 최종 공격 제원 (이모티콘 제거 및 표준 기호 사용)
-			// ==========================================
-			UPetCombatComponent* CombatComp = Pet->GetCombatComponent();
-			if (CombatComp && ItemComp)
-			{
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
-				bool bCombatOpen = ImGui::TreeNodeEx("[ 최종 공격 제원 ] (Combat Output)", ImGuiTreeNodeFlags_DefaultOpen);
-				ImGui::PopStyleColor();
-
-				if (bCombatOpen)
-				{
-					if (ImGui::BeginTable("PetCombatTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
-					{
-						FProjectileModifierData AggregatedProj = ItemComp->GetAggregatedProjectileModifier();
-						FGameplayTag DominantTag = ItemComp->GetDominantElementTag();
-
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("주 속성 (Dominant Element)");
-						ImGui::TableSetColumnIndex(1);
-						if (DominantTag.IsValid()) ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f), "%s", TCHAR_TO_UTF8(*DominantTag.ToString()));
-						else ImGui::TextDisabled("무속성 (None)");
-
-						FString ProjName = AggregatedProj.OverrideProjectileClass.IsNull() ?
-							(CombatComp->DefaultProjectileClass ? CombatComp->DefaultProjectileClass->GetName() : "None") :
-							AggregatedProj.OverrideProjectileClass.GetAssetName();
-						ImGuiUtils::DrawRowText("발사체 클래스 (Projectile)", "%s", TCHAR_TO_UTF8(*ProjName));
-
-						const char* PatternStr = "단발 (Single)";
-						ImVec4 PatternColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-						switch (AggregatedProj.Pattern)
-						{
-						case EProjectilePattern::Spread: PatternStr = "산탄 (Spread)"; PatternColor = ImVec4(1.0f, 0.6f, 0.2f, 1.0f); break;
-						case EProjectilePattern::Laser:  PatternStr = "레이저 (Laser)"; PatternColor = ImVec4(0.2f, 1.0f, 1.0f, 1.0f); break;
-						case EProjectilePattern::Spiral: PatternStr = "나선 (Spiral)"; PatternColor = ImVec4(0.8f, 0.3f, 1.0f, 1.0f); break;
-						default: break;
-						}
-
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(0); ImGui::TextDisabled("발사 패턴 (Pattern)");
-						ImGui::TableSetColumnIndex(1); ImGui::TextColored(PatternColor, "%s", PatternStr);
-
-						ImGuiUtils::DrawRowText("동시 발사 수 (Count)", "%d 발", FMath::Max(1, AggregatedProj.ProjectileCountAdd));
-						ImGuiUtils::DrawRowText("크기 배율 (Size)", "x %.2f", AggregatedProj.SizeMultiplier);
-						ImGuiUtils::DrawRowText("속도 배율 (Speed)", "x %.2f", AggregatedProj.SpeedMultiplier);
-
-						ImGui::EndTable();
-					}
-					ImGui::TreePop();
-				}
-			}
-
-			ImGui::Unindent(15.0f);
-			ImGui::Spacing();
+			ImGui::TableSetColumnIndex(1);
+			ImGui::TextDisabled("%s", TCHAR_TO_UTF8(*Id.Left(8)));
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", TCHAR_TO_UTF8(*Id));
+			ImGui::TableSetColumnIndex(2);
+			// A non-null but invalid asset must not be handed to RemoveItem's raw pointer path.
+			ImGui::BeginDisabled(!Item.InstanceId.IsValid() || !IsValid(Pet->GetStatComponent())
+				|| (Item.LoadedData.Get() != nullptr && !bHasAsset));
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.55f, 0.2f, 0.2f, 1.f));
+			if (ImGui::SmallButton("제거")) RemoveId = Item.InstanceId;
+			ImGui::PopStyleColor();
+			ImGui::EndDisabled();
+			ImGui::PopID();
 		}
+		ImGui::EndTable();
+	}
+	if (Items->GetOwnedItems().IsEmpty()) ImGui::TextDisabled("보유 아이템이 없습니다.");
+	return RemoveId;
+}
 
+void UDebugImGuiComponent::DrawPetCombat(APetCompanionCharacter* Pet)
+{
+	UPetCombatComponent* Combat = Pet->GetCombatComponent();
+	UPetItemComponent* Items = Pet->GetItemComponent();
+	if (!IsValid(Combat) || !IsValid(Items))
+	{
+		ImGui::TextDisabled("전투 또는 아이템 컴포넌트가 없습니다.");
+		return;
+	}
+	AActor* Target = Combat->GetCurrentTarget();
+	ImGui::Text("현재 타겟: %s", IsValid(Target) ? TCHAR_TO_UTF8(*Target->GetName()) : "없음");
+	ImGui::TextDisabled("아이템 집계값입니다. 실제 공격 결과나 공격 중 여부를 뜻하지 않습니다.");
+	if (ImGui::BeginTable("CombatInputs", 2, PetDashboard::TableFlags))
+	{
+		const FProjectileModifierData Modifier = Items->GetAggregatedProjectileModifier();
+		const FGameplayTag Dominant = Items->GetDominantElementTag();
+		ImGuiUtils::DrawRowText("공격 속성 (ElementType)", "%s", Modifier.ElementType.IsValid() ? TCHAR_TO_UTF8(*Modifier.ElementType.ToString()) : "없음");
+		ImGuiUtils::DrawRowText("태그 집계 주 속성", "%s", Dominant.IsValid() ? TCHAR_TO_UTF8(*Dominant.ToString()) : "없음");
+		ImGuiUtils::DrawRowText("기본 발사체", "%s", IsValid(Combat->DefaultProjectileClass.Get()) ? TCHAR_TO_UTF8(*Combat->DefaultProjectileClass->GetName()) : "없음");
+		ImGuiUtils::DrawRowText("교체 발사체", "%s", Modifier.OverrideProjectileClass.IsNull() ? "미지정" : TCHAR_TO_UTF8(*Modifier.OverrideProjectileClass.GetAssetName()));
+		if (!Modifier.OverrideProjectileClass.IsNull())
+			ImGuiUtils::DrawRowBool("교체 클래스 로드됨", Modifier.OverrideProjectileClass.IsValid());
+		const FString Pattern = StaticEnum<EProjectilePattern>()->GetDisplayNameTextByValue(static_cast<int64>(Modifier.Pattern)).ToString();
+		ImGuiUtils::DrawRowText("발사 패턴", "%s", TCHAR_TO_UTF8(*Pattern));
+		ImGuiUtils::DrawRowText("발사 수 집계값", "%d", Modifier.ProjectileCountAdd);
+		ImGuiUtils::DrawRowText("크기 배율", "%.2f 배", Modifier.SizeMultiplier);
+		ImGuiUtils::DrawRowText("속도 배율", "%.2f 배", Modifier.SpeedMultiplier);
+		ImGui::EndTable();
+	}
+}
+
+void UDebugImGuiComponent::DrawPetSynergies(UPetItemComponent* Items)
+{
+	if (!IsValid(Items))
+	{
+		ImGui::TextDisabled("아이템 컴포넌트가 없습니다.");
+		return;
+	}
+	ImGui::Text("활성 시너지 %d개", Items->GetActiveSynergies().Num());
+	if (Items->GetActiveSynergies().IsEmpty()) ImGui::TextDisabled("활성 시너지가 없습니다.");
+	for (const auto& Entry : Items->GetActiveSynergies())
+	{
+		const UPetSynergyDataAsset* Synergy = Entry.Get();
+		if (!IsValid(Synergy))
+		{
+			ImGui::TextDisabled("유효하지 않은 시너지 참조");
+			continue;
+		}
+		ImGui::PushID(Synergy);
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.85f, 0.5f, 1.f));
+		const bool bOpen = ImGui::TreeNodeEx("Synergy", ImGuiTreeNodeFlags_None,
+			"%s", TCHAR_TO_UTF8(*Synergy->SynergyName.ToString()));
+		ImGui::PopStyleColor();
+		if (bOpen)
+		{
+			ImGui::TextDisabled("요구 조건 (설정값)");
+			for (const auto& Pair : Synergy->RequiredTagCounts)
+				ImGui::BulletText("%s: %d개", TCHAR_TO_UTF8(*Pair.Key.ToString()), Pair.Value);
+			ImGui::TextDisabled("스탯 보너스 (설정값)");
+			for (const FStatModifier& Modifier : Synergy->StatBonuses) PetDashboard::DrawModifier(Modifier);
+			ImGui::TreePop();
+		}
 		ImGui::PopID();
-		ImGui::Separator();
 	}
 }

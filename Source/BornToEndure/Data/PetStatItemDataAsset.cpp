@@ -18,7 +18,7 @@ void UPetStatItemDataAsset::ApplyToComponent(UPetItemComponent* ItemComp) const
 	for (FStatModifier Mod : StatModifiers)
 	{
 		Mod.SourceId = SourceId;
-		StatComp->AddModifier(Mod);
+		//StatComp->AddModifier(Mod);
 	}
 }
 
@@ -31,5 +31,5 @@ void UPetStatItemDataAsset::RemoveFromComponent(UPetItemComponent* ItemComp, con
 	if (StatComp == nullptr) return;
 
 	// 2.해당 아이템의 InstanceId를 보내서 StatComponent에서 제거한다
-	StatComp->RemoveModifiersBySource(InstanceId);
+	//StatComp->RemoveModifiersBySource(InstanceId);
 }

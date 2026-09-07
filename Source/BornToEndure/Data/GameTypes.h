@@ -71,5 +71,5 @@ public:
 
 	// Item에 대한 정보들 
 	UPROPERTY()
-	TArray<TObjectPtr<UObject>> RandomItemList;
+	TArray<FItemDataHandle> RandomItemHandles;
 };

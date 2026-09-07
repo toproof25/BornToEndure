@@ -7,7 +7,10 @@
 #include "Character/Pet/PetCompanionCharacter.h"
 #include "Component/PetManagerComponent.h"
 #include "Data/DataTableRow/ItemDataRow.h"
+#include "Data/DataTableRow/StatItemDataRow.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
 #include "Data/PetItemDataAsset.h"
+#include "Subsystem/ItemPoolSubsystem.h"
 
 void ULevelUpRewardWidget::NativeOnInitialized()
 {
@@ -17,26 +20,6 @@ void ULevelUpRewardWidget::NativeOnInitialized()
 	}
 }
 
-void ULevelUpRewardWidget::ExitButtonClicked()
-{
-	if (!SelectedPet || !SelectedItem) return;
-
-    ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(GetOwningPlayer());
-	if (!PC) return;
-
-	PC->SetGameInputMode();
-
-	UPetManagerComponent* PetManager = PC->GetPawn()->FindComponentByClass<UPetManagerComponent>();
-	if (!PetManager) return;	
-
-	UItemDataObject* ItemDataObject = Cast<UItemDataObject>(SelectedItem);
-	FItemDataRow* ItemData = ItemDataObject ? &(ItemDataObject->ItemData) : nullptr;
-	if (!ItemData) return;
-	PetManager->GiveItemToPet(SelectedPet, ItemData->ItemDataAsset.LoadSynchronous());
-	UE_LOG(LogTemp, Warning, TEXT("[ULevelUpRewardWidget] ExitButtonClicked: Given item %s to pet %s"), *ItemData->ItemText.Name.ToString(), *SelectedPet->GetName());
-
-	RemoveFromParent();
-}
 void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& InLevelUpData)
 {
 	if (!PetListBox || !ItemListBox) return;
@@ -45,15 +28,13 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 	PetListBox->ClearChildren();
 	ItemListBox->ClearChildren();
 
-	//DisplayedPets = InLevelUpData.PetList;
-	//DisplayedItems = InLevelUpData.RandomItemList;
-
 	if (InLevelUpData.PetList.Num() <= 0 || !PetEntryWidgetClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ULevelUpRewardWidget] InitializeWithLevelUpData: No pets to display or PetEntryWidgetClass is not set."));
 		return;
 	}
-
+	
+	bool firstPet = true;
 	for (TObjectPtr<APetCompanionCharacter> Pet : InLevelUpData.PetList)
 	{
 		// Pet 위젯 초기화 로직 추가
@@ -61,32 +42,59 @@ void ULevelUpRewardWidget::InitializeWithLevelUpData(const FLevelUpDataBundle& I
 		NewPetEntry->InitializeWithPetData(this, Pet);
 		NewPetEntry->OnPetSelectedDelegate.AddDynamic(this, &ULevelUpRewardWidget::HandlePetSelected);
 		PetListBox->AddChild(NewPetEntry);
+
+		if (firstPet)
+		{
+			NewPetEntry->OnPetSelectButtonClicked();
+			firstPet = false;
+		}
 	}
 
-
-	if (InLevelUpData.RandomItemList.Num() <= 0 || !ItemEntryWidgetClass)
+	if (InLevelUpData.RandomItemHandles.Num() <= 0 || !ItemEntryWidgetClass)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ULevelUpRewardWidget] InitializeWithLevelUpData: No items to display or ItemEntryWidgetClass is not set."));
 		return;
 	}
 
-	for (TObjectPtr<UObject> Item : InLevelUpData.RandomItemList)
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UItemPoolSubsystem* ItemPool = World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>();
+	if (!ItemPool) return;
+
+	bool firstItem = true;
+	for (FItemDataHandle item : InLevelUpData.RandomItemHandles)
 	{
 		// Item 위젯 초기화 로직 추가
 		UItemEntryWidget* NewItemEntry = CreateWidget<UItemEntryWidget>(this, ItemEntryWidgetClass);
-		NewItemEntry->InitializeWithItemData(this, Item);
+		NewItemEntry->InitializeWithItemData(this, ItemPool, item);
 		NewItemEntry->OnItemSelectedDelegate.AddDynamic(this, &ULevelUpRewardWidget::HandleItemSelected);
 		ItemListBox->AddChild(NewItemEntry);
+
+		if (firstItem)
+		{
+			NewItemEntry->OnItemSelectButtonClicked();
+			firstItem = false;
+		}
 	}
 
 	// UI 입력 활성화
 	ADefaultPlayerController* PC = GetOwningPlayer<ADefaultPlayerController>();
-	if (PC) 
-	{
-		PC->SetUIInputMode(this, true);
-	}
+	if (PC) PC->SetUIInputMode(this, true);
+}
 
-	UE_LOG(LogTemp, Log, TEXT("LevelUpRewardWidget initialized with PetList Num: %d, ItemList Num: %d"), DisplayedPets.Num(), DisplayedItems.Num());
+void ULevelUpRewardWidget::ExitButtonClicked()
+{
+	if (!SelectedPet || SelectedItem.ItemRowName.IsNone()) return;
+
+	ADefaultPlayerController* PC = Cast<ADefaultPlayerController>(GetOwningPlayer());
+	if (!PC) return;
+
+	UPetManagerComponent* PetManager = PC->GetPawn()->FindComponentByClass<UPetManagerComponent>();
+	if (!PetManager) return;
+
+	PC->SetGameInputMode();
+	PetManager->GiveItemToPet(SelectedPet, SelectedItem);
+	RemoveFromParent();
 }
 
 void ULevelUpRewardWidget::HandlePetSelected(APetCompanionCharacter* InSelectedPet)
@@ -95,23 +103,11 @@ void ULevelUpRewardWidget::HandlePetSelected(APetCompanionCharacter* InSelectedP
 	UE_LOG(LogTemp, Log, TEXT("Pet selected"));
 }
 
-void ULevelUpRewardWidget::HandleItemSelected(UObject* InSelectedItem)
+void ULevelUpRewardWidget::HandleItemSelected(const FItemDataHandle& InSelectedItem)
 {
 	SelectedItem = InSelectedItem;
-	UE_LOG(LogTemp, Log, TEXT("Item selected"));
-}
-
-void ULevelUpRewardWidget::OnSelectedItemWidget(UItemEntryWidget* InSelectedItemWidget)
-{
-	if (!InSelectedItemWidget) return;
-
-	if (SelectedItemWidget)
-	{
-		SelectedItemWidget->SetSelectedVisual(false);
-	}
-
-	SelectedItemWidget = InSelectedItemWidget;
-	SelectedItemWidget->SetSelectedVisual(true);
+	UE_LOG(LogTemp, Log, TEXT("[LevelUpRewardWidget] SeletedItem %s"), *SelectedItem.ItemRowName.ToString());
+	UE_LOG(LogTemp, Log, TEXT("LevelUpRewardWidget Item selected"));
 }
 
 void ULevelUpRewardWidget::OnSelectedPetWidget(UPetEntryWidget* InSelectedPetWidget)
@@ -127,4 +123,15 @@ void ULevelUpRewardWidget::OnSelectedPetWidget(UPetEntryWidget* InSelectedPetWid
 	SelectedPetWidget->SetSelectedVisual(true);
 }
 
+void ULevelUpRewardWidget::OnSelectedItemWidget(UItemEntryWidget* InSelectedItemWidget)
+{
+	if (!InSelectedItemWidget) return;
 
+	if (SelectedItemWidget)
+	{
+		SelectedItemWidget->SetSelectedVisual(false);
+	}
+
+	SelectedItemWidget = InSelectedItemWidget;
+	SelectedItemWidget->SetSelectedVisual(true);
+}

@@ -4,55 +4,59 @@
 #include "Components/Image.h"
 #include "Components/Border.h"
 #include "Data/DataTableRow/ItemDataRow.h"
+#include "Data/DataTableRow/StatItemDataRow.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "Subsystem/ItemPoolSubsystem.h"
 
-void UItemEntryWidget::InitializeWithItemData(ULevelUpRewardWidget* InParentWidget, TObjectPtr<UObject> InItem)
+void UItemEntryWidget::InitializeWithItemData(ULevelUpRewardWidget* InParentWidget, UItemPoolSubsystem* ItemPool, const FItemDataHandle& InItem)
 {
-	if (!InParentWidget) return;
-	if (!InItem) return;
+	if (!InParentWidget || !ItemPool) return;
 
-	this->ParentWidget = InParentWidget;
+	ParentWidget = InParentWidget;
 
-	UItemDataObject* ItemDataObject = Cast<UItemDataObject>(InItem);
-	FItemDataRow* ItemData = &(ItemDataObject->ItemData);
-	FItemText* ItemText = &(ItemData->ItemText);
-
-	// 이미지 비동기 로딩
-	TSoftObjectPtr<UTexture2D>& ItemIcon = ItemData->ItemIcon;
-	if (ItemIcon.IsNull())
+	const FItemDataRow* ItemDataRow = nullptr;
+	switch (InItem.ItemType)
 	{
-		// 추후 배경색을 빨강으로 혹은 X 표시 이미지로 적용
-		//ItemIconImage->SetBrushFromTexture();
-	}
-	else if (ItemIcon.IsValid())
-	{
-		//OnIconsLoaded(ItemIcon);
-		ItemIconImage->SetBrushFromTexture(ItemIcon.Get());
-	}
-	else if (TextureLoadingHandle.IsValid() && TextureLoadingHandle->IsActive())
-	{
-		// 이미 로딩 중인 경우 처리
-		TextureLoadingHandle->CancelHandle();
-	}
-	else
-	{
-		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-		TextureLoadingHandle = Streamable.RequestAsyncLoad(
-			ItemIcon.ToSoftObjectPath(),
-			FStreamableDelegate::CreateUObject(this, &UItemEntryWidget::OnIconsLoaded, ItemIcon)
-		);
+		case EItemType::Stat:
+		{
+			ItemDataRow = ItemPool->GetStatItemDataRowByID(InItem.ItemRowName);
+			UE_LOG(LogTemp, Warning, TEXT("[UItemEntryWidget] LevelUpHandler: 랜덤 아이템 - Type: Stat"));
+			break;
+		}
+		case EItemType::Weapon:
+		{
+			ItemDataRow = ItemPool->GetWeaponItemDataRowByID(InItem.ItemRowName);
+			UE_LOG(LogTemp, Warning, TEXT("[UItemEntryWidget] LevelUpHandler: 랜덤 아이템 - Type: Weapon"));
+			break;
+		}
+		default:
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[UItemEntryWidget] LevelUpHandler: 랜덤 아이템 - Type: Unknown"));
+			break;
+		}
 	}
 
-	// 이름, 설명 등 설정
-	ItemNameText->SetText(ItemText->Name);
-	ItemDescriptionText->SetText(ItemText->Description);
+	if (ItemDataRow != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UItemEntryWidget] LevelUpHandler: 랜덤 아이템 - Name: %s, Description: %s"), *ItemDataRow->ItemText.Name.ToString(), *ItemDataRow->ItemText.Description.ToString());
 
-	SelectedItem = InItem;
+		// 이미지 비동기 로딩
+		SetItemIconImage(ItemDataRow->ItemIcon);
 
-	// 버튼 클릭 시 OnItemSelectButtonClicked 함수가 호출
-	ItemSelectButton->OnClicked.AddDynamic(this, &UItemEntryWidget::OnItemSelectButtonClicked);
+		// 이름, 설명 등 설정
+		FItemText ItemText = ItemDataRow->ItemText;
+		ItemNameText->SetText(ItemText.Name);
+		ItemDescriptionText->SetText(ItemText.Description);
+
+		SelectedItem = InItem;
+
+		// 버튼 클릭 시 OnItemSelectButtonClicked 함수가 호출
+		ItemSelectButton->OnClicked.AddDynamic(this, &UItemEntryWidget::OnItemSelectButtonClicked);
+	}
 }
+
 
 void UItemEntryWidget::OnItemSelectButtonClicked()
 {
@@ -88,4 +92,31 @@ void UItemEntryWidget::OnIconsLoaded(TSoftObjectPtr<UTexture2D> LoadedIcons)
 	}
 
 	TextureLoadingHandle->CancelHandle();
+}
+
+void UItemEntryWidget::SetItemIconImage(const TSoftObjectPtr<UTexture2D>& IconTextureSoftPtr)
+{
+	if (IconTextureSoftPtr.IsNull())
+	{
+		// 추후 배경색을 빨강으로 혹은 X 표시 이미지로 적용
+		//ItemIconImage->SetBrushFromTexture();
+	}
+	else if (IconTextureSoftPtr.IsValid())
+	{
+		//OnIconsLoaded(ItemIcon);
+		ItemIconImage->SetBrushFromTexture(IconTextureSoftPtr.Get());
+	}
+	else if (TextureLoadingHandle.IsValid() && TextureLoadingHandle->IsActive())
+	{
+		// 이미 로딩 중인 경우 처리
+		TextureLoadingHandle->CancelHandle();
+	}
+	else
+	{
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		TextureLoadingHandle = Streamable.RequestAsyncLoad(
+			IconTextureSoftPtr.ToSoftObjectPath(),
+			FStreamableDelegate::CreateUObject(this, &UItemEntryWidget::OnIconsLoaded, IconTextureSoftPtr)
+		);
+	}
 }

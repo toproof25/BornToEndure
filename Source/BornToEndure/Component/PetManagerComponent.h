@@ -12,6 +12,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Delegates/Delegate.h"
+#include "Data/DataTableRow/ItemDataRow.h"
 #include "PetManagerComponent.generated.h"
 
 class APetCompanionCharacter;
@@ -60,24 +61,14 @@ public:
     void RemovePet(APetCompanionCharacter* PetToRemove);
 
     /**
-     * @brief UI등에서 아이템을 선택한 후 아이템의 DataAsset을 로드하여 인스턴스화하는 함수
-	 * @param ItemAssetId UI에서 선택하여 고른 아이템의 PrimaryAssetId
-	 * @details
-	 * - 로드가 안된 아이템은 비동기 로드 후 OnItemDataLoaded 콜백에서 Pet에게 전달한다.
-     * - 아이템 추가는 해당 함수를 시작으로 비동기 로드 -> Pet 선택 SelectPetForItem -> GiveItemToPet으로 전달된다
-     */
-    UFUNCTION(BlueprintCallable, Category = "Pet|Item")
-    void RequestItemForPet(const FPrimaryAssetId& ItemAssetId);
-
-    /**
      * @brief 아이템을 선택한 Pet에게 전달하는 함수
      * @param TargetPet 아이템을 주고자 하는 Pet의 포인터
      * @param ItemData 아이템의 DataAsset 포인터
      * @todo
      * - 현재는 기본만 구현되어 있으며, 추후 변경 예정
      */
-    UFUNCTION(BlueprintCallable, Category = "Pet|Item")
-    void GiveItemToPet(APetCompanionCharacter* TargetPet, UPetItemDataAsset* ItemData);
+	UFUNCTION(Category = "Pet|Item")
+	void GiveItemToPet(APetCompanionCharacter* TargetPet, FItemDataHandle ItemData);
 
     /**
      * @brief Pet 소유한 아이템을 제거하는 함수
@@ -146,7 +137,5 @@ private:
      * - Selection Policy 패턴으로 확장
      */
     APetCompanionCharacter* SelectPetForItem(const UPetItemDataAsset* ItemData) const;
-
-    void OnItemDataLoaded(FPrimaryAssetId ItemAssetId);
 
 };

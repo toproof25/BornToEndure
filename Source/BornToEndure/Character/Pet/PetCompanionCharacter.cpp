@@ -9,7 +9,10 @@
 #include "Component/PetStatComponent.h"
 #include "Component/PetItemComponent.h"
 #include "Data/PetBaseDataAsset.h"
+#include "Data/PetItemDataAsset.h"
 #include "Data/PetProjectileItemDataAsset.h"
+#include "Subsystem/ItemPoolSubsystem.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
 
 APetCompanionCharacter::APetCompanionCharacter()
 {
@@ -62,24 +65,37 @@ void APetCompanionCharacter::BeginPlay()
 
 void APetCompanionCharacter::InitializeFromDataAsset()
 {
+	// Item Subsystem에서 StarWeaponID를 가져온 후 인스턴스화 하여 시작 아이템으로 적용
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UItemPoolSubsystem* ItemPoolSubsystem = World ? World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+	if (!ItemPoolSubsystem) return;
+
+	// 시작 무기의 경우 초기에 가져와서 설정
+	const FWeaponItemDataRow* StartWeaponRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(PetBaseData->StartWeaponID);
+	TSoftObjectPtr<UPetItemDataAsset> StartWeaponDataAsset = StartWeaponRow->WeaponItemDataAsset;
+	UPetProjectileItemDataAsset* StartWeaponInstance = Cast<UPetProjectileItemDataAsset>(StartWeaponDataAsset.LoadSynchronous());
+
+	FItemDataHandle StartWeaponHandle;
+	StartWeaponHandle.ItemType = EItemType::Weapon;
+	StartWeaponHandle.ItemRowName = PetBaseData->StartWeaponID;
+
 	// StatComponent 초기화
 	if (PetStatComp)
 	{
 		PetStatComp->InitializeBaseStats(PetBaseData->BaseStats);
 	}
 
-	UPetProjectileItemDataAsset* DefaultProjectileClass = PetBaseData->DefaultProjectileClass.LoadSynchronous();
-
 	// CombatComponent에 기본 공격 클래스 설정 (BeginPlay에서는 로드하여 적용)
-	if (PetCombatComp && DefaultProjectileClass)
+	if (PetCombatComp && StartWeaponInstance)
 	{
-		FProjectileModifierData ProjectileModifier = DefaultProjectileClass->ProjectileModifier;
+		FProjectileModifierData ProjectileModifier = StartWeaponInstance->ProjectileModifier;
 		PetCombatComp->DefaultProjectileClass = ProjectileModifier.OverrideProjectileClass.LoadSynchronous();
 	}
 
-	if (PetItemComp && DefaultProjectileClass)
+	if (PetItemComp)
 	{
-		PetItemComp->AddItem(DefaultProjectileClass);
+		PetItemComp->AddItem(StartWeaponHandle);
 	}
 
 	// 이동 속도도 DataAsset 기반으로 설정
@@ -87,13 +103,6 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 	{
 		GetCharacterMovement()->MaxWalkSpeed = PetStatComp->GetFinalStat(EPetStatType::MoveSpeed);
 	}
-
-	//PetBaseData에 BehaviorTree가 설정되어 있으면 AI Controller에 전달
-	//APetCompanionAIController* PetAI = Cast<APetCompanionAIController>(GetController());
-	//if (PetAI)
-	//{
-	//	PetAI->SetBehaviorTree(PetBaseData->BehaviorTree.LoadSynchronous());
-	//}
 }
 
 void APetCompanionCharacter::BindComponentDelegates()

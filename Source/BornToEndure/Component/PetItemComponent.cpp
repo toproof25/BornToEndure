@@ -4,7 +4,14 @@
 #include "Data/PetSynergyDataAsset.h"
 #include "Character/Pet/PetCompanionCharacter.h"
 #include "Engine/AssetManager.h"
+
+#include "Data/DataTableRow/ItemDataRow.h"
+#include "Data/DataTableRow/StatItemDataRow.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
+
 #include "Subsystem/ObjectPoolSubsystem.h"
+#include "Subsystem/ItemPoolSubsystem.h"
+
 
 
 UPetItemComponent::UPetItemComponent()
@@ -18,31 +25,58 @@ void UPetItemComponent::BeginPlay()
     LoadSynergyDataAsync();
 }
 
-void UPetItemComponent::AddItem(UPetItemDataAsset* ItemData)
+void UPetItemComponent::AddItem(FItemDataHandle ItemData)
 {
-    if (!ItemData) return;
+	// 1. 아이템 인스턴스 생성
+	FPetItemInstance NewInstance;
+	NewInstance.InstanceId = FGuid::NewGuid();
+	LastAddedInstanceId = NewInstance.InstanceId;
 
-    // 1. 아이템 인스턴스 생성
-    FPetItemInstance NewInstance;
-    NewInstance.InstanceId = FGuid::NewGuid();
-    NewInstance.LoadedData = ItemData;
-    LastAddedInstanceId = NewInstance.InstanceId;
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+	UItemPoolSubsystem* ItemPoolSubsystem = World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>();
+	if (ItemPoolSubsystem == nullptr) return;
 
-    OwnedItems.Add(NewInstance);
+	switch (ItemData.ItemType)
+	{
+		case EItemType::Stat:
+		{
+			const FStatItemDataRow* StatItemDataRow = ItemPoolSubsystem->GetStatItemDataRowByID(ItemData.ItemRowName);
 
-    // 2. 아이템 DataAsset에게 적용을 위임 (Visitor 패턴)
-        // StatItemData라면 → StatComponent에 modifier를 추가
-        // ProjectileItemData라면 → ItemComponent의 ProjectileModifier에 추가
-    ItemData->ApplyToComponent(this);
+			// 해당 아이템에 대한 FGuid를 모두 추가한 후 StatComponent에 Modifier로 추가한다 (Stat 추적 가능하도록)
+			for (FStatModifier Mod : StatItemDataRow->StatModifiers)
+			{
+				Mod.SourceId = LastAddedInstanceId;
+				UE_LOG(LogTemp, Log, TEXT("[PetItemComponent] AddItem: Adding StatModifier for SourceId: %s, StatType: %d, Value: %f"),
+					*Mod.SourceId.ToString(), static_cast<int32>(Mod.StatType), Mod.Value);
+				AddStatModifier(Mod);
+			}
+			break;
+		}
 
-    // 3. 시너지 재검사
-    CheckAndUpdateSynergies();
+		case EItemType::Weapon:
+		{
+			const FWeaponItemDataRow* WeaponItemDataRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(ItemData.ItemRowName);
 
-    // 4. 외부에 방송
-    OnItemAdded.Broadcast(ItemData);
+			// 무기의 경우 비동기로 로드 후 ApplyToComponent 호출하도록 함
+			UPetItemDataAsset* WeaponItemData = WeaponItemDataRow->WeaponItemDataAsset.LoadSynchronous();
+			NewInstance.LoadedData = WeaponItemData;
+			WeaponItemData->ApplyToComponent(this);
+			break;
+		}
+		default:
+			break;
+	}
 
-    UE_LOG(LogTemp, Log, TEXT("[PetItemComponent] Item added: %s (InstanceId: %s)"),
-        *ItemData->ItemName.ToString(), *LastAddedInstanceId.ToString());
+	OwnedItems.Add(NewInstance);
+
+	// 2. 시너지 재검사
+	CheckAndUpdateSynergies();
+
+	// 3. 외부에 방송
+	//OnItemAdded.Broadcast(ItemData);
+
+	//UE_LOG(LogTemp, Log, TEXT("[PetItemComponent] Item added: %s (InstanceId: %s)"), *ItemData->ItemName.ToString(), *LastAddedInstanceId.ToString());
 }
 
 void UPetItemComponent::RemoveItem(const FGuid& InstanceId)
@@ -66,6 +100,11 @@ void UPetItemComponent::RemoveItem(const FGuid& InstanceId)
 		// 3.FGuid를 기반으로 아이템을 각 Component에서 제거한다
         ItemData->RemoveFromComponent(this, InstanceId);
     }
+	else
+	{
+		// 스탯 아이템의 경우 ItemData가 nullptr로 존재함
+		RemoveStatModifiersBySource(InstanceId);
+	}
 
     // 4.최종적으로 소유한 아이템에서 제거할 아이템에 해당하는 Index를 제거한다
     OwnedItems.RemoveAtSwap(Index);
@@ -92,7 +131,6 @@ void UPetItemComponent::AddProjectileModifier(const FProjectileModifierData& Mod
 
 void UPetItemComponent::RemoveProjectileModifier(const FGuid& InstanceId)
 {
-
     // 새로운 발사체 오브젝트 풀링에서 제거
     UWorld* World = GetWorld();
     if (!World) return;
@@ -107,6 +145,43 @@ void UPetItemComponent::RemoveProjectileModifier(const FGuid& InstanceId)
     }
 
     ProjectileModifiers.Remove(InstanceId);
+}
+
+void UPetItemComponent::AddStatModifier(const FStatModifier& Modifier)
+{
+	ActiveStatModifiers.Add(Modifier);
+
+	APetCompanionCharacter* PetChar = Cast<APetCompanionCharacter>(GetOwner());
+	UPetStatComponent* StatComp = PetChar->GetStatComponent();
+	StatComp->RecalculateStat(Modifier.StatType);
+}
+
+void UPetItemComponent::RemoveStatModifiersBySource(const FGuid& SourceId)
+{
+	// 1. 가진 모든 아이템에서 일치하는 타입들을 모두 수집 (중복은 없도록 Set으로 사용)
+	TSet<EPetStatType> AffectedStats;
+	for (const FStatModifier& Mod : ActiveStatModifiers)
+	{
+		if (Mod.SourceId == SourceId)
+		{
+			AffectedStats.Add(Mod.StatType);
+		}
+	}
+
+	// 2. SourceId가 일치하는 modifier 모두 제거
+	ActiveStatModifiers.RemoveAllSwap([&SourceId](const FStatModifier& Mod)
+		{
+			return Mod.SourceId == SourceId;
+		}
+	);
+
+	// 3. 영향받은 스탯만 재계산
+	APetCompanionCharacter* PetChar = Cast<APetCompanionCharacter>(GetOwner());
+	UPetStatComponent* StatComp = PetChar->GetStatComponent();
+	for (EPetStatType StatType : AffectedStats)
+	{
+		StatComp->RecalculateStat(StatType);
+	}
 }
 
 FProjectileModifierData UPetItemComponent::GetAggregatedProjectileModifier() const
@@ -173,7 +248,7 @@ void UPetItemComponent::CheckAndUpdateSynergies()
 {
     if (AllSynergyData.IsEmpty()) return;
 
-    // 현재 아이템의 모든 태그 집계
+    // 현재 아이템의 모든 태그 집계 *********************** 아마 Stat 아이템은 적용이 안될 수 있음 리펙토링 하면서 구조가 바뀌어서
     TMap<FGameplayTag, int32> CurrentTagCounts;
     for (const FPetItemInstance& Instance : OwnedItems)
     {
@@ -208,7 +283,7 @@ void UPetItemComponent::CheckAndUpdateSynergies()
                 for (FStatModifier Bonus : SynergyData->StatBonuses)
                 {
                     Bonus.SourceId = FGuid::NewGuid();
-                    StatComp->AddModifier(Bonus);
+                    AddStatModifier(Bonus);
                 }
             }
             OnSynergyChanged.Broadcast(SynergyData, true);
