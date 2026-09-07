@@ -5,6 +5,8 @@
 #include "Interface/PetItemProviderInterface.h"
 #include "Data/PetProjectileItemDataAsset.h"
 #include "GameplayTagContainer.h"
+#include "Data/DataTableRow/ItemDataRow.h"
+#include "Stat/PetStatTypes.h"
 #include "PetItemComponent.generated.h"
 
 class UPetItemDataAsset;
@@ -50,14 +52,15 @@ public:
     virtual FProjectileModifierData GetAggregatedProjectileModifier() const override;
     virtual FGameplayTag GetDominantElementTag() const override;
 
-    /**
-     * @brief 아이템 추가
-     * @param ItemData PetManagerComponent에서 아이템 DataAsset을 보내준다
-     * @details
+	/**
+	 * @brief 아이템 추가
+	 * @param ItemData PetManagerComponent에서 아이템 DataAsset을 보내준다
+	 * @details
 	 * - 파라미터로 온 아이템의 FPetItemInstance를 생성한 후 OwnedItems에 추가한다
 	 * - 각 ItemData의 ApplyToComponent를 호출하여 적절하게 반영됨
-     */
-    void AddItem(UPetItemDataAsset* ItemData);
+	 */
+	void AddItem(FItemDataHandle ItemData);
+
 
     /**
      * @brief 아이템 제거
@@ -88,6 +91,23 @@ public:
      */
     void RemoveProjectileModifier(const FGuid& InstanceId);
 
+	/**
+	 * @brief Stat Modifier를 추가하고 해당 스탯을 재계산 후 최종 스탯 캐싱
+	 * @param Modifier StatModifier 구조체로, 어떤 스탯에 어떤 방식으로 얼마만큼의 증감할 지 정의함 (AttackPower +10% 등)
+	 * @details
+	 * - UPetStatItemDataAsset::ApplyToComponent에서 아이템이 추가될 때 호출된다
+	 */
+	void AddStatModifier(const FStatModifier& Modifier);
+
+	/**
+	 * @brief SourceId에 해당하는 Modifier를 모두 제거하고 재계산 후 최종 스탯 캐싱
+	 * @param SourceId 제거하고자 하는 Stat Item의 고유 ID
+	 */
+	void RemoveStatModifiersBySource(const FGuid& SourceId);
+
+	const TArray<FStatModifier>& GetStatModifiers() const { return ActiveStatModifiers; }
+	 
+
 	// 아이템 추가, 제거, 시너지 변경 Delegate (UI 업데이트 등에 활용하여 아직 구독된 곳 없음)
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAdded, const UPetItemDataAsset*);
     FOnItemAdded OnItemAdded;
@@ -105,6 +125,9 @@ private:
 
     TArray<FPetItemInstance> OwnedItems;
     TMap<FGuid, FProjectileModifierData> ProjectileModifiers;
+
+	/** * @brief 현재 적용이 되는 모든 Stat 증감 아이템 수치 리스트 */
+	TArray<FStatModifier> ActiveStatModifiers;
 
     /** @brief활성화된 시너지 목록 */
     UPROPERTY()

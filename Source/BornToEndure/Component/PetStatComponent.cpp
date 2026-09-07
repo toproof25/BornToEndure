@@ -1,4 +1,6 @@
 ﻿#include "Component/PetStatComponent.h"
+#include "Component/PetItemComponent.h"
+#include "Character/Pet/PetCompanionCharacter.h"
 
 UPetStatComponent::UPetStatComponent()
 {
@@ -35,7 +37,11 @@ float UPetStatComponent::GetFinalStat(EPetStatType StatType) const
     float AdditiveSum = 0.f;
     float MultiplicativeProduct = 1.f;
 
-    for (const FStatModifier& Mod : ActiveModifiers)
+	// 아이템 컴포넌트에서 Stat 아이템을 가져와 계산
+	APetCompanionCharacter* PetCharacter = Cast<APetCompanionCharacter>(GetOwner());
+	UPetItemComponent* ItemComp = PetCharacter->GetItemComponent();
+
+    for (const FStatModifier& Mod : ItemComp->GetStatModifiers())
     {
         if (Mod.StatType != StatType) continue;
 
@@ -59,39 +65,6 @@ float UPetStatComponent::GetFinalStat(EPetStatType StatType) const
     CachedFinalStats.Add(StatType, FinalValue);
 
     return FinalValue;
-}
-
-void UPetStatComponent::AddModifier(const FStatModifier& Modifier)
-{
-    ActiveModifiers.Add(Modifier);
-    RecalculateStat(Modifier.StatType);
-}
-
-
-void UPetStatComponent::RemoveModifiersBySource(const FGuid& SourceId)
-{
-    // 1. 가진 모든 아이템에서 일치하는 타입들을 모두 수집 (중복은 없도록 Set으로 사용)
-    TSet<EPetStatType> AffectedStats;
-    for (const FStatModifier& Mod : ActiveModifiers)
-    {
-        if (Mod.SourceId == SourceId)
-        {
-            AffectedStats.Add(Mod.StatType);
-        }
-    }
-
-    // 2. SourceId가 일치하는 modifier 모두 제거
-    ActiveModifiers.RemoveAllSwap([&SourceId](const FStatModifier& Mod)
-        {
-            return Mod.SourceId == SourceId;
-        }
-    );
-
-    // 3. 영향받은 스탯만 재계산
-    for (EPetStatType StatType : AffectedStats)
-    {
-        RecalculateStat(StatType);
-    }
 }
 
 void UPetStatComponent::RecalculateStat(EPetStatType StatType)

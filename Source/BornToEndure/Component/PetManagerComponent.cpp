@@ -5,6 +5,8 @@
 #include "Engine/AssetManager.h"
 #include "Component/PetItemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Data/DataTableRow/ItemDataRow.h"
+#include "Data/DataTableRow/StatItemDataRow.h"
 
 DEFINE_LOG_CATEGORY(LogPetManager);
 
@@ -85,6 +87,7 @@ void UPetManagerComponent::RemovePet(APetCompanionCharacter* PetToRemove)
     PetToRemove->Destroy();
 }
 
+/*
 void UPetManagerComponent::RequestItemForPet(const FPrimaryAssetId& ItemAssetId)
 {
     if (!ItemAssetId.IsValid())
@@ -103,22 +106,22 @@ void UPetManagerComponent::RequestItemForPet(const FPrimaryAssetId& ItemAssetId)
 
     UE_LOG(LogPetManager, Verbose, TEXT("[PetManagerComponent] Async loading item: %s"), *ItemAssetId.ToString());
 }
-
-void UPetManagerComponent::GiveItemToPet(APetCompanionCharacter* TargetPet, UPetItemDataAsset* ItemData)
+*/
+void UPetManagerComponent::GiveItemToPet(APetCompanionCharacter* TargetPet, FItemDataHandle ItemData)
 {
-    if (!TargetPet || !ItemData) return;
-    if (!PetList.Contains(TargetPet))
-    {
-        UE_LOG(LogPetManager, Warning, TEXT("[PetManagerComponent] Target pet is not owned."));
-        return;
-    }
+	if (!TargetPet || ItemData.ItemRowName.IsNone()) return;
 
-    UPetItemComponent* ItemComp = TargetPet->GetItemComponent();
-    if (ItemComp)
-    {
-        ItemComp->AddItem(ItemData);
-        //OnPetItemReceived.Broadcast(TargetPet, ItemData);
-    }
+	if (!PetList.Contains(TargetPet))
+	{
+		UE_LOG(LogPetManager, Warning, TEXT("[PetManagerComponent] Target pet is not owned."));
+		return;
+	}
+
+	UPetItemComponent* ItemComp = TargetPet->GetItemComponent();
+	if (ItemComp)
+	{
+		ItemComp->AddItem(ItemData);
+	}
 }
 
 void UPetManagerComponent::RemoveItemFromPet(APetCompanionCharacter* TargetPet, const FGuid& InstanceId)
@@ -172,6 +175,7 @@ APetCompanionCharacter* UPetManagerComponent::SelectPetForItem(
     return GetActivePet();
 }
 
+/*
 void UPetManagerComponent::OnItemDataLoaded(FPrimaryAssetId ItemAssetId)
 {
     UAssetManager& AM = UAssetManager::Get();
@@ -195,3 +199,4 @@ void UPetManagerComponent::OnItemDataLoaded(FPrimaryAssetId ItemAssetId)
 
     UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Item '%s' given to pet '%s'"), *ItemData->ItemName.ToString(), *SelectedPet->GetName());
 }
+*/
