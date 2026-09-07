@@ -9,8 +9,10 @@
 #include "Component/PetStatComponent.h"
 #include "Component/PetItemComponent.h"
 #include "Data/PetBaseDataAsset.h"
+#include "Data/PetItemDataAsset.h"
 #include "Data/PetProjectileItemDataAsset.h"
 #include "Subsystem/ItemPoolSubsystem.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
 
 APetCompanionCharacter::APetCompanionCharacter()
 {
@@ -68,8 +70,15 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 	if (!World) return;
 	UItemPoolSubsystem* ItemPoolSubsystem = World ? World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
 	if (!ItemPoolSubsystem) return;
-	TSoftObjectPtr<UPetItemDataAsset> StartWeaponDataAsset = ItemPoolSubsystem->GetItemDataAssetByID(PetBaseData->StartWeaponID);
+
+	// 시작 무기의 경우 초기에 가져와서 설정
+	const FWeaponItemDataRow* StartWeaponRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(PetBaseData->StartWeaponID);
+	TSoftObjectPtr<UPetItemDataAsset> StartWeaponDataAsset = StartWeaponRow->WeaponItemDataAsset;
 	UPetProjectileItemDataAsset* StartWeaponInstance = Cast<UPetProjectileItemDataAsset>(StartWeaponDataAsset.LoadSynchronous());
+
+	FItemDataHandle StartWeaponHandle;
+	StartWeaponHandle.ItemType = EItemType::Weapon;
+	StartWeaponHandle.ItemRowName = PetBaseData->StartWeaponID;
 
 	// StatComponent 초기화
 	if (PetStatComp)
@@ -84,9 +93,9 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 		PetCombatComp->DefaultProjectileClass = ProjectileModifier.OverrideProjectileClass.LoadSynchronous();
 	}
 
-	if (PetItemComp && StartWeaponInstance)
+	if (PetItemComp)
 	{
-		PetItemComp->AddItem(StartWeaponInstance);
+		PetItemComp->AddItem(StartWeaponHandle);
 	}
 
 	// 이동 속도도 DataAsset 기반으로 설정
@@ -94,13 +103,6 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 	{
 		GetCharacterMovement()->MaxWalkSpeed = PetStatComp->GetFinalStat(EPetStatType::MoveSpeed);
 	}
-
-	//PetBaseData에 BehaviorTree가 설정되어 있으면 AI Controller에 전달
-	//APetCompanionAIController* PetAI = Cast<APetCompanionAIController>(GetController());
-	//if (PetAI)
-	//{
-	//	PetAI->SetBehaviorTree(PetBaseData->BehaviorTree.LoadSynchronous());
-	//}
 }
 
 void APetCompanionCharacter::BindComponentDelegates()
