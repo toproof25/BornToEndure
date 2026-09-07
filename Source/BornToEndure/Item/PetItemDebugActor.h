@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿/*
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -16,6 +17,7 @@
 #include "Data/DataTableRow/StatItemDataRow.h"
 #include "Data/DataTableRow/WeaponItemDataRow.h"
 #include "PetItemDebugActor.generated.h"
+
 
 class UPetManagerComponent;
 class APetCompanionCharacter;
@@ -110,3 +112,4 @@ inline FString APetItemDebugActor::GetEnumDisplayName(const FString& EnumPath, T
 
 	return TEXT("Unknown");
 }
+*/
