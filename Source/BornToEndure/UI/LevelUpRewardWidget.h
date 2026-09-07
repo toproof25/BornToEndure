@@ -49,19 +49,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UI Classes")
 	TSubclassOf<UItemEntryWidget> ItemEntryWidgetClass;
 
-	UPROPERTY()
-	TArray<TObjectPtr<APetCompanionCharacter>> DisplayedPets;
-	UPROPERTY()
-	TArray<TObjectPtr<UObject>> DisplayedItems;
-
 public:
 
 	virtual void NativeOnInitialized() override;
 
+	void InitializeWithLevelUpData(const FLevelUpDataBundle& InLevelUpData);
+
 	UFUNCTION()
 	void ExitButtonClicked();
-
-	void InitializeWithLevelUpData(const FLevelUpDataBundle& InLevelUpData);
 	
 	UFUNCTION()
 	void HandlePetSelected(APetCompanionCharacter* InSelectedPet);
@@ -69,16 +64,16 @@ public:
 	void HandleItemSelected(const FItemDataHandle& InSelectedItem);
 
 	/**
-	 * @brief ItemWidget에서 각 아이템이 선택될 때 호출되는 함수로, 선택된 아이템 위젯을 직관적으로 표시하기 위해 사용됨
-	 * @param InSelectedItemWidget 선택된 UItemEntryWidget 포인터
-	 */
-	void OnSelectedItemWidget(UItemEntryWidget* InSelectedItemWidget);
-
-	/**
 	 * @brief PetWidget에서 각 펫이 선택될 때 호출되는 함수로, 선택된 펫 위젯을 직관적으로 표시하기 위해 사용됨
 	 * @param InSelectedPetWidget 선택된 UPetEntryWidget 포인터
 	 */
 	void OnSelectedPetWidget(UPetEntryWidget* InSelectedPetWidget);
+
+	/**
+	 * @brief ItemWidget에서 각 아이템이 선택될 때 호출되는 함수로, 선택된 아이템 위젯을 직관적으로 표시하기 위해 사용됨
+	 * @param InSelectedItemWidget 선택된 UItemEntryWidget 포인터
+	 */
+	void OnSelectedItemWidget(UItemEntryWidget* InSelectedItemWidget);
 
 private:
 
