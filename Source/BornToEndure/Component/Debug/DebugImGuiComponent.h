@@ -13,6 +13,8 @@
 
 
 class APlayerCharacter;
+class APetCompanionCharacter;
+class UPetItemComponent;
 class ABaseWeapon;
 class UPlayerAnimInstance;
 class UStatComponent;
@@ -78,5 +80,12 @@ private:
 
 	// 펫 시스템 전용 디버그 렌더링 함수
 	void DrawPetInfo();
+	void DrawPetStatus(APetCompanionCharacter* Pet);
+	FGuid DrawPetInventory(APetCompanionCharacter* Pet);
+	void DrawPetCombat(APetCompanionCharacter* Pet);
+	void DrawPetSynergies(UPetItemComponent* ItemComponent);
+
+	TWeakObjectPtr<APetCompanionCharacter> InspectedPet;
+	FString PetActionResult;
 
 };

@@ -13,6 +13,7 @@ class UPetManagerComponent;
 class UItemPoolSubsystem;
 class UDataTable;
 class UPetItemDataAsset;
+struct FStreamableHandle;
 
 UCLASS()
 class BORNTOENDURE_API APetItemDebugActor : public AActor
@@ -39,7 +40,22 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UPetItemDataAsset>> LoadedWeaponItems;
 
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UObject>> CatalogAssets;
+
 #if !UE_BUILD_SHIPPING
+	struct FCatalogEntry
+	{
+		FName RowName;
+		FString Name, ItemId, Description, Effects, Synergies;
+		TArray<FString> SynergyKeys;
+	};
+	TArray<FCatalogEntry> CatalogEntries;
+	TMap<FString, FString> SynergyOptions;
+	FString SelectedSynergy;
+	TSharedPtr<FStreamableHandle> CatalogLoadHandle;
+	EItemType ListedType = EItemType::Stat;
+	bool bCatalogLoading = false;
 	FImGuiDelegateHandle ImGuiDelegateHandle;
 	TWeakObjectPtr<APetCompanionCharacter> SelectedPet;
 	TWeakObjectPtr<UDataTable> ListedTable;
@@ -53,5 +69,7 @@ private:
 	void DrawPetSelection(UPetManagerComponent* Manager);
 	void DrawCatalog(UItemPoolSubsystem* Pool, EItemType Type);
 	void GiveItem(EItemType Type, FName RowName);
+	void RefreshCatalog(UDataTable* Table, EItemType Type);
+	void OnCatalogLoaded();
 #endif
 };
