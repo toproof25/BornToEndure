@@ -21,6 +21,7 @@ class UButton;
 class UTextBlock;
 class UImage;
 class UBorder;
+class UItemPoolSubsystem;
 
 UCLASS()
 class BORNTOENDURE_API UItemEntryWidget : public UUserWidget
@@ -43,11 +44,11 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* ItemSelectButton;
 
-	UObject* SelectedItem;
+	FItemDataHandle SelectedItem;
 
 	FOnItemSelected OnItemSelectedDelegate;
 
-	void InitializeWithItemData(ULevelUpRewardWidget* InParentWidget, TObjectPtr<UObject> InItem);
+	void InitializeWithItemData(ULevelUpRewardWidget* InParentWidget, UItemPoolSubsystem* ItemPool,  const FItemDataHandle& InItem);
 
 	UFUNCTION()
 	void OnItemSelectButtonClicked();
@@ -80,4 +81,6 @@ private:
 	 * @brief 부모 Widtet을 참조하기 위한 변수
 	 */
 	ULevelUpRewardWidget* ParentWidget;
+
+	void SetItemIconImage(const TSoftObjectPtr<UTexture2D>& IconTextureSoftPtr);
 };

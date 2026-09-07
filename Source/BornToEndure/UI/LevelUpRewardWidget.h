@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/GameTypes.h"
+#include "Data/DataTableRow/ItemDataRow.h"
 #include "LevelUpRewardWidget.generated.h"
 
 class UImage;
@@ -16,7 +17,7 @@ class APetCompanionCharacter;
 
 // Pet과 Item 선택 시 포인터를 전달하기 위한 Delegate
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPetSelected, APetCompanionCharacter*, SelectedPet);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSelected, UObject*, SelectedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const FItemDataHandle&, SelectedItem);
 //FOnItemSelected OnItemSelectedDelegate;
 
 
@@ -65,7 +66,7 @@ public:
 	UFUNCTION()
 	void HandlePetSelected(APetCompanionCharacter* InSelectedPet);
 	UFUNCTION()
-	void HandleItemSelected(UObject* InSelectedItem);
+	void HandleItemSelected(const FItemDataHandle& InSelectedItem);
 
 	/**
 	 * @brief ItemWidget에서 각 아이템이 선택될 때 호출되는 함수로, 선택된 아이템 위젯을 직관적으로 표시하기 위해 사용됨
@@ -84,7 +85,7 @@ private:
 	UPROPERTY()
 	APetCompanionCharacter* SelectedPet;
 	UPROPERTY()
-	UObject* SelectedItem;
+	FItemDataHandle SelectedItem;
 
 	/**
 	 * @brief 현재 선택된 아이템 위젯을 캐싱
