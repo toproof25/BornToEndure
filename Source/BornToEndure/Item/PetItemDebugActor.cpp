@@ -5,7 +5,7 @@
 #include "Component/PetItemComponent.h"
 #include "Component/PetManagerComponent.h"
 #include "Component/PetStatComponent.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "Engine/DataTable.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -203,8 +203,8 @@ void APetItemDebugActor::GiveItem(EItemType Type, FName RowName)
 	{
 		const FWeaponItemDataRow* Row = Pool->GetWeaponItemDataRowByID(RowName);
 		// Explicit button action only; never load assets in the per-frame catalog.
-		UPetProjectileItemDataAsset* Asset = Row
-			? Cast<UPetProjectileItemDataAsset>(Row->WeaponItemDataAsset.LoadSynchronous()) : nullptr;
+		UPetWeaponItemDataAsset* Asset = Row
+			? Cast<UPetWeaponItemDataAsset>(Row->WeaponItemDataAsset.LoadSynchronous()) : nullptr;
 		if (!IsValid(Asset))
 		{
 			LastResult = TEXT("지급 취소: 무기 에셋이 없거나 타입이 맞지 않습니다.");
@@ -347,15 +347,15 @@ void APetItemDebugActor::OnCatalogLoaded()
 		}
 		else
 		{
-			const UPetProjectileItemDataAsset* Asset = Cast<UPetProjectileItemDataAsset>(WeaponRow->WeaponItemDataAsset.Get());
+			const UPetWeaponItemDataAsset* Asset = Cast<UPetWeaponItemDataAsset>(WeaponRow->WeaponItemDataAsset.Get());
 			if (IsValid(Asset))
 			{
 				ItemSynergyTags = Asset->SynergyTags;
-				const FProjectileModifierData& Mod = Asset->ProjectileModifier;
-				const FString Pattern = StaticEnum<EProjectilePattern>()->GetDisplayNameTextByValue(static_cast<int64>(Mod.Pattern)).ToString();
-				Entry.Effects = FString::Printf(TEXT("발사 수 %+d / 크기 x%.2f / 속도 x%.2f\n패턴: %s\n속성: %s\n교체 발사체: %s"),
-					Mod.ProjectileCountAdd, Mod.SizeMultiplier, Mod.SpeedMultiplier, *Pattern,
-					*Mod.ElementType.ToString(), Mod.OverrideProjectileClass.IsNull() ? TEXT("없음") : *Mod.OverrideProjectileClass.GetAssetName());
+				const FWeaponModifierData& Mod = Asset->WeaponModifier;
+				const FString Pattern = StaticEnum<EWeaponPattern>()->GetDisplayNameTextByValue(static_cast<int64>(Mod.Pattern)).ToString();
+				Entry.Effects = FString::Printf(TEXT("무기 수 %+d / 크기 x%.2f / 속도 x%.2f\n패턴: %s\n속성: %s\n교체 무기: %s"),
+					Mod.WeaponCountAdd, Mod.SizeMultiplier, Mod.SpeedMultiplier, *Pattern,
+					*Mod.ElementType.ToString(), Mod.OverrideWeaponClass.IsNull() ? TEXT("없음") : *Mod.OverrideWeaponClass.GetAssetName());
 			}
 			else
 			{

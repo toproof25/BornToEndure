@@ -8,7 +8,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Data/DataTableRow/ItemDataRow.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "CombatTypes.generated.h"
 
 class AActor;
@@ -39,9 +39,9 @@ struct FPetAttackInfo
 	float BleedDamageBonus = 0.f;
 
 	// 발사체 구성
-	TSubclassOf<AActor> ProjectileClass;
-	int32 ProjectileCount = 1;
-	float ProjectileSpeed = 1200.f;
-	float ProjectileSize = 1.f;
-	EProjectilePattern Pattern = EProjectilePattern::Single;
+	TSubclassOf<AActor> WeaponClass;
+	int32 WeaponCount = 1;
+	float WeaponSpeed = 1200.f;
+	float WeaponSize = 1.f;
+	EWeaponPattern Pattern = EWeaponPattern::Single;
 };

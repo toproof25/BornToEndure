@@ -12,7 +12,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "GameplayTagContainer.h"
 #include "PetItemProviderInterface.generated.h"
 
@@ -32,7 +32,7 @@ public:
      * @brief 현재 장착된 모든 발사체 modifier를 합산한 결과를 반환한다.
      * - PetCombatComponent가 이 값으로 발사체를 구성한다.
      */
-    virtual FProjectileModifierData GetAggregatedProjectileModifier() const = 0;
+    virtual FWeaponModifierData GetAggregatedWeaponModifier() const = 0;
 
     /**
      * @brief 현재 Pet의 주 속성 태그를 반환한다.

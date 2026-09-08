@@ -21,7 +21,7 @@ struct FWeaponItemDataRow : public FItemDataRow
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data", meta = (AllowedClasses = "PetProjectileItemDataAsset"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data", meta = (AllowedClasses = "PetWeaponItemDataAsset"))
 	TSoftObjectPtr<UPetItemDataAsset> WeaponItemDataAsset;
 
 };

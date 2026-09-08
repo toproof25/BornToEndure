@@ -10,7 +10,7 @@
 #include "Component/PetItemComponent.h"
 #include "Data/PetBaseDataAsset.h"
 #include "Data/PetItemDataAsset.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "Subsystem/ItemPoolSubsystem.h"
 #include "Data/DataTableRow/WeaponItemDataRow.h"
 
@@ -74,7 +74,7 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 	// 시작 무기의 경우 초기에 가져와서 설정
 	const FWeaponItemDataRow* StartWeaponRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(PetBaseData->StartWeaponID);
 	TSoftObjectPtr<UPetItemDataAsset> StartWeaponDataAsset = StartWeaponRow->WeaponItemDataAsset;
-	UPetProjectileItemDataAsset* StartWeaponInstance = Cast<UPetProjectileItemDataAsset>(StartWeaponDataAsset.LoadSynchronous());
+	UPetWeaponItemDataAsset* StartWeaponInstance = Cast<UPetWeaponItemDataAsset>(StartWeaponDataAsset.LoadSynchronous());
 
 	FItemDataHandle StartWeaponHandle;
 	StartWeaponHandle.ItemType = EItemType::Weapon;
@@ -89,8 +89,8 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 	// CombatComponent에 기본 공격 클래스 설정 (BeginPlay에서는 로드하여 적용)
 	if (PetCombatComp && StartWeaponInstance)
 	{
-		FProjectileModifierData ProjectileModifier = StartWeaponInstance->ProjectileModifier;
-		PetCombatComp->DefaultProjectileClass = ProjectileModifier.OverrideProjectileClass.LoadSynchronous();
+		FWeaponModifierData WeaponModifier = StartWeaponInstance->WeaponModifier;
+		PetCombatComp->DefaultWeaponClass = WeaponModifier.OverrideWeaponClass.LoadSynchronous();
 	}
 
 	if (PetItemComp)

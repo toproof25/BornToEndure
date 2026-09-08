@@ -35,7 +35,7 @@
 #include "Component/PetItemComponent.h"
 #include "Data/PetItemDataAsset.h"
 #include "Data/PetSynergyDataAsset.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "Stat/PetStatTypes.h"
 #include "Component/PlayerExperienceComponent.h"
 #include "PlayerState/CombatPlayerState.h"
@@ -1084,17 +1084,17 @@ void UDebugImGuiComponent::DrawPetCombat(APetCompanionCharacter* Pet)
 	ImGui::TextDisabled("아이템 집계값입니다. 실제 공격 결과나 공격 중 여부를 뜻하지 않습니다.");
 	if (ImGui::BeginTable("CombatInputs", 2, PetDashboard::TableFlags))
 	{
-		const FProjectileModifierData Modifier = Items->GetAggregatedProjectileModifier();
+		const FWeaponModifierData Modifier = Items->GetAggregatedWeaponModifier();
 		const FGameplayTag Dominant = Items->GetDominantElementTag();
 		ImGuiUtils::DrawRowText("공격 속성 (ElementType)", "%s", Modifier.ElementType.IsValid() ? TCHAR_TO_UTF8(*Modifier.ElementType.ToString()) : "없음");
 		ImGuiUtils::DrawRowText("태그 집계 주 속성", "%s", Dominant.IsValid() ? TCHAR_TO_UTF8(*Dominant.ToString()) : "없음");
-		ImGuiUtils::DrawRowText("기본 발사체", "%s", IsValid(Combat->DefaultProjectileClass.Get()) ? TCHAR_TO_UTF8(*Combat->DefaultProjectileClass->GetName()) : "없음");
-		ImGuiUtils::DrawRowText("교체 발사체", "%s", Modifier.OverrideProjectileClass.IsNull() ? "미지정" : TCHAR_TO_UTF8(*Modifier.OverrideProjectileClass.GetAssetName()));
-		if (!Modifier.OverrideProjectileClass.IsNull())
-			ImGuiUtils::DrawRowBool("교체 클래스 로드됨", Modifier.OverrideProjectileClass.IsValid());
-		const FString Pattern = StaticEnum<EProjectilePattern>()->GetDisplayNameTextByValue(static_cast<int64>(Modifier.Pattern)).ToString();
-		ImGuiUtils::DrawRowText("발사 패턴", "%s", TCHAR_TO_UTF8(*Pattern));
-		ImGuiUtils::DrawRowText("발사 수 집계값", "%d", Modifier.ProjectileCountAdd);
+		ImGuiUtils::DrawRowText("기본 무기", "%s", IsValid(Combat->DefaultWeaponClass.Get()) ? TCHAR_TO_UTF8(*Combat->DefaultWeaponClass->GetName()) : "없음");
+		ImGuiUtils::DrawRowText("교체 무기", "%s", Modifier.OverrideWeaponClass.IsNull() ? "미지정" : TCHAR_TO_UTF8(*Modifier.OverrideWeaponClass.GetAssetName()));
+		if (!Modifier.OverrideWeaponClass.IsNull())
+			ImGuiUtils::DrawRowBool("교체 클래스 로드됨", Modifier.OverrideWeaponClass.IsValid());
+		const FString Pattern = StaticEnum<EWeaponPattern>()->GetDisplayNameTextByValue(static_cast<int64>(Modifier.Pattern)).ToString();
+		ImGuiUtils::DrawRowText("무기 패턴", "%s", TCHAR_TO_UTF8(*Pattern));
+		ImGuiUtils::DrawRowText("무기 수 집계값", "%d", Modifier.WeaponCountAdd);
 		ImGuiUtils::DrawRowText("크기 배율", "%.2f 배", Modifier.SizeMultiplier);
 		ImGuiUtils::DrawRowText("속도 배율", "%.2f 배", Modifier.SpeedMultiplier);
 		ImGui::EndTable();
