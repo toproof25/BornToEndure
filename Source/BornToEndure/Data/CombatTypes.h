@@ -39,9 +39,9 @@ struct FPetAttackInfo
 	float BleedDamageBonus = 0.f;
 
 	// 발사체 구성
-	TSubclassOf<AActor> WeaponClass;
-	int32 WeaponCount = 1;
-	float WeaponSpeed = 1200.f;
-	float WeaponSize = 1.f;
-	EWeaponPattern Pattern = EWeaponPattern::Single;
+	//TSubclassOf<AActor> WeaponClass;
+	//int32 WeaponCount = 1;
+	//float WeaponSpeed = 1200.f;
+	//float WeaponSize = 1.f;
+	//EWeaponPattern Pattern = EWeaponPattern::Single;
 };

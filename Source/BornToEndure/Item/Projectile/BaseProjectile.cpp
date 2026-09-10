@@ -266,7 +266,7 @@ void ABaseProjectile::FireProjectile(FPetAttackInfo AtkInfo, const FVector& Dire
 	if (ProjectileMovementComp)
 	{
 		ProjectileDamage = AtkInfo.FinalDamage;
-		ProjectileMovementComp->Velocity = Direction * AtkInfo.WeaponSpeed;
+		//ProjectileMovementComp->Velocity = Direction * AtkInfo.WeaponSpeed;
 		ProjectileMovementComp->Activate(true);
 	}
 }

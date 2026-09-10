@@ -41,8 +41,8 @@ public:
     /**
      * @brief 시너지 발동 시 변화되는 공격 수정자 데이터
      */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Synergy|Effect")
-    FWeaponModifierData WeaponBonus;
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Synergy|Effect")
+    //FWeaponModifierData WeaponBonus;
 
     virtual FPrimaryAssetId GetPrimaryAssetId() const override
     {
