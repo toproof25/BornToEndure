@@ -9,6 +9,8 @@
 #include "Data/DataTableRow/StatItemDataRow.h"
 #include "Data/DataTableRow/WeaponItemDataRow.h"
 
+#include "Component/PetCombatComponent.h"
+
 #include "Subsystem/ObjectPoolSubsystem.h"
 #include "Subsystem/ItemPoolSubsystem.h"
 
@@ -57,11 +59,15 @@ void UPetItemComponent::AddItem(FItemDataHandle ItemData)
 		case EItemType::Weapon:
 		{
 			const FWeaponItemDataRow* WeaponItemDataRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(ItemData.ItemRowName);
-
+			UPetCombatComponent* CombatComp = Cast<APetCompanionCharacter>(GetOwner())->GetCombatComponent();
+			if (CombatComp)
+			{
+				CombatComp->InitializeDefaultWeapon(*WeaponItemDataRow);
+			}
 			// 무기의 경우 비동기로 로드 후 ApplyToComponent 호출하도록 함
-			UPetItemDataAsset* WeaponItemData = WeaponItemDataRow->WeaponItemDataAsset.LoadSynchronous();
-			NewInstance.LoadedData = WeaponItemData;
-			WeaponItemData->ApplyToComponent(this);
+			//UPetItemDataAsset* WeaponItemData = WeaponItemDataRow->WeaponItemDataAsset.LoadSynchronous();
+			//NewInstance.LoadedData = WeaponItemData;
+			//WeaponItemData->ApplyToComponent(this);
 			break;
 		}
 		default:
@@ -114,6 +120,7 @@ void UPetItemComponent::RemoveItem(const FGuid& InstanceId)
     OnItemRemoved.Broadcast(InstanceId);
 }
 
+/*
 void UPetItemComponent::AddWeaponModifier(const FWeaponModifierData& Modifier, const FGuid& InstanceId)
 {
     WeaponModifiers.Add(InstanceId, Modifier);
@@ -146,6 +153,7 @@ void UPetItemComponent::RemoveWeaponModifier(const FGuid& InstanceId)
 
     WeaponModifiers.Remove(InstanceId);
 }
+*/
 
 void UPetItemComponent::AddStatModifier(const FStatModifier& Modifier)
 {
@@ -183,7 +191,7 @@ void UPetItemComponent::RemoveStatModifiersBySource(const FGuid& SourceId)
 		StatComp->RecalculateStat(StatType);
 	}
 }
-
+/*
 FWeaponModifierData UPetItemComponent::GetAggregatedWeaponModifier() const
 {
     // 1.기본 발사체를 바탕으로 결과 발사체를 만든다
@@ -214,7 +222,7 @@ FWeaponModifierData UPetItemComponent::GetAggregatedWeaponModifier() const
 
     return Result;
 }
-
+*/
 FGameplayTag UPetItemComponent::GetDominantElementTag() const
 {
 
