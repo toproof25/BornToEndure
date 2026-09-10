@@ -194,7 +194,7 @@ void APlayerCharacter::ClickLeft(const FInputActionValue& Value)
 
 	if (bClickLeftCheck && WeaponBaseComp)
 	{
-		WeaponBaseComp->Attack();
+		//WeaponBaseComp->Attack();
 	}
 }
 
