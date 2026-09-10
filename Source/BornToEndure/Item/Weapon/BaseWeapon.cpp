@@ -1,48 +1,41 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Item/Weapon/BaseWeapon.h"
-#include "Character/Player/PlayerCharacter.h"
+﻿#include "Item/Weapon/BaseWeapon.h"
 
 #include "Subsystem/EffectSubsystem.h"
-#include "Delegates/Delegate.h"
-#include "Kismet/GameplayStatics.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
+#include "Data/PetWeaponItemDataAsset.h"
+#include "UObject/PrimaryAssetId.h"
 
 DEFINE_LOG_CATEGORY(LogBaseWeapon);
 
 ABaseWeapon::ABaseWeapon()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	WeaponStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponStaticMesh"));
 	RootComponent = WeaponStaticMesh;
 
-	// 물리 충돌 허용
-	WeaponStaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	WeaponStaticMesh->SetSimulatePhysics(true);
-	WeaponStaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
+	// 현재는 Mesh를 소유하지만, 추후 Actor Component로 변경할 수 있기에 없는 것 처럼 설정
+	WeaponStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponStaticMesh->SetSimulatePhysics(false);
+	WeaponStaticMesh->SetCollisionProfileName(TEXT("IgnoreAll"));
+	WeaponStaticMesh->SetVisibility(false);
 }
 
-void ABaseWeapon::Interact_Implementation(APlayerCharacter* InstigatorCharacter)
+void ABaseWeapon::InitializeWeapon(const UPetWeaponItemDataAsset& ItemData)
 {
-	if (InstigatorCharacter == nullptr) return;
-
-	// 무기 메쉬의 물리와 콜리젼 제거
-	WeaponStaticMesh->SetSimulatePhysics(false);
+	WeaponStaticMesh->SetStaticMesh(ItemData.WeaponStaticMesh.LoadSynchronous());
 	WeaponStaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponStaticMesh->SetSimulatePhysics(false);
+	WeaponStaticMesh->SetCollisionProfileName(TEXT("IgnoreAll"));
+	WeaponStaticMesh->SetVisibility(false);
 
-	// 플레이어 메쉬와 소켓에 무기 부착
-	USkeletalMeshComponent* PlayerMesh = InstigatorCharacter->GetMesh();
-	if (PlayerMesh)
-	{
-		AttachToComponent(PlayerMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponSocket"));
-	}
+	SpawnSoundId = ItemData.WeaponPrimaryAssetIds.SpawnSoundId;
+	SpawnNiagaraId = ItemData.WeaponPrimaryAssetIds.SpawnNiagaraId;
+	AttackSoundId = ItemData.WeaponPrimaryAssetIds.AttackSoundId;
+	AttackNiagaraId = ItemData.WeaponPrimaryAssetIds.AttackNiagaraId;
 
-	SetInstigator(InstigatorCharacter);
-	InstigatorCharacter->SetWeaponBase(this);
-	InitializeProjectilePool();
-
-	UE_LOG(LogBaseWeapon, Warning, TEXT("Weapon Interacted: %s, Instigator set"), *InstigatorCharacter->GetName());
+	// 자식 클래스 데이터 설정
+	OnInitalizeWeapon(ItemData);
 }
 
 void ABaseWeapon::BeginPlay()
@@ -58,25 +51,24 @@ void ABaseWeapon::BeginPlay()
 	NiagaraDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);
 }
 
-
-void ABaseWeapon::Tick(float DeltaTime)
+void ABaseWeapon::OnSpawnSoundAndNiagara(const FVector& SpawnLocation) const
 {
-	Super::Tick(DeltaTime);
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UEffectSubsystem* EffectSubsystem = World->GetSubsystem<UEffectSubsystem>();
+	if (!EffectSubsystem) return;
+
+	EffectSubsystem->SpawnSoundAtLocation(SpawnSoundId.PrimaryAssetName, SpawnLocation);
+	EffectSubsystem->SpawnNiagaraAtLocation(SpawnNiagaraId.PrimaryAssetName, SpawnLocation);
 }
 
-
-void ABaseWeapon::OnAttackSound(const FVector& SpawnLocation) const
+void ABaseWeapon::OnAttackSoundAndNiagara(const FVector& SpawnLocation) const
 {
-	if (AttackSoundId.IsValid())
-	{
-		SoundDelegate.ExecuteIfBound(AttackSoundId.PrimaryAssetName, SpawnLocation);
-	}
-}
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UEffectSubsystem* EffectSubsystem = World->GetSubsystem<UEffectSubsystem>();
+	if (!EffectSubsystem) return;
 
-void ABaseWeapon::OnAttackNiagara(const FVector& SpawnLocation) const
-{
-	if (AttackNiagaraId.IsValid())
-	{
-		NiagaraDelegate.ExecuteIfBound(AttackNiagaraId.PrimaryAssetName, SpawnLocation);
-	}
+	EffectSubsystem->SpawnSoundAtLocation(AttackSoundId.PrimaryAssetName, SpawnLocation);
+	EffectSubsystem->SpawnNiagaraAtLocation(AttackNiagaraId.PrimaryAssetName, SpawnLocation);
 }
