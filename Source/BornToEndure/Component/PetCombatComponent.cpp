@@ -1,14 +1,21 @@
 ﻿#include "Component/PetCombatComponent.h"
+
 #include "Subsystem/EffectSubsystem.h"
 #include "Subsystem/ObjectPoolSubsystem.h"
-#include "Delegates/Delegate.h"
-#include "Item/Projectile/BaseProjectile.h"
+
 #include "Interface/PetStatProviderInterface.h"
 #include "Interface/PetItemProviderInterface.h"
+
+#include "Data/CombatTypes.h"
+#include "Data/PetWeaponItemDataAsset.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
+
+#include "Item/Weapon/BaseWeapon.h"
+#include "Item/Projectile/BaseProjectile.h"
 #include "UObject/PrimaryAssetId.h"
+
 #include "TimerManager.h"
 #include "AIController.h"
-#include "Data/CombatTypes.h"
 
 UPetCombatComponent::UPetCombatComponent()
 {
@@ -38,7 +45,7 @@ void UPetCombatComponent::BeginPlay()
 	SoundDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 	NiagaraDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);
 
-	InitializeWeaponPool();
+	//InitializeWeaponPool();
 }
 
 void UPetCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -66,6 +73,22 @@ void UPetCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+
+void UPetCombatComponent::InitializeDefaultWeapon(const FWeaponItemDataRow& WeaponItemDataRow)
+{
+	StopAttack();
+
+	UPetWeaponItemDataAsset* WeaponDataAsset = WeaponItemDataRow.WeaponItemDataAsset.LoadSynchronous();
+	if (!WeaponDataAsset) return;
+
+	ABaseWeapon* NewWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponDataAsset->WeaponClass);
+	if (!NewWeapon) return;
+
+	NewWeapon->InitializeWeapon(*WeaponDataAsset);
+	DefaultWeaponClassTest = NewWeapon;
+
+	StartAttack();
+}
 
 void UPetCombatComponent::SetProviders(
     TScriptInterface<IPetStatProviderInterface> InStatProvider,
@@ -211,6 +234,7 @@ FPetAttackInfo UPetCombatComponent::BuildAttackInfo() const
         Info.FinalDamage = AttackPower * Info.CriticalMultiplier;
     }
 
+	/*
     // ItemProvider에서 발사체 아이템 종합 - 발사체에 대한 패턴, 크기, 속도 등을 정의함
     if (ItemProvider.GetObject())
     {
@@ -240,6 +264,7 @@ FPetAttackInfo UPetCombatComponent::BuildAttackInfo() const
         Info.WeaponClass = DefaultWeaponClass;
 		Info.WeaponCount = 1;
 	}
+	*/
 
 	return Info;
 }
@@ -248,8 +273,18 @@ void UPetCombatComponent::SpawnWeapons(
 	const FPetAttackInfo& AttackInfo,
 	const FVector& TargetLocation)
 {
-	if (!AttackInfo.WeaponClass) return;
+	//if (!AttackInfo.WeaponClass) return;
 
+	if (!IsValid(DefaultWeaponClassTest))
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[UPetCombatComponent] SpawnWeapons: WeaponClass is valid. Proceeding with attack."));
+	DefaultWeaponClassTest->OnAttack(AttackInfo);
+
+
+	/*
     // 오브젝트 풀 시스템 가져오기
     UWorld* World = GetWorld();
     if (World == nullptr) return;
@@ -284,8 +319,10 @@ void UPetCombatComponent::SpawnWeapons(
 		Projectile->SetHomingTarget(CurrentTarget.Get());
         Projectile->FireProjectile(AttackInfo, Dir);
     }
+	*/
 }
 
+/*
 TArray<FVector> UPetCombatComponent::CalculateWeaponDirections(
 	EWeaponPattern Pattern,
 	int32 Count,
@@ -334,6 +371,7 @@ TArray<FVector> UPetCombatComponent::CalculateWeaponDirections(
     return Directions;
 }
 
+
 void UPetCombatComponent::OnAttackSound(const FVector& SpawnLocation) const
 {
 	if (AttackSoundId.IsValid())
@@ -364,3 +402,4 @@ void UPetCombatComponent::InitializeWeaponPool()
 		ObjectPoolSubsystem->InitializePoolForClass(DefaultWeaponClass, WeaponPoolSize);
 	}
 }
+*/

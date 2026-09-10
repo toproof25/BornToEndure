@@ -7,8 +7,11 @@
 #include "Stat/PetStatTypes.h"
 #include "GameplayTagContainer.h"
 #include "Data/CombatTypes.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
+
 #include "PetCombatComponent.generated.h"
 
+class ABaseWeapon;
 class UArrowComponent;
 class ABaseProjectile; 
 class IPetStatProviderInterface;
@@ -55,6 +58,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Combat")
 	TSubclassOf<AActor> DefaultWeaponClass;
 
+	UPROPERTY()
+	TObjectPtr<ABaseWeapon> DefaultWeaponClassTest;
+	void InitializeDefaultWeapon(const FWeaponItemDataRow& WeaponItemDataRow);
+
 	/**
 	 * @brief StatProvider와 ItemProvider를 설정하는 함수
 	 * @details
@@ -82,11 +89,11 @@ public:
 
 private:
 
-	void OnAttackSound(const FVector& SpawnLocation) const;
-	void OnAttackNiagara(const FVector& SpawnLocation) const;
+	//void OnAttackSound(const FVector& SpawnLocation) const;
+	//void OnAttackNiagara(const FVector& SpawnLocation) const;
 
 	/** * @brief 발사체 풀을 초기화하는 함수 */
-	void InitializeWeaponPool();
+	//void InitializeWeaponPool();
 
 	UPROPERTY()
 	TScriptInterface<IPetStatProviderInterface> StatProvider;
@@ -124,11 +131,11 @@ private:
 	 * @brief 발사체 패턴에 따른 방향 벡터 배열을 계산한다.
 	 * - 단발, 점사, 나선 등 패턴에 따른 각 발사체가 나아갈 방향을 의미함
 	 */
-	TArray<FVector> CalculateWeaponDirections(
-		EWeaponPattern Pattern,
-		int32 Count,
-		const FVector& Origin,
-		const FVector& TargetLocation) const;
+	//TArray<FVector> CalculateWeaponDirections(
+	//	EWeaponPattern Pattern,
+	//	int32 Count,
+	//	const FVector& Origin,
+	//	const FVector& TargetLocation) const;
 
 
 public:
