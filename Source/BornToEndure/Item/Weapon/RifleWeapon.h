@@ -17,6 +17,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void OnAttack(const FPetAttackInfo& AtkInfo) override {};
+	virtual void OnAttack(const FPetAttackInfo& AtkInfo, const FVector& TargetLocation) override {};
 
 };

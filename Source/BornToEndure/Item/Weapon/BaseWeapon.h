@@ -45,10 +45,11 @@ public:
 	* - 부모 클래스에서는 공격 데이터만 전달받고, 자식 클래스에서 실제 공격 로직 구현
 	* - 순수 가상 함수(PURE_VIRTUAL)로 선언되어 자식 클래스에서 반드시 구현해야 함
 	*/
-	virtual void OnAttack(const FPetAttackInfo& AtkInfo) PURE_VIRTUAL(ABaseWeapon::OnAttack, );
+	virtual void OnAttack(const FPetAttackInfo& AtkInfo, const FVector& TargetLocation) PURE_VIRTUAL(ABaseWeapon::OnAttack, );
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void OnInitalizeWeapon(const UPetWeaponItemDataAsset& ItemData) PURE_VIRTUAL(ABaseWeapon::OnInitalizeWeapon, );
 
 	/**

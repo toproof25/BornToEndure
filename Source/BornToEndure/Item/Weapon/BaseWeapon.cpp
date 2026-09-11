@@ -29,10 +29,19 @@ void ABaseWeapon::InitializeWeapon(const UPetWeaponItemDataAsset& ItemData)
 	WeaponStaticMesh->SetCollisionProfileName(TEXT("IgnoreAll"));
 	WeaponStaticMesh->SetVisibility(false);
 
+	WeaponType = EWeaponType::Fire;
+
 	SpawnSoundId = ItemData.WeaponPrimaryAssetIds.SpawnSoundId;
 	SpawnNiagaraId = ItemData.WeaponPrimaryAssetIds.SpawnNiagaraId;
 	AttackSoundId = ItemData.WeaponPrimaryAssetIds.AttackSoundId;
 	AttackNiagaraId = ItemData.WeaponPrimaryAssetIds.AttackNiagaraId;
+
+	UE_LOG(LogBaseWeapon, Log, TEXT("ABaseWeapon::InitializeWeapon - SpawnSoundId: %s, SpawnNiagaraId: %s, AttackSoundId: %s, AttackNiagaraId: %s"),
+		*SpawnSoundId.ToString(),
+		*SpawnNiagaraId.ToString(),
+		*AttackSoundId.ToString(),
+		*AttackNiagaraId.ToString()
+	);
 
 	// 자식 클래스 데이터 설정
 	OnInitalizeWeapon(ItemData);
@@ -49,6 +58,25 @@ void ABaseWeapon::BeginPlay()
 
 	SoundDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 	NiagaraDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);
+}
+
+void ABaseWeapon::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 사용하던 사운드 애셋, 나이아가라 제거
+	if (UWorld* World = GetWorld())
+	{
+		if (UEffectSubsystem* EffectSubsystem = GetWorld()->GetSubsystem<UEffectSubsystem>())
+		{
+			// 사용하는 Asset Unload
+			EffectSubsystem->UnloadEffectAssets(SpawnSoundId);
+			EffectSubsystem->UnloadEffectAssets(SpawnNiagaraId);
+
+			EffectSubsystem->UnloadEffectAssets(AttackSoundId);
+			EffectSubsystem->UnloadEffectAssets(AttackNiagaraId);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ABaseWeapon::OnSpawnSoundAndNiagara(const FVector& SpawnLocation) const

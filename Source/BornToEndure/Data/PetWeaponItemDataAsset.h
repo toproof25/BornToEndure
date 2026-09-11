@@ -42,6 +42,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponItem Data")
 	FWeaponPrimaryAssetIds WeaponPrimaryAssetIds;
 
+
 	virtual void ApplyToComponent(UPetItemComponent* ItemComp) const override;
 	virtual void RemoveFromComponent(UPetItemComponent* ItemComp, const FGuid& InstanceId) const override;
 };

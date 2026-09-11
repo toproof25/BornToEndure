@@ -74,10 +74,9 @@ public:
 	);
 
 	void SetHomingTarget(AActor* NewTarget);
-	void FireProjectile(FPetAttackInfo AtkInfo, const FVector& Direction);
+	void FireProjectile(const FProjectileData& ProjectileData, const FPetAttackInfo& AtkInfo, const FVector& Direction);
 
 	const FPetAttackInfo& GetCurrentAttackInfo() const { return CurrentAttackInfo; }
-
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile | Components")

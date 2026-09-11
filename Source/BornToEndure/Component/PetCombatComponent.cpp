@@ -281,7 +281,7 @@ void UPetCombatComponent::SpawnWeapons(
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("[UPetCombatComponent] SpawnWeapons: WeaponClass is valid. Proceeding with attack."));
-	DefaultWeaponClassTest->OnAttack(AttackInfo);
+	DefaultWeaponClassTest->OnAttack(AttackInfo, TargetLocation);
 
 
 	/*
