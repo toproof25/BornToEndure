@@ -22,14 +22,18 @@ void AFireWeapon::OnAttack(const FPetAttackInfo& AtkInfo, const FVector& TargetL
 	ABaseProjectile* AttackProjectile = Cast<ABaseProjectile>(Projetile);
 	if (!AttackProjectile) return;
 
+	// 발사 위치와 발사 방향
+	const FVector Origin = GetActorLocation();
+	const FVector Direction = (TargetLocation - Origin).GetSafeNormal();
+
 	// 발사체에 대한 소유자와 주체자 초기화
 	AttackProjectile->Owner = GetOwner();
 	AttackProjectile->SetInstigator(Cast<APawn>(GetOwner()));
-	//AttackProjectile->SetActorLocationAndRotation(Origin, Dir.Rotation(), false, nullptr, ETeleportType::TeleportPhysics);
+	AttackProjectile->SetActorLocationAndRotation(Origin, Direction.Rotation(), false, nullptr, ETeleportType::TeleportPhysics);
 	AttackProjectile->SetActorScale3D(FVector(ProjectileData.ProjectileSize));
+	AttackProjectile->FireProjectile(ProjectileData, AtkInfo, Direction);
 
 	OnAttackSoundAndNiagara(GetActorLocation());
-	AttackProjectile->FireProjectile(ProjectileData, AtkInfo, TargetLocation);
 }
 
 void AFireWeapon::BeginPlay()
@@ -44,6 +48,7 @@ void AFireWeapon::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		if (UObjectPoolSubsystem* PoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>())
 		{
+			UE_LOG(LogBaseWeapon, Log, TEXT("AFireWeapon::EndPlay - Removing projectile class from pool: %s"), *ProjectileClass->GetName());
 			PoolSubsystem->RemovePoolActor(ProjectileClass);
 		}
 	}

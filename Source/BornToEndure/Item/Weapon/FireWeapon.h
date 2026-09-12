@@ -49,10 +49,9 @@ protected:
 	void UpdateProjectileData(const FProjectileData& InProjectileData);
 
 
+
 private:
 
 	// 오브젝트 풀링 초기화 함수
 	void InitializeProjectilePool();
-
-
 };
