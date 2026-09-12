@@ -15,8 +15,6 @@
 class APlayerCharacter;
 class APetCompanionCharacter;
 class UPetItemComponent;
-// TODO(WeaponSystem): 무기 디버그 복구 시 최종 타입에 필요한 전방 선언만 복구한다.
-// class ABaseWeapon;
 class UPlayerAnimInstance;
 class UStatComponent;
 class UCharacterMovementComponent;
@@ -64,8 +62,6 @@ private:
 	void DrawCameraInfo();
 	void DrawPlayerCharacterInfo();
 	void DrawAnimationBasic();
-	// TODO(WeaponSystem): cpp의 복구 지침에 따라 구현/include/호출부와 함께 복구한다.
-	// void DrawWeaponInfo();
 	void DrawStatInfo();
 	void DrawEnemyDetectionInfo();
 	void DrawExperienceInfo();
@@ -79,6 +75,7 @@ private:
 
 	// 월드 및 서브시스템 전용 디버그 렌더링 함수
 	void DrawSystemAndMemoryInfo();
+	void DrawObjectPoolInfo();
 
 	// 펫 시스템 전용 디버그 렌더링 함수
 	void DrawPetInfo();
