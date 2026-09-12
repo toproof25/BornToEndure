@@ -265,7 +265,7 @@ void ABaseProjectile::FireProjectile(const FProjectileData& ProjectileData, cons
 
 	if (ProjectileMovementComp)
 	{
-		SetActorScale3D(FVector(ProjectileData.ProjectileSize));
+		//SetActorScale3D(FVector(ProjectileData.ProjectileSize));
 		ProjectileMovementComp->Velocity = Direction * ProjectileData.ProjectileSpeed;
 		ProjectileDamage = AtkInfo.FinalDamage;
 		ProjectileMovementComp->Activate(true);
