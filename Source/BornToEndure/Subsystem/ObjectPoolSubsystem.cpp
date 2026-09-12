@@ -127,11 +127,20 @@ void UObjectPoolSubsystem::ReturnPoolActor(AActor* PoolActor)
     }
 }
 
-void UObjectPoolSubsystem::RemovePoolActor(TSubclassOf<AActor> PoolActor)
+void UObjectPoolSubsystem::RemovePoolActor(TSubclassOf<AActor> RemovePoolActor)
 {
-    if (PoolActor == nullptr) return;
+    if (RemovePoolActor == nullptr) return;
 
-    UClass* ClassKey = PoolActor.Get();
+    UClass* ClassKey = RemovePoolActor.Get();
+	UE_LOG(LogObjectPoolSubsystem, Display, TEXT("RemovePoolActor UObjectPoolSubsystem Class: %s"), *ClassKey->GetName());
+
+	// 현재 ActorPools에 존재하는 모든 정보를 이쁘게 출력
+	for (const auto& Pair : ActorPools)
+	{
+		UClass* Key = Pair.Key;
+		const TArray<AActor*>& Pool = Pair.Value;
+		UE_LOG(LogObjectPoolSubsystem, Display, TEXT("Class: %s, Pool Size: %d"), *Key->GetName(), Pool.Num());
+	}
 
     // 요청한 발사체가 풀에 존재하는지 확인 (PoolPtr은 배열의 시작 포인터가됨)
     TArray<AActor*>* PoolPtr = ActorPools.Find(ClassKey);
@@ -148,8 +157,16 @@ void UObjectPoolSubsystem::RemovePoolActor(TSubclassOf<AActor> PoolActor)
 			PoolActor->Destroy();
         }
     }
-
 	ActorPools.Remove(ClassKey);
+
+	// 제거된 ActorPools에 존재하는 모든 정보를 이쁘게 출력
+	UE_LOG(LogObjectPoolSubsystem, Display, TEXT("After RemovePoolActor UObjectPoolSubsystem Class: %s"), *ClassKey->GetName());
+	for (const auto& Pair : ActorPools)
+	{
+		UClass* Key = Pair.Key;
+		const TArray<AActor*>& Pool = Pair.Value;
+		UE_LOG(LogObjectPoolSubsystem, Display, TEXT("Class: %s, Pool Size: %d"), *Key->GetName(), Pool.Num());
+	}
 }
 
 void UObjectPoolSubsystem::GetPoolStats(TSubclassOf<AActor> ActorClass, int32& OutTotal, int32& OutActive, int32& OutInactive) const
