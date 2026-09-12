@@ -78,6 +78,12 @@ void UPetCombatComponent::InitializeDefaultWeapon(const FWeaponItemDataRow& Weap
 {
 	StopAttack();
 
+	if (DefaultWeaponClassTest)
+	{
+		DefaultWeaponClassTest->Destroy();
+		DefaultWeaponClassTest = nullptr;
+	}
+
 	UPetWeaponItemDataAsset* WeaponDataAsset = WeaponItemDataRow.WeaponItemDataAsset.LoadSynchronous();
 	if (!WeaponDataAsset) return;
 
@@ -86,6 +92,10 @@ void UPetCombatComponent::InitializeDefaultWeapon(const FWeaponItemDataRow& Weap
 
 	NewWeapon->InitializeWeapon(*WeaponDataAsset);
 	DefaultWeaponClassTest = NewWeapon;
+
+	DefaultWeaponClassTest->SetOwner(GetOwner());
+	DefaultWeaponClassTest->SetInstigator(Cast<APawn>(GetOwner()));
+	DefaultWeaponClassTest->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepRelativeTransform);
 
 	StartAttack();
 }
