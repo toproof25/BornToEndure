@@ -256,7 +256,7 @@ void ABaseProjectile::SetHomingTarget(AActor* NewTarget)
 	}
 }
 
-void ABaseProjectile::FireProjectile(FPetAttackInfo AtkInfo, const FVector& Direction)
+void ABaseProjectile::FireProjectile(const FProjectileData& ProjectileData, const FPetAttackInfo& AtkInfo, const FVector& Direction)
 {
 	CurrentAttackInfo = AtkInfo;
 
@@ -265,8 +265,9 @@ void ABaseProjectile::FireProjectile(FPetAttackInfo AtkInfo, const FVector& Dire
 
 	if (ProjectileMovementComp)
 	{
+		//SetActorScale3D(FVector(ProjectileData.ProjectileSize));
+		ProjectileMovementComp->Velocity = Direction * ProjectileData.ProjectileSpeed;
 		ProjectileDamage = AtkInfo.FinalDamage;
-		ProjectileMovementComp->Velocity = Direction * AtkInfo.ProjectileSpeed;
 		ProjectileMovementComp->Activate(true);
 	}
 }

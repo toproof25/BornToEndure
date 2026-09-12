@@ -4,7 +4,7 @@
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
 #include "Stat/PetStatTypes.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "PetSynergyDataAsset.generated.h"
 
 
@@ -41,8 +41,8 @@ public:
     /**
      * @brief 시너지 발동 시 변화되는 공격 수정자 데이터
      */
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Synergy|Effect")
-    FProjectileModifierData ProjectileBonus;
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Synergy|Effect")
+    //FWeaponModifierData WeaponBonus;
 
     virtual FPrimaryAssetId GetPrimaryAssetId() const override
     {

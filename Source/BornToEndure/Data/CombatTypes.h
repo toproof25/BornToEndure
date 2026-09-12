@@ -8,10 +8,8 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Data/DataTableRow/ItemDataRow.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "CombatTypes.generated.h"
-
-class AActor;
 
  /**
   * @brief 공격 정보를 담는 구조체
@@ -21,7 +19,7 @@ class AActor;
   * - 생성된 후 버려지기에 스탯이 중간에 변경되어서 이미 공격된 공격은 영향을 받지 않음
   */
 USTRUCT()
-struct FPetAttackInfo
+struct BORNTOENDURE_API FPetAttackInfo
 {
 	GENERATED_BODY()
 
@@ -37,11 +35,18 @@ struct FPetAttackInfo
 	float WindDamageBonus = 0.f;
 	float PoisonDamageBonus = 0.f;
 	float BleedDamageBonus = 0.f;
-
-	// 발사체 구성
-	TSubclassOf<AActor> ProjectileClass;
-	int32 ProjectileCount = 1;
-	float ProjectileSpeed = 1200.f;
-	float ProjectileSize = 1.f;
-	EProjectilePattern Pattern = EProjectilePattern::Single;
 };
+
+USTRUCT(BlueprintType)
+struct BORNTOENDURE_API FProjectileData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile", meta = (ClampMin = "1"))
+	int32 ProjectileCount = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile", meta = (ClampMin = "0.0"))
+	float ProjectileSpeed = 1200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile", meta = (ClampMin = "0.01"))
+	float ProjectileSize = 1.f;
+};
+

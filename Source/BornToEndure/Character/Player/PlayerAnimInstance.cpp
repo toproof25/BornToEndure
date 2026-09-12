@@ -41,6 +41,7 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	ABaseWeapon* CurrentWeapon;
 	PlayerCharacter->GetWeaponBase(CurrentWeapon);
 
+	/*
 	if (CurrentWeapon && CurrentWeapon->GetWeaponStaticMesh())
 	{
 		// 무기를 들고 있다면, "LHIK" 소켓 좌표를 계속 저장
@@ -53,7 +54,7 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		WeaponBaseComp = nullptr;
 		Alpha = 0.0f; // IK 적용 안함
-		CurrentWeaponType = EWeaponType::EWT_Unarmed;
+		CurrentWeaponType = EWeaponTypeT::EWT_Unarmed;
 	}
-
+	*/
 }

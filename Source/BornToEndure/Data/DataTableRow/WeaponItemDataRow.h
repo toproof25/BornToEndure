@@ -8,10 +8,19 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "Data/DataTableRow/ItemDataRow.h"
+
 #include "WeaponItemDataRow.generated.h"
 
-class UPetItemDataAsset;
-class UTexture2D;
+class UPetWeaponItemDataAsset;
+
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Fire UMETA(DisplayName = "Fire"),
+	Melee UMETA(DisplayName = "Melee"),
+	Beam UMETA(DisplayName = "Beam"),
+};
 
 
 USTRUCT(BlueprintType)
@@ -19,9 +28,9 @@ struct FWeaponItemDataRow : public FItemDataRow
 {
 	GENERATED_BODY()
 
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponItem Data", meta = (AllowedClasses = "PetWeaponItemDataAsset"))
+	TSoftObjectPtr<UPetWeaponItemDataAsset> WeaponItemDataAsset;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data", meta = (AllowedClasses = "PetProjectileItemDataAsset"))
-	TSoftObjectPtr<UPetItemDataAsset> WeaponItemDataAsset;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponItem Data")
+	EWeaponType WeaponType;
 };

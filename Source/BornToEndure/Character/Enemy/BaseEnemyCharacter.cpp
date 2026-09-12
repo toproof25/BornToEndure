@@ -300,7 +300,7 @@ void ABaseEnemyCharacter::AttackPlayer()
         // 플레이어에게 데미지 적용
         UGameplayStatics::ApplyDamage(
             TargetPlayerCharacter.Get(),
-            10.f,
+            0.f,
             GetInstigatorController(),
             this,
             UDamageType::StaticClass()

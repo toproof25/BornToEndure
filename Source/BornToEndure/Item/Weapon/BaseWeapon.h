@@ -1,112 +1,83 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
+﻿/**
+* @file BaseWeapon.h
+* @brief Pet이 사용하는 무기 클래스의 최상위 클래스
+*/
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Delegates/Delegate.h"
-#include "Interface/Interactable.h" // Interface 상속을 위한 헤더
+
+#include "Data/CombatTypes.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
+
+#include "UObject/PrimaryAssetId.h"
+
 #include "BaseWeapon.generated.h"
 
-class UStaticMeshComponent;
+DECLARE_LOG_CATEGORY_EXTERN(LogBaseWeapon, Log, All); // 로그 카테고리 선언
 
 // Delegate 선언
 DECLARE_DELEGATE_TwoParams(FSpawnSoundAtLocation, FName, FVector);
 DECLARE_DELEGATE_TwoParams(FSpawnNiagaraAtLocation, FName, FVector);
 
-// 로그 카테고리 선언
-DECLARE_LOG_CATEGORY_EXTERN(LogBaseWeapon, Log, All);
-
-
-UENUM(BlueprintType)
-enum class EWeaponType : uint8
-{
-	EWT_Unarmed		UMETA(DisplayName = "Unarmed"),
-	EWT_Rifle		UMETA(DisplayName = "Rifle")
-};
+class UStaticMeshComponent;
+class UPetWeaponItemDataAsset;
 
 UCLASS(Abstract)
-class BORNTOENDURE_API ABaseWeapon : public AActor, public IInteractable
+class BORNTOENDURE_API ABaseWeapon : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	ABaseWeapon();
-	virtual void Tick(float DeltaTime) override;
 
 	/**
-	 * @brief 플레이어 캐릭터와 무기 액터의 상호작용 구현
-	 * @param InstigatorCharacter 상호작용을 한 플레이어 캐릭터 컴포넌트
-	 */
-	virtual void Interact_Implementation(APlayerCharacter* InstigatorCharacter) override;
+	* @brief 무기 데이터 테이블 행 구조체를 설정하는 함수
+	* - WeaponItemDataRow 구조체를 기반으로 무기 데이터를 설정
+	* - 부모 클래스에서는 공통 데이터 설정만 수행하며, 자식 클래스에서 추가 데이터 설정 구현
+	* - 항상 자식 클래스에서는 Super::SetWeaponData(ItemData)를 호출해야 함
+	*/
+	void InitializeWeapon(const UPetWeaponItemDataAsset& ItemData);
+
+	/**
+	* @brief 무기 공격 함수
+	* - PetCombatComponent에서 호출되며 최종 공격 데이터를 받아 공격을 수행함
+	* - 부모 클래스에서는 공격 데이터만 전달받고, 자식 클래스에서 실제 공격 로직 구현
+	* - 순수 가상 함수(PURE_VIRTUAL)로 선언되어 자식 클래스에서 반드시 구현해야 함
+	*/
+	virtual void OnAttack(const FPetAttackInfo& AtkInfo, const FVector& TargetLocation) PURE_VIRTUAL(ABaseWeapon::OnAttack, );
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void OnInitalizeWeapon(const UPetWeaponItemDataAsset& ItemData) PURE_VIRTUAL(ABaseWeapon::OnInitalizeWeapon, );
 
 	/**
 	 * @brief 무기 메쉬를 참조하는 포인터
-	 * @note 상호작용 시 해당 메쉬를 플레이어 소켓에 연결
+	 * @note 상호작용 시 해당 메쉬 획득 연결
 	 */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> WeaponStaticMesh;
 
-public:
-	/**
-	 * @brief UProjectilePoolSubsystem에서 사용할 풀 크기를 설정하는 변수
-	 */
-	UPROPERTY(EditAnywhere, Category = "Weapon")
-	int32 PoolSize;
+	
+	// ---------- 스폰, 공격 사운드, 나이아가라 설정 ----------
 
-	/** * @brief 현재 무기의 타입을 저장하는 ENUM 변수 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	EWeaponType WeaponType;
-
-	/**
-	 * @brief 현재 클래스인 ABaseWeapon 객체를 반환하는 Getter 함수
-	 * @return ABaseWeapon 객체의 포인터
-	 */
-	UFUNCTION(BlueprintPure)
-	ABaseWeapon* GetWeaponBase() { return this; }
-
-	/**
-	 * @brief 무기의 메쉬 컴포넌트를 반환하는 Getter 함수
-	 * @return USkeletalMeshComponent를 가리키는 포인터
-	 */
-	UFUNCTION(BlueprintPure)
-	UStaticMeshComponent* GetWeaponStaticMesh() const { return WeaponStaticMesh; }
-
-	/**
-	 * @brief Delegate 시그니처 선언으로, 공격 시 사운드와 나이아가라 스폰 호출
-	 */
+	/** * @brief Delegate 시그니처 선언으로, 공격 시 사운드와 나이아가라 스폰 호출 */
 	FSpawnSoundAtLocation SoundDelegate;
 	FSpawnNiagaraAtLocation NiagaraDelegate;
 
-	/**
-	 * @brief 사운드와 나이아가라 애셋을 참조하는 변수
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effect|Sound", meta = (AllowedTypes = "SoundDataAsset"))
+	/** * @brief 사운드와 나이아가라 애셋을 참조하는 변수 */
+	FPrimaryAssetId SpawnSoundId;
+	FPrimaryAssetId SpawnNiagaraId;
 	FPrimaryAssetId AttackSoundId;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effect|Niagara", meta = (AllowedTypes = "NiagaraDataAsset"))
 	FPrimaryAssetId AttackNiagaraId;
+	
+	/** * @brief 사운드와 나이아가라를 EffectSubsystem에 전달하여 호출*/
+	void OnSpawnSoundAndNiagara(const FVector& SpawnLocation) const;
+	void OnAttackSoundAndNiagara(const FVector& SpawnLocation) const;
 
-	UFUNCTION()
-	void OnAttackSound(const FVector& SpawnLocation) const;
+	/** * @brief 무기의 타입을 지정*/
+	EWeaponType WeaponType;
 
-	UFUNCTION()
-	void OnAttackNiagara(const FVector& SpawnLocation) const;
-
-public:
-	/**
-	 * @brief 공격 함수로 플레이어 캐릭터가 공격 입력을 받았을 때 호출되는 함수
-	 * @note 자식 클래스에서 이 함수를 오버라이드하여 실제 공격 로직을 구현할 수 있음
-	 */
-	UFUNCTION()
-	virtual void Attack() PURE_VIRTUAL(ABaseWeapon::Attack, );
-
-	/**
-	 * @brief UProjectilePoolSubsystem으로 발사체 풀을 초기화하는 함수
-	 */
-	virtual void InitializeProjectilePool() {};
 };
 

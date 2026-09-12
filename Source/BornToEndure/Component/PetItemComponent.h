@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Interface/PetItemProviderInterface.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "GameplayTagContainer.h"
 #include "Data/DataTableRow/ItemDataRow.h"
 #include "Stat/PetStatTypes.h"
@@ -49,7 +49,7 @@ public:
     UPetItemComponent();
 
     // IPetItemProviderInterface 오버라이드 구현
-    virtual FProjectileModifierData GetAggregatedProjectileModifier() const override;
+    //virtual FWeaponModifierData GetAggregatedWeaponModifier() const override;
     virtual FGameplayTag GetDominantElementTag() const override;
 
 	/**
@@ -83,13 +83,13 @@ public:
      * @param Modifier 새로 추가할 발사체에 대한 modifire 구조체
      * @param InstanceId 추가할 발사체의 고유 ID
      */
-    void AddProjectileModifier(const FProjectileModifierData& Modifier, const FGuid& InstanceId);
+    //void AddWeaponModifier(const FWeaponModifierData& Modifier, const FGuid& InstanceId);
 
     /**
-     * @brief Projectile modifier를 제거
+     * @brief Weapon modifier를 제거
      * @param InstanceId 제거할 modifire의 고유한 FGuid
      */
-    void RemoveProjectileModifier(const FGuid& InstanceId);
+    //void RemoveWeaponModifier(const FGuid& InstanceId);
 
 	/**
 	 * @brief Stat Modifier를 추가하고 해당 스탯을 재계산 후 최종 스탯 캐싱
@@ -124,7 +124,7 @@ protected:
 private:
 
     TArray<FPetItemInstance> OwnedItems;
-    TMap<FGuid, FProjectileModifierData> ProjectileModifiers;
+    //TMap<FGuid, FWeaponModifierData> WeaponModifiers;
 
 	/** * @brief 현재 적용이 되는 모든 Stat 증감 아이템 수치 리스트 */
 	TArray<FStatModifier> ActiveStatModifiers;

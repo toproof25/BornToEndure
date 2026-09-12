@@ -5,7 +5,7 @@
 #include "Component/PetItemComponent.h"
 #include "Component/PetManagerComponent.h"
 #include "Component/PetStatComponent.h"
-#include "Data/PetProjectileItemDataAsset.h"
+#include "Data/PetWeaponItemDataAsset.h"
 #include "Engine/DataTable.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -203,8 +203,8 @@ void APetItemDebugActor::GiveItem(EItemType Type, FName RowName)
 	{
 		const FWeaponItemDataRow* Row = Pool->GetWeaponItemDataRowByID(RowName);
 		// Explicit button action only; never load assets in the per-frame catalog.
-		UPetProjectileItemDataAsset* Asset = Row
-			? Cast<UPetProjectileItemDataAsset>(Row->WeaponItemDataAsset.LoadSynchronous()) : nullptr;
+		UPetWeaponItemDataAsset* Asset = Row
+			? Cast<UPetWeaponItemDataAsset>(Row->WeaponItemDataAsset.LoadSynchronous()) : nullptr;
 		if (!IsValid(Asset))
 		{
 			LastResult = TEXT("지급 취소: 무기 에셋이 없거나 타입이 맞지 않습니다.");
@@ -347,15 +347,20 @@ void APetItemDebugActor::OnCatalogLoaded()
 		}
 		else
 		{
-			const UPetProjectileItemDataAsset* Asset = Cast<UPetProjectileItemDataAsset>(WeaponRow->WeaponItemDataAsset.Get());
+			const UPetWeaponItemDataAsset* Asset = Cast<UPetWeaponItemDataAsset>(WeaponRow->WeaponItemDataAsset.Get());
 			if (IsValid(Asset))
 			{
 				ItemSynergyTags = Asset->SynergyTags;
-				const FProjectileModifierData& Mod = Asset->ProjectileModifier;
-				const FString Pattern = StaticEnum<EProjectilePattern>()->GetDisplayNameTextByValue(static_cast<int64>(Mod.Pattern)).ToString();
-				Entry.Effects = FString::Printf(TEXT("발사 수 %+d / 크기 x%.2f / 속도 x%.2f\n패턴: %s\n속성: %s\n교체 발사체: %s"),
-					Mod.ProjectileCountAdd, Mod.SizeMultiplier, Mod.SpeedMultiplier, *Pattern,
-					*Mod.ElementType.ToString(), Mod.OverrideProjectileClass.IsNull() ? TEXT("없음") : *Mod.OverrideProjectileClass.GetAssetName());
+				// TODO(WeaponSystem): FWeaponModifierData / EWeaponPattern / Asset->WeaponModifier 제거로 구 효과 표시를 보관한다.
+				// 새 무기 효과 데이터 또는 const 공개 조회 API가 확정되면 아래 수/배율/패턴/속성의 대응 관계를 확인한다.
+				// WeaponClass는 기존 OverrideWeaponClass와 의미가 같다고 가정하지 않으며, BaseWeapon 의존성을 다시 추가하지 않는다.
+				// 카탈로그의 설정값과 실제 공격 집계값을 구분하고, 복구 후 카탈로그를 새로고침하여 설명을 재생성한다.
+				// const FWeaponModifierData& Mod = Asset->WeaponModifier;
+				// const FString Pattern = StaticEnum<EWeaponPattern>()->GetDisplayNameTextByValue(static_cast<int64>(Mod.Pattern)).ToString();
+				// Entry.Effects = FString::Printf(TEXT("무기 수 %+d / 크기 x%.2f / 속도 x%.2f\n패턴: %s\n속성: %s\n교체 무기: %s"),
+				// Mod.WeaponCountAdd, Mod.SizeMultiplier, Mod.SpeedMultiplier, *Pattern,
+				// *Mod.ElementType.ToString(), Mod.OverrideWeaponClass.IsNull() ? TEXT("없음") : *Mod.OverrideWeaponClass.GetAssetName());
+				Entry.Effects = TEXT("무기 상세 효과 표시 중단 (WeaponSystem 개편 중)");
 			}
 			else
 			{

@@ -10,7 +10,7 @@ class APlayerCharacter;
 class UCharacterMovementComponent;
 class USkeletalMeshComponent;
 class ABaseWeapon;
-enum class EWeaponType : uint8;
+//enum class EWeaponTypeT : uint8;
 
 UCLASS()
 class BORNTOENDURE_API UPlayerAnimInstance : public UAnimInstance
@@ -47,8 +47,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float Alpha = 0.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
-	EWeaponType CurrentWeaponType;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	//EWeaponTypeT CurrentWeaponType;
 
 
 public:

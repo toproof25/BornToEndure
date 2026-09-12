@@ -41,7 +41,8 @@ TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomItemData(int32 Count)
 	if (StatItemDataList.IsEmpty() && WeaponItemDataList.IsEmpty()) return ResultObjects;
 
 	// Count 만큼 랜덤 추출
-	TArray<FItemDataRow*> TempList = StatItemDataList;
+	TArray<FItemDataRow*> TempList = WeaponItemDataList;
+	//TArray<FItemDataRow*> TempList = StatItemDataList;
 	//TempList.Append(WeaponItemDataList);
 	int32 ActualCount = FMath::Min(Count, TempList.Num());
 

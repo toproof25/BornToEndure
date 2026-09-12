@@ -1,14 +1,21 @@
 ﻿#include "Component/PetCombatComponent.h"
+
 #include "Subsystem/EffectSubsystem.h"
 #include "Subsystem/ObjectPoolSubsystem.h"
-#include "Delegates/Delegate.h"
-#include "Item/Projectile/BaseProjectile.h"
+
 #include "Interface/PetStatProviderInterface.h"
 #include "Interface/PetItemProviderInterface.h"
+
+#include "Data/CombatTypes.h"
+#include "Data/PetWeaponItemDataAsset.h"
+#include "Data/DataTableRow/WeaponItemDataRow.h"
+
+#include "Item/Weapon/BaseWeapon.h"
+#include "Item/Projectile/BaseProjectile.h"
 #include "UObject/PrimaryAssetId.h"
+
 #include "TimerManager.h"
 #include "AIController.h"
-#include "Data/CombatTypes.h"
 
 UPetCombatComponent::UPetCombatComponent()
 {
@@ -38,7 +45,7 @@ void UPetCombatComponent::BeginPlay()
 	SoundDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnSoundAtLocation);
 	NiagaraDelegate.BindUObject(EffectSubsystem, &UEffectSubsystem::SpawnNiagaraAtLocation);
 
-	InitializeProjectilePool();
+	//InitializeWeaponPool();
 }
 
 void UPetCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -66,6 +73,32 @@ void UPetCombatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+
+void UPetCombatComponent::InitializeDefaultWeapon(const FWeaponItemDataRow& WeaponItemDataRow)
+{
+	StopAttack();
+
+	if (DefaultWeaponClassTest)
+	{
+		DefaultWeaponClassTest->Destroy();
+		DefaultWeaponClassTest = nullptr;
+	}
+
+	UPetWeaponItemDataAsset* WeaponDataAsset = WeaponItemDataRow.WeaponItemDataAsset.LoadSynchronous();
+	if (!WeaponDataAsset) return;
+
+	ABaseWeapon* NewWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponDataAsset->WeaponClass);
+	if (!NewWeapon) return;
+
+	NewWeapon->InitializeWeapon(*WeaponDataAsset);
+	DefaultWeaponClassTest = NewWeapon;
+
+	DefaultWeaponClassTest->SetOwner(GetOwner());
+	DefaultWeaponClassTest->SetInstigator(Cast<APawn>(GetOwner()));
+	DefaultWeaponClassTest->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepRelativeTransform);
+
+	StartAttack();
+}
 
 void UPetCombatComponent::SetProviders(
     TScriptInterface<IPetStatProviderInterface> InStatProvider,
@@ -100,7 +133,7 @@ void UPetCombatComponent::OnAttack(const FVector& TargetLocation)
     {
         // BTTask가 직접 호출하는 경우
         FPetAttackInfo AttackInfo = BuildAttackInfo();
-        SpawnProjectiles(AttackInfo, TargetLocation);
+        SpawnWeapons(AttackInfo, TargetLocation);
     }
     else
     {
@@ -184,7 +217,7 @@ void UPetCombatComponent::ExecuteAttack()
     }
 
     FPetAttackInfo AttackInfo = BuildAttackInfo();
-    SpawnProjectiles(AttackInfo, CurrentTarget->GetActorLocation());
+    SpawnWeapons(AttackInfo, CurrentTarget->GetActorLocation());
 }
 
 FPetAttackInfo UPetCombatComponent::BuildAttackInfo() const
@@ -211,45 +244,57 @@ FPetAttackInfo UPetCombatComponent::BuildAttackInfo() const
         Info.FinalDamage = AttackPower * Info.CriticalMultiplier;
     }
 
+	/*
     // ItemProvider에서 발사체 아이템 종합 - 발사체에 대한 패턴, 크기, 속도 등을 정의함
     if (ItemProvider.GetObject())
     {
-        const FProjectileModifierData Modifier = ItemProvider->GetAggregatedProjectileModifier();
+        const FWeaponModifierData Modifier = ItemProvider->GetAggregatedWeaponModifier();
         //Info.ElementTag = ItemProvider->GetDominantElementTag();
 		Info.ElementTag = Modifier.ElementType;
 
         // 아이템이 Override를 지정했으면 사용, 없으면 기본값
-        if (!Modifier.OverrideProjectileClass.IsNull())
-        {
-            // Soft class를 동기 로드
-            Info.ProjectileClass = Modifier.OverrideProjectileClass.Get();
-        }
-        else
-        {
-            Info.ProjectileClass = DefaultProjectileClass;
-        }
+        if (!Modifier.OverrideWeaponClass.IsNull())
+		{
+			// Soft class를 동기 로드
+			Info.WeaponClass = Modifier.OverrideWeaponClass.Get();
+		}
+		else
+		{
+			Info.WeaponClass = DefaultWeaponClass;
+		}
 
-        Info.ProjectileCount = FMath::Max(1, Modifier.ProjectileCountAdd);
-        Info.ProjectileSize = Modifier.SizeMultiplier;
-        Info.ProjectileSpeed = 1200.f * Modifier.SpeedMultiplier;
+		Info.WeaponCount = FMath::Max(1, Modifier.WeaponCountAdd);
+		Info.WeaponSize = Modifier.SizeMultiplier;
+		Info.WeaponSpeed = 1200.f * Modifier.SpeedMultiplier;
         Info.Pattern = Modifier.Pattern;
     }
     else
     {
         // 아이템 없으면 기본값
-        Info.ProjectileClass = DefaultProjectileClass;
-        Info.ProjectileCount = 1;
-    }
+        Info.WeaponClass = DefaultWeaponClass;
+		Info.WeaponCount = 1;
+	}
+	*/
 
-    return Info;
+	return Info;
 }
 
-void UPetCombatComponent::SpawnProjectiles(
-    const FPetAttackInfo& AttackInfo,
-    const FVector& TargetLocation)
+void UPetCombatComponent::SpawnWeapons(
+	const FPetAttackInfo& AttackInfo,
+	const FVector& TargetLocation)
 {
-    if (!AttackInfo.ProjectileClass) return;
+	//if (!AttackInfo.WeaponClass) return;
 
+	if (!IsValid(DefaultWeaponClassTest))
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[UPetCombatComponent] SpawnWeapons: WeaponClass is valid. Proceeding with attack."));
+	DefaultWeaponClassTest->OnAttack(AttackInfo, TargetLocation);
+
+
+	/*
     // 오브젝트 풀 시스템 가져오기
     UWorld* World = GetWorld();
     if (World == nullptr) return;
@@ -257,15 +302,15 @@ void UPetCombatComponent::SpawnProjectiles(
 	if (ObjectPoolSubsystem == nullptr) return;
 
     // 사용할 발사체 오브젝트 풀에서 가져오기
-    UClass* ProjectileClassKey = DefaultProjectileClass.Get();
+    UClass* WeaponClassKey = DefaultWeaponClass.Get();
 
     const FVector Origin = GetOwner()->GetActorLocation();
-    const TArray<FVector> Directions = CalculateProjectileDirections(
-        AttackInfo.Pattern, AttackInfo.ProjectileCount, Origin, TargetLocation);
+    const TArray<FVector> Directions = CalculateWeaponDirections(
+		AttackInfo.Pattern, AttackInfo.WeaponCount, Origin, TargetLocation);
 
-    for (const FVector& Dir : Directions)
-    {
-        AActor* GetPoolActor = ObjectPoolSubsystem->RequestPoolActor(AttackInfo.ProjectileClass);
+	for (const FVector& Dir : Directions)
+	{
+		AActor* GetPoolActor = ObjectPoolSubsystem->RequestPoolActor(AttackInfo.WeaponClass);
         if (GetPoolActor == nullptr) return;
         ABaseProjectile* Projectile = Cast<ABaseProjectile>(GetPoolActor);
         if (Projectile == nullptr) return;
@@ -274,7 +319,7 @@ void UPetCombatComponent::SpawnProjectiles(
         Projectile->Owner = GetOwner();
         Projectile->SetInstigator(Cast<APawn>(GetOwner()));
         Projectile->SetActorLocationAndRotation(Origin, Dir.Rotation(), false, nullptr, ETeleportType::TeleportPhysics);
-		Projectile->SetActorScale3D(FVector(AttackInfo.ProjectileSize));
+		Projectile->SetActorScale3D(FVector(AttackInfo.WeaponSize));
 
         // 사운드 및 Niagara 재생
         OnAttackSound(Origin);
@@ -284,38 +329,40 @@ void UPetCombatComponent::SpawnProjectiles(
 		Projectile->SetHomingTarget(CurrentTarget.Get());
         Projectile->FireProjectile(AttackInfo, Dir);
     }
+	*/
 }
 
-TArray<FVector> UPetCombatComponent::CalculateProjectileDirections(
-    EProjectilePattern Pattern,
-    int32 Count,
-    const FVector& Origin,
-    const FVector& TargetLocation) const
+/*
+TArray<FVector> UPetCombatComponent::CalculateWeaponDirections(
+	EWeaponPattern Pattern,
+	int32 Count,
+	const FVector& Origin,
+	const FVector& TargetLocation) const
 {
-    TArray<FVector> Directions;
-    const FVector BaseDir = (TargetLocation - Origin).GetSafeNormal();
+	TArray<FVector> Directions;
+	const FVector BaseDir = (TargetLocation - Origin).GetSafeNormal();
 
-    switch (Pattern)
-    {
-        case EProjectilePattern::Single:
-            Directions.Add(BaseDir);
-            break;
+	switch (Pattern)
+	{
+	case EWeaponPattern::Single:
+		Directions.Add(BaseDir);
+		break;
 
-        case EProjectilePattern::Spread:
-        {
-            // Count발을 일정 각도로 펼친다
-            const float SpreadAngle = 15.f;
-            const float AngleStep = (Count > 1) ? (SpreadAngle * 2.f / (Count - 1)) : 0.f;
-            for (int32 i = 0; i < Count; ++i)
-            {
-                const float Angle = -SpreadAngle + AngleStep * i;
-                const FVector Dir = BaseDir.RotateAngleAxis(Angle, FVector::UpVector);
-                Directions.Add(Dir);
-            }
-            break;
-        }
+	case EWeaponPattern::Spread:
+	{
+		// Count발을 일정 각도로 펼친다
+		const float SpreadAngle = 15.f;
+		const float AngleStep = (Count > 1) ? (SpreadAngle * 2.f / (Count - 1)) : 0.f;
+		for (int32 i = 0; i < Count; ++i)
+		{
+			const float Angle = -SpreadAngle + AngleStep * i;
+			const FVector Dir = BaseDir.RotateAngleAxis(Angle, FVector::UpVector);
+			Directions.Add(Dir);
+		}
+		break;
+	}
 
-        case EProjectilePattern::Spiral:
+	case EWeaponPattern::Spiral:
         {
             const float AngleStep = 360.f / Count;
             for (int32 i = 0; i < Count; ++i)
@@ -334,6 +381,7 @@ TArray<FVector> UPetCombatComponent::CalculateProjectileDirections(
     return Directions;
 }
 
+
 void UPetCombatComponent::OnAttackSound(const FVector& SpawnLocation) const
 {
 	if (AttackSoundId.IsValid())
@@ -350,9 +398,9 @@ void UPetCombatComponent::OnAttackNiagara(const FVector& SpawnLocation) const
 	}
 }
 
-void UPetCombatComponent::InitializeProjectilePool()
+void UPetCombatComponent::InitializeWeaponPool()
 {
-	if (ProjectilePoolSize <= 0) return;
+	if (WeaponPoolSize <= 0) return;
 
 	UWorld* World = GetWorld();
 	if (!World) return;
@@ -360,7 +408,8 @@ void UPetCombatComponent::InitializeProjectilePool()
 	UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
 	if (ObjectPoolSubsystem)
 	{
-		UClass* Projectile = DefaultProjectileClass.Get();
-		ObjectPoolSubsystem->InitializePoolForClass(DefaultProjectileClass, ProjectilePoolSize);
+		UClass* Weapon = DefaultWeaponClass.Get();
+		ObjectPoolSubsystem->InitializePoolForClass(DefaultWeaponClass, WeaponPoolSize);
 	}
 }
+*/

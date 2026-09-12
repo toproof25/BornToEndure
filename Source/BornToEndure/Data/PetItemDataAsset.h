@@ -30,14 +30,6 @@ class BORNTOENDURE_API UPetItemDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Identity")
-    FText ItemName;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Identity")
-    FText ItemDescription;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item|Identity")
-    TSoftObjectPtr<UTexture2D> ItemIcon;
 
     /**
      * @brief 아이템이 가지는 시너지 태그들
