@@ -753,12 +753,14 @@ void UDebugImGuiComponent::DrawPetInfo()
 	ImGui::Text("보유 펫 %d", ValidCount);
 	ImGui::SameLine();
 	ImGui::TextDisabled("행을 선택하면 아래에 상세 정보가 표시됩니다.");
-	if (ImGui::BeginTable("PetOverview", 4, PetDashboard::TableFlags))
+	TWeakObjectPtr<APetCompanionCharacter> PetToRemove;
+	if (ImGui::BeginTable("PetOverview", 5, PetDashboard::TableFlags))
 	{
 		ImGui::TableSetupColumn("펫", ImGuiTableColumnFlags_WidthStretch, 2);
 		ImGui::TableSetupColumn("체력");
 		ImGui::TableSetupColumn("아이템");
 		ImGui::TableSetupColumn("기록 피해");
+		ImGui::TableSetupColumn("작업");
 		ImGui::TableHeadersRow();
 		for (const auto& Entry : Pets)
 		{
@@ -768,7 +770,7 @@ void UDebugImGuiComponent::DrawPetInfo()
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			if (ImGui::Selectable(TCHAR_TO_UTF8(*Pet->GetName()), InspectedPet.Get() == Pet,
-				ImGuiSelectableFlags_SpanAllColumns))
+				ImGuiSelectableFlags_None))
 			{
 				InspectedPet = Pet;
 				PetActionResult.Reset();
@@ -790,9 +792,21 @@ void UDebugImGuiComponent::DrawPetInfo()
 			ImGui::TableSetColumnIndex(3);
 			if (IsValid(PlayerState)) ImGui::Text("%.1f", PlayerState->GetPetDamageStats().FindRef(Pet->GetFName()));
 			else ImGui::TextDisabled("대기 중");
+			ImGui::TableSetColumnIndex(4);
+			if (ImGui::Button("펫 제거")) PetToRemove = Pet;
 			ImGui::PopID();
 		}
 		ImGui::EndTable();
+	}
+	// Finish iteration before RemovePet mutates the list and broadcasts delegates.
+	if (PetDashboard::IsUsable(PetToRemove.Get()) && IsValid(Manager)
+		&& IsValid(GetWorld()) && IsValid(Owner) && !Owner->IsActorBeingDestroyed()
+		&& Manager->GetPetList().Contains(PetToRemove.Get()))
+	{
+		if (InspectedPet == PetToRemove) InspectedPet.Reset();
+		PetActionResult.Reset();
+		Manager->RemovePet(PetToRemove.Get());
+		return;
 	}
 	if (ImGui::CollapsingHeader("전체 피해 기록 (이전 펫 포함)"))
 	{
