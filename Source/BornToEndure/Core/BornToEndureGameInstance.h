@@ -21,9 +21,12 @@ class BORNTOENDURE_API UBornToEndureGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable|Pet")
+	TObjectPtr<UDataTable> PetDataTableClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable|Item")
 	TObjectPtr<UDataTable> StatItemDataTableClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable|Item")
 	TObjectPtr<UDataTable> WeaponItemDataTableClass;
 };
