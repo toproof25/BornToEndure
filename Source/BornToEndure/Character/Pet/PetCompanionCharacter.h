@@ -37,6 +37,12 @@ public:
 	/** * @brief PetManagerComponent가 스폰 직후 오너를 설정할 때 호출 */
 	void SetFollowOwner(APawn* PlayerPawn);
 
+	/**
+	* @brief PetBaseData를 읽어 각 컴포넌트를 초기화한다
+	* - StatComponent로 PetBaseData의 Stat을 전달하여 초기화
+	*/
+	void InitializeFromDataAsset(UPetBaseDataAsset* NewPetBaseData);
+
 private:
 
 	// 컴포넌트 캐싱
@@ -63,11 +69,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pet|Data", meta = (AllowPrivateAccess = "true", AllowedTypes = "PetBaseDataAsset"))
 	TObjectPtr<UPetBaseDataAsset> PetBaseData;
 
-	/** 
-	* @brief PetBaseData를 읽어 각 컴포넌트를 초기화한다 
-	* - StatComponent로 PetBaseData의 Stat을 전달하여 초기화
-	*/
-	void InitializeFromDataAsset();
 
 	/** 
 	* @brief StatComponent와 CombatComponent를 연결한다 

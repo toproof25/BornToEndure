@@ -48,49 +48,34 @@ void APetCompanionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// DataAsset이 설정되어 있을 때만 초기화
-	if (PetBaseData)
-	{
-		InitializeFromDataAsset();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[PetCompanionCharacter] %s: PetBaseData is not set! Using default values."), *GetName());
-	}
-
 	// 컴포넌트 간 델리게이트 연결
 	BindComponentDelegates();
 }
 
 
-void APetCompanionCharacter::InitializeFromDataAsset()
+void APetCompanionCharacter::InitializeFromDataAsset(UPetBaseDataAsset* NewPetBaseData)
 {
+	PetBaseData = NewPetBaseData;
+	if (!PetBaseData) return;
+
 	// Item Subsystem에서 StarWeaponID를 가져온 후 인스턴스화 하여 시작 아이템으로 적용
 	UWorld* World = GetWorld();
 	if (!World) return;
 	UItemPoolSubsystem* ItemPoolSubsystem = World ? World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
 	if (!ItemPoolSubsystem) return;
 
-
-	//TSoftObjectPtr<UPetItemDataAsset> StartWeaponDataAsset = StartWeaponRow->WeaponItemDataAsset;
-	//UPetWeaponItemDataAsset* StartWeaponInstance = Cast<UPetWeaponItemDataAsset>(StartWeaponDataAsset.LoadSynchronous());
-
-	//FItemDataHandle StartWeaponHandle;
-	//StartWeaponHandle.ItemType = EItemType::Weapon;
-	//StartWeaponHandle.ItemRowName = PetBaseData->StartWeaponID;
+	// Pet Character의 SkeletalMesh를 DataAsset 기반으로 설정
+	USkeletalMesh* SkeletalMesh = GetMesh() ? GetMesh()->SkeletalMesh : nullptr;
+	if (SkeletalMesh && PetBaseData && PetBaseData->PetMesh)
+	{
+		GetMesh()->SetSkeletalMesh(PetBaseData->PetMesh.LoadSynchronous());
+	}
 
 	// StatComponent 초기화
 	if (PetStatComp)
 	{
 		PetStatComp->InitializeBaseStats(PetBaseData->BaseStats);
 	}
-
-	// CombatComponent에 기본 공격 클래스 설정 (BeginPlay에서는 로드하여 적용)
-	//if (PetCombatComp && StartWeaponInstance)
-	//{
-	//	FWeaponModifierData WeaponModifier = StartWeaponInstance->WeaponModifier;
-	//	PetCombatComp->DefaultWeaponClass = WeaponModifier.OverrideWeaponClass.LoadSynchronous();
-	//}
 
 	const FWeaponItemDataRow* StartWeaponRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(PetBaseData->StartWeaponID);
 	if (PetItemComp && StartWeaponRow)
@@ -103,6 +88,7 @@ void APetCompanionCharacter::InitializeFromDataAsset()
 	{
 		GetCharacterMovement()->MaxWalkSpeed = PetStatComp->GetFinalStat(EPetStatType::MoveSpeed);
 	}
+
 }
 
 void APetCompanionCharacter::BindComponentDelegates()
@@ -171,12 +157,12 @@ UBehaviorTree* APetCompanionCharacter::GetBehaviorTree() const
 
 FName APetCompanionCharacter::GetPetName() const
 {
-	FText Name = PetBaseData->PetName;
+	FText Name = PetBaseData->GetPetName();
 	FName NameAsFName(*Name.ToString());
 	return NameAsFName;
 }
 
 TSoftObjectPtr<UTexture2D> APetCompanionCharacter::GetIcon() const
 {
-	return PetBaseData ? PetBaseData->Icon : nullptr;
+	return nullptr; //PetBaseData ? PetBaseData->Icon : nullptr;
 }

@@ -85,10 +85,18 @@ void UPetCombatComponent::InitializeDefaultWeapon(const FWeaponItemDataRow& Weap
 	}
 
 	UPetWeaponItemDataAsset* WeaponDataAsset = WeaponItemDataRow.WeaponItemDataAsset.LoadSynchronous();
-	if (!WeaponDataAsset) return;
+	if (!WeaponDataAsset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[PetCombatComponent] Failed to load WeaponDataAsset for default weapon."));
+		return;
+	}
 
 	ABaseWeapon* NewWeapon = GetWorld()->SpawnActor<ABaseWeapon>(WeaponDataAsset->WeaponClass);
-	if (!NewWeapon) return;
+	if (!NewWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[PetCombatComponent] Failed to spawn default weapon actor."));
+		return;
+	}
 
 	NewWeapon->InitializeWeapon(*WeaponDataAsset);
 	DefaultWeaponClassTest = NewWeapon;
@@ -97,6 +105,7 @@ void UPetCombatComponent::InitializeDefaultWeapon(const FWeaponItemDataRow& Weap
 	DefaultWeaponClassTest->SetInstigator(Cast<APawn>(GetOwner()));
 	DefaultWeaponClassTest->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepRelativeTransform);
 
+	UE_LOG(LogTemp, Log, TEXT("[PetCombatComponent] Default weapon initialized: %s"), *NewWeapon->GetName());
 	StartAttack();
 }
 
@@ -114,6 +123,7 @@ void UPetCombatComponent::StartAttack()
 	if (bIsAttacking) return;
 	bIsAttacking = true;
 	RefreshAttackTimer();
+	UE_LOG(LogTemp, Log, TEXT("[PetCombatComponent] Attack started."));
 }
 
 void UPetCombatComponent::StopAttack()
@@ -122,6 +132,7 @@ void UPetCombatComponent::StopAttack()
 	if (UWorld* World = GetWorld())
 	{
 		World->GetTimerManager().ClearTimer(AttackTimerHandle);
+		UE_LOG(LogTemp, Log, TEXT("[PetCombatComponent] Attack stopped."));
 	}
 }
 
@@ -169,6 +180,7 @@ void UPetCombatComponent::RefreshAttackTimer()
         Interval,
         true
     );
+	UE_LOG(LogTemp, Log, TEXT("[PetCombatComponent] Attack timer refreshed. Interval: %f seconds."), Interval);
 }
 
 void UPetCombatComponent::SetAttackTarget(AActor* NewTarget)
@@ -213,6 +225,7 @@ void UPetCombatComponent::ExecuteAttack()
     if (!CurrentTarget.IsValid())
     {
         StopAttack();
+		UE_LOG(LogTemp, Warning, TEXT("[PetCombatComponent] ExecuteAttack called but CurrentTarget is invalid. Stopping attack."));
         return;
     }
 

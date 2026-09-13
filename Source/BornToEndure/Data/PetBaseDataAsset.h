@@ -30,11 +30,6 @@ class BORNTOENDURE_API UPetBaseDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Identity")
-    FText PetName;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Identity")
-    TSoftObjectPtr<UTexture2D> Icon;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
     TSoftObjectPtr<USkeletalMesh> PetMesh;
@@ -45,9 +40,6 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
     TSoftObjectPtr<UBehaviorTree> BehaviorTree;
 
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowClasses = "PetProjectileItemDataAsset"))
-    //TSoftObjectPtr<UPetProjectileItemDataAsset> DefaultProjectileClass;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	FName StartWeaponID;
 
@@ -56,5 +48,5 @@ public:
         return FPrimaryAssetId(FPrimaryAssetType("PetData"), GetFName());
     }
 
-	FText GetPetName() const { return PetName; }
+	FText GetPetName() const { return FText::FromString("Test"); }
 };

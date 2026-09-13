@@ -17,6 +17,7 @@
 
 class APetCompanionCharacter;
 class UPetItemDataAsset;
+class UPetBaseDataAsset;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPetManager, Log, All);
 
@@ -43,13 +44,13 @@ public:
 
     /**
      * @brief Pet을 관리 목록에 추가한 후 레벨에 스폰하는 함수
-     * @param PetClassOverride null이면 DefaultPetClass를 사용
+     * @param PetDataAsset DataTableRow의 PetBaseDataAsset을 전달하면 해당 Pet을 스폰하고 관리 목록에 추가
      * @return 스폰된 Pet의 포인터
      * @details
 	 * - Pet을 성공적으로 스폰한 후 FOnPetAdded Delegate를 호출
      */
-    UFUNCTION(BlueprintCallable, Category = "Pet")
-    APetCompanionCharacter* SpawnAndAddPet(TSubclassOf<APetCompanionCharacter> PetClassOverride = nullptr);
+	UFUNCTION(BlueprintCallable, Category = "Pet")
+	APetCompanionCharacter* SpawnAndAddPet(TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset = nullptr);
 
     /**
 	 * @brief Pet을 관리 목록에서 제거하고, Destroy하는 함수

@@ -10,6 +10,11 @@ void UBornToEndureGameInstance::Init()
 	UItemPoolSubsystem* ItemPool = GetSubsystem<UItemPoolSubsystem>();
 	check(ItemPool);
 
+	if (PetDataTableClass)
+	{
+		ItemPool->InitializePetDataTable(PetDataTableClass);
+		UE_LOG(LogTemp, Log, TEXT("GameInstance: Pet 데이터 테이블을 서브시스템으로 전달 완료!"));
+	}
 	if (StatItemDataTableClass)
 	{
 		ItemPool->InitializeItemPoolSubsystem(StatItemDataTableClass, 0);
