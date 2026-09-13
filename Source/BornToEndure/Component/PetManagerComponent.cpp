@@ -8,6 +8,9 @@
 #include "Data/DataTableRow/ItemDataRow.h"
 #include "Data/DataTableRow/StatItemDataRow.h"
 
+#include "Data/PetBaseDataAsset.h"
+#include "Subsystem/ItemPoolSubsystem.h"
+
 DEFINE_LOG_CATEGORY(LogPetManager);
 
 UPetManagerComponent::UPetManagerComponent()
@@ -20,62 +23,41 @@ void UPetManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogPetManager, Display, TEXT("PetManager BeginPlay called. Attempting to spawn pet."));
-
-    // DefaultPetClass가 설정되어 있으면 게임 시작 시 자동 스폰
-    if (DefaultPetClass)
-    {
-        SpawnAndAddPet(DefaultPetClass);
-    }
-    else
-    {
-        UE_LOG(LogPetManager, Warning, TEXT("[PetManagerComponent] DefaultPetClass is not set."));
-    }
-
-	
 }
 
-APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSubclassOf<APetCompanionCharacter> PetClassOverride)
+APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset)
 {
-    // 파라미터로 들어온 Pet이 유효하면 사용하고 아니면 기본 Pet을 사용한다
-    TSubclassOf<APetCompanionCharacter> ClassToSpawn = PetClassOverride ? PetClassOverride : DefaultPetClass;
+	if (!PetDataAsset)
+	{
+		UE_LOG(LogPetManager, Warning, TEXT("[PetManagerComponent] PetDataAsset is null."));
+		return nullptr;
+	}
 
-    if (!ClassToSpawn)
-    {
-        UE_LOG(LogPetManager, Error, TEXT("[PetManagerComponent] No pet class to spawn."));
-        return nullptr;
-    }
+	UWorld* World = GetWorld();
+	if (!World) return nullptr;
 
-    UWorld* World = GetWorld();
-    if (!World) return nullptr;
+	// 플레이어 근방에 Pet을 스폰
+	const FTransform SpawnTransform = CalculateSpawnTransform(PetList.Num());
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	APetCompanionCharacter* NewPet = World->SpawnActor<APetCompanionCharacter>(DefaultPetClass, SpawnTransform, SpawnParams);
+	NewPet->InitializeFromDataAsset(PetDataAsset.LoadSynchronous());
 
-    // 플레이어 근방에 Pet을 스폰
-    const FTransform SpawnTransform = CalculateSpawnTransform(PetList.Num());
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.Owner = GetOwner();
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-    APetCompanionCharacter* NewPet = World->SpawnActor<APetCompanionCharacter>(ClassToSpawn, SpawnTransform, SpawnParams);
+	// Pet 관리 목록에 추가
+	PetList.Add(NewPet);
 
-    if (!NewPet)
-    {
-        UE_LOG(LogPetManager, Error, TEXT("[PetManagerComponent] Pet spawn failed."));
-        return nullptr;
-    }
+	// Pet의 주인(플레이어)을 설정
+	if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+	{
+		NewPet->SetFollowOwner(OwnerPawn);
+	}
 
-    // Pet 관리 목록에 추가
-    PetList.Add(NewPet);
+	// Pet 추가 이벤트를 방송
+	OnPetAdded.Broadcast(NewPet);
+	UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Pet spawned: %s (Total: %d)"), *NewPet->GetName(), PetList.Num());
 
-    // Pet의 주인(플레이어)을 설정
-    if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
-    {
-        NewPet->SetFollowOwner(OwnerPawn);
-    }
-
-    // Pet 추가 이벤트를 방송
-    OnPetAdded.Broadcast(NewPet);
-    UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Pet spawned: %s (Total: %d)"),*NewPet->GetName(), PetList.Num());
-
-    return NewPet;
+	return NewPet;
 }
 
 void UPetManagerComponent::RemovePet(APetCompanionCharacter* PetToRemove)
