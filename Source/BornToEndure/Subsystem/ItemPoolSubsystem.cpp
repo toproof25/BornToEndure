@@ -33,6 +33,34 @@ void UItemPoolSubsystem::InitializeItemPoolSubsystem(UDataTable* ItemDataTable, 
 	}
 }
 
+void UItemPoolSubsystem::InitializePetDataTable(UDataTable* InPetDataTable)
+{
+	PetDataTable = InPetDataTable;
+	if (PetDataTable)
+	{
+		PetDataTable->GetAllRows<FPetDataRow>(
+			TEXT("UItemPoolSubsystem InitializePetDataTableDebug: Pet Load"), 
+			PetDataList
+		);
+	}
+	else
+	{
+		UE_LOG(LogItemPoolSubsystem, Error, TEXT("[UItemPoolSubsystem] InitializePetDataTable: PetDataTable이 nullptr입니다."));
+	}
+
+	for (const FPetDataRow* PetRow : PetDataList)
+	{
+		if (PetRow)
+		{
+			UE_LOG(LogItemPoolSubsystem, Log, TEXT("[UItemPoolSubsystem] InitializePetDataTable: Name: %s"), *PetRow->Name.ToString());
+		}
+		else
+		{
+			UE_LOG(LogItemPoolSubsystem, Warning, TEXT("[UItemPoolSubsystem] InitializePetDataTable: PetRow이 nullptr입니다."));
+		}
+	}
+}
+
 TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomItemData(int32 Count)
 {
 	TArray<FItemDataHandle> ResultObjects;
@@ -66,6 +94,19 @@ TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomItemData(int32 Count)
 	}
 
 	return ResultObjects;
+}
+
+const FPetDataRow* UItemPoolSubsystem::GetPetDataRowByID(const FName& PetID)
+{
+	// PetDataTable에서 PetID에 해당하는 FPetDataRow를 찾아 반환
+	const FPetDataRow* PetRow =
+		PetDataTable->FindRow<FPetDataRow>(
+			PetID,
+			TEXT("Apply Pet Data")
+		);
+
+	if (PetRow) return PetRow;
+	return nullptr;
 }
 
 const FItemDataRow* UItemPoolSubsystem::GetItemDataRowByID(const EItemType ItemType, const FName& ItemID)
