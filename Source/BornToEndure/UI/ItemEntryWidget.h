@@ -23,6 +23,8 @@ class UImage;
 class UBorder;
 class UItemPoolSubsystem;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const FItemDataHandle&, SelectedItem);
+
 UCLASS()
 class BORNTOENDURE_API UItemEntryWidget : public UUserWidget
 {

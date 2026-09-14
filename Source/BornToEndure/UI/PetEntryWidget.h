@@ -16,6 +16,7 @@
 
 #include "PetEntryWidget.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPetSelected, APetCompanionCharacter*, SelectedPet);
 
 class UButton;
 class UTextBlock;
@@ -57,27 +58,23 @@ public:
 	 */
 	void SetSelectedVisual(bool bSelected);
 
-protected:
+private:
 
-	/**
-	 * @brief 이미지를 비동기 로드 후 GC를 방지하기 위한 캐싱 변수
-	 */
+	/** * @brief 이미지를 비동기 로드 후 GC를 방지하기 위한 캐싱 변수 */
 	TSharedPtr<FStreamableHandle> TextureLoadingHandle;
+
+	/** * @brief 선택된 아이템의 시각적 효과를 나타내는 변수 */
+	bool bIsSelected = false;
+
+	/** * @brief 부모 Widtet을 참조하기 위한 변수 */
+	ULevelUpRewardWidget* ParentWidget;
+
+
+	void SetPetIconImage(TSoftObjectPtr<UTexture2D> InTexture);
 
 	/**
 	 * @brief 이미지 로드 후 호출되는 콜백 함수
 	 * @param LoadedIcons 메모리에 로드가 완료된 이미지의 경로 (TSoftObjectPtr<UTexture2D>)
 	 */
 	void OnIconsLoaded(TSoftObjectPtr<UTexture2D> LoadedIcons);
-
-private:
-	/**
-	 * @brief 선택된 아이템의 시각적 효과를 나타내는 변수
-	 */
-	bool bIsSelected = false;
-
-	/**
-	 * @brief 부모 Widtet을 참조하기 위한 변수
-	 */
-	ULevelUpRewardWidget* ParentWidget;
 };

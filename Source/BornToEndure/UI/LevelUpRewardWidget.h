@@ -15,10 +15,6 @@ class UItemEntryWidget;
 class APetCompanionCharacter;
 
 
-// Pet과 Item 선택 시 포인터를 전달하기 위한 Delegate
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPetSelected, APetCompanionCharacter*, SelectedPet);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const FItemDataHandle&, SelectedItem);
-//FOnItemSelected OnItemSelectedDelegate;
 
 
 UCLASS()
