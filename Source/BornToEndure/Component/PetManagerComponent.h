@@ -50,7 +50,7 @@ public:
 	 * - Pet을 성공적으로 스폰한 후 FOnPetAdded Delegate를 호출
      */
 	UFUNCTION(BlueprintCallable, Category = "Pet")
-	APetCompanionCharacter* SpawnAndAddPet(TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset = nullptr);
+	APetCompanionCharacter* SpawnAndAddPet(FName RowName, TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset = nullptr);
 
     /**
 	 * @brief Pet을 관리 목록에서 제거하고, Destroy하는 함수

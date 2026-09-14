@@ -199,12 +199,12 @@ float ABaseEnemyCharacter::TakeDamage(
 	// 데미지 정보 기록
 	APetCompanionCharacter* Pet = Cast<APetCompanionCharacter>(EventInstigator->GetPawn());
 	if (!Pet) return FinalDamage;
-	EnemyRewardPayload.RegisterDamage(Pet ? Pet->GetPetName() : NAME_None, FinalDamage); // 킬에 기여한 펫이 있을 경우 데미지 정보 기록
+	EnemyRewardPayload.RegisterDamage(Pet ? Pet->GetPetRowName() : NAME_None, FinalDamage); // 킬에 기여한 펫이 있을 경우 데미지 정보 기록
 
 	// 사망하는 경우
 	if (CurrentHealth <= 0.f)
 	{
-		EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
+		EnemyRewardPayload.KillerPetId = Pet ? Pet->GetPetRowName() : NAME_None; // 킬에 기여한 펫이 있을 경우 ID 기록
 		HandleDeath();
 	}
 

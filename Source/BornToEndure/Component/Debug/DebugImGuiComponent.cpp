@@ -14,6 +14,8 @@
 #include "Item/Weapon/BaseWeapon.h"
 #include "Item/Weapon/FireWeapon.h"
 #include "Engine/World.h"
+#include "Engine/GameInstance.h"
+#include "Subsystem/ItemPoolSubsystem.h"
 
 #include "Subsystem/ObjectPoolSubsystem.h"
 #include "Subsystem/EffectSubsystem.h"
@@ -687,6 +689,20 @@ void UDebugImGuiComponent::DrawObjectPoolInfo()
 
 namespace PetDashboard
 {
+	FText GetPetName(const APetCompanionCharacter* Pet)
+	{
+		UWorld* World = Pet->GetWorld();
+		UGameInstance* Instance = IsValid(World) ? World->GetGameInstance() : nullptr;
+		UItemPoolSubsystem* Pool = IsValid(Instance) ? Instance->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+		return IsValid(Pool) && IsValid(Pool->PetDataTable) ? Pet->GetPetName() : FText::GetEmpty();
+	}
+
+	FString GetDisplayName(const APetCompanionCharacter* Pet)
+	{
+		const FText Name = GetPetName(Pet);
+		return Name.IsEmpty() ? Pet->GetName() : Name.ToString();
+	}
+
 	constexpr ImGuiTableFlags TableFlags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerH
 		| ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
 
@@ -769,7 +785,7 @@ void UDebugImGuiComponent::DrawPetInfo()
 			ImGui::PushID(Pet);
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
-			if (ImGui::Selectable(TCHAR_TO_UTF8(*Pet->GetName()), InspectedPet.Get() == Pet,
+			if (ImGui::Selectable(TCHAR_TO_UTF8(*PetDashboard::GetDisplayName(Pet)), InspectedPet.Get() == Pet,
 				ImGuiSelectableFlags_None))
 			{
 				InspectedPet = Pet;
@@ -790,7 +806,7 @@ void UDebugImGuiComponent::DrawPetInfo()
 			if (IsValid(Items)) ImGui::Text("%d", Items->GetOwnedItems().Num());
 			else ImGui::TextDisabled("없음");
 			ImGui::TableSetColumnIndex(3);
-			if (IsValid(PlayerState)) ImGui::Text("%.1f", PlayerState->GetPetDamageStats().FindRef(Pet->GetFName()));
+			if (IsValid(PlayerState)) ImGui::Text("%.1f", PlayerState->GetPetDamageStats().FindRef(Pet->GetPetRowName()));
 			else ImGui::TextDisabled("대기 중");
 			ImGui::TableSetColumnIndex(4);
 			if (ImGui::Button("펫 제거")) PetToRemove = Pet;
@@ -815,7 +831,7 @@ void UDebugImGuiComponent::DrawPetInfo()
 		else if (PlayerState->GetPetDamageStats().IsEmpty()) ImGui::TextDisabled("기록이 없습니다.");
 		else if (ImGui::BeginTable("PetDamageHistory", 2, PetDashboard::TableFlags))
 		{
-			ImGui::TableSetupColumn("펫 ID");
+			ImGui::TableSetupColumn("펫 이름");
 			ImGui::TableSetupColumn("기록 피해");
 			ImGui::TableHeadersRow();
 			for (const auto& Pair : PlayerState->GetPetDamageStats())
@@ -830,7 +846,7 @@ void UDebugImGuiComponent::DrawPetInfo()
 		return;
 	}
 	ImGui::Separator();
-	ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.f, 1.f), "%s", TCHAR_TO_UTF8(*Pet->GetName()));
+	ImGui::TextColored(ImVec4(0.5f, 0.8f, 1.f, 1.f), "%s", TCHAR_TO_UTF8(*PetDashboard::GetDisplayName(Pet)));
 	if (!PetActionResult.IsEmpty()) ImGui::TextWrapped("%s", TCHAR_TO_UTF8(*PetActionResult));
 	FGuid RemoveId;
 	ImGui::PushID(Pet);

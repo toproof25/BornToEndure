@@ -52,6 +52,7 @@ void APetAddAndRemoveDebugActor::RenderImGui()
 	if (!IsValid(World) || IsActorBeingDestroyed()) return;
 	const FString Title = FString::Printf(TEXT("펫 추가 테스트###PetAddDebug_%s"), *GetPathName());
 	ImGui::SetNextWindowSize(ImVec2(760.f, 460.f), ImGuiCond_FirstUseEver);
+	FName RequestedRowName;
 	TSoftObjectPtr<UPetBaseDataAsset> RequestedAsset;
 	TWeakObjectPtr<UPetManagerComponent> RequestedManager;
 	if (ImGui::Begin(TCHAR_TO_UTF8(*Title)))
@@ -98,6 +99,7 @@ void APetAddAndRemoveDebugActor::RenderImGui()
 				ImGui::BeginDisabled(!bCanAdd || Row->PetBaseDataAsset.IsNull());
 				if (ImGui::Button("추가"))
 				{
+					RequestedRowName = Entry.Key;
 					RequestedAsset = Row->PetBaseDataAsset;
 					RequestedManager = Manager;
 				}
@@ -123,7 +125,7 @@ void APetAddAndRemoveDebugActor::RenderImGui()
 		if (!IsValid(ManagerOwner) || ManagerOwner->IsActorBeingDestroyed() || !IsValid(Manager->GetWorld())
 			|| !IsValid(Manager->DefaultPetClass.Get())) return;
 		const int32 PreviousCount = Manager->GetPetCount();
-		Manager->SpawnAndAddPet(RequestedAsset);
+		Manager->SpawnAndAddPet(RequestedRowName, RequestedAsset);
 		// The current production implementation returns nullptr even after adding a pet.
 		if (RequestedManager.IsValid() && IsValid(this) && !IsActorBeingDestroyed())
 		{

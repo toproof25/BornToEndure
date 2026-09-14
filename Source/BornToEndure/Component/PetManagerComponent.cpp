@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Data/DataTableRow/ItemDataRow.h"
 #include "Data/DataTableRow/StatItemDataRow.h"
+#include "Data/DataTableRow/PetDataRow.h"
 
 #include "Data/PetBaseDataAsset.h"
 #include "Subsystem/ItemPoolSubsystem.h"
@@ -25,7 +26,7 @@ void UPetManagerComponent::BeginPlay()
 
 }
 
-APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset)
+APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(FName RowName, TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset)
 {
 	if (!PetDataAsset)
 	{
@@ -42,7 +43,7 @@ APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSoftObjectPtr<UPet
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	APetCompanionCharacter* NewPet = World->SpawnActor<APetCompanionCharacter>(DefaultPetClass, SpawnTransform, SpawnParams);
-	NewPet->InitializeFromDataAsset(PetDataAsset.LoadSynchronous());
+	NewPet->InitializeFromDataAsset(RowName, PetDataAsset.LoadSynchronous());
 
 	// Pet 관리 목록에 추가
 	PetList.Add(NewPet);

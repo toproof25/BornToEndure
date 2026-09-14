@@ -13,8 +13,7 @@ void UPetEntryWidget::InitializeWithPetData(ULevelUpRewardWidget* InParentWidget
 {
 	ParentWidget = InParentWidget;
 
-	FName PetName = InPet ? InPet->GetPetName() : NAME_None;
-	FText DisplayName = FText::FromName(PetName);
+	FText DisplayName = InPet->GetPetName();
 	PetNameText->SetText(DisplayName);
 	SelectedPet = InPet;
 

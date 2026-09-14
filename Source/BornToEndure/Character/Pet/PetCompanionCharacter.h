@@ -41,7 +41,7 @@ public:
 	* @brief PetBaseData를 읽어 각 컴포넌트를 초기화한다
 	* - StatComponent로 PetBaseData의 Stat을 전달하여 초기화
 	*/
-	void InitializeFromDataAsset(UPetBaseDataAsset* NewPetBaseData);
+	void InitializeFromDataAsset(FName RowName, UPetBaseDataAsset* NewPetBaseData);
 
 private:
 
@@ -69,6 +69,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pet|Data", meta = (AllowPrivateAccess = "true", AllowedTypes = "PetBaseDataAsset"))
 	TObjectPtr<UPetBaseDataAsset> PetBaseData;
 
+	FName PetRowName;
 
 	/** 
 	* @brief StatComponent와 CombatComponent를 연결한다 
@@ -85,7 +86,6 @@ public:
 	UPetCombatComponent* GetCombatComponent() const { return PetCombatComp; }
 	UBehaviorTree* GetBehaviorTree() const;
 
-	TSoftObjectPtr<UTexture2D> GetIcon() const;
 
 	//FText GetPetName() const { return PetBaseData ? PetBaseData->GetPetName() : FText::FromName(NAME_None); }
 
@@ -97,5 +97,8 @@ public:
 	float GetAttackRange() const { return 500.0f; }
 
 	// 디버그 윈도우에서 Pet 이름 표시용 Getter
-	FName GetPetName() const;
+	FName GetPetRowName() const;
+	FText GetPetName() const;
+	TSoftObjectPtr<UTexture2D> GetIcon() const;
+
 };
