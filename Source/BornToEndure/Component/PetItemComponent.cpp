@@ -61,6 +61,7 @@ void UPetItemComponent::AddItem(FItemDataHandle ItemData)
 		{
 			const FWeaponItemDataRow* WeaponItemDataRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(ItemData.ItemRowName);
 			UPetCombatComponent* CombatComp = Cast<APetCompanionCharacter>(GetOwner())->GetCombatComponent();
+			WeaponItemDataHandle = ItemData;
 			if (CombatComp)
 			{
 				CombatComp->InitializeDefaultWeapon(*WeaponItemDataRow);

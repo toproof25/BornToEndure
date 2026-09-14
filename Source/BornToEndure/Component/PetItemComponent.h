@@ -107,6 +107,7 @@ protected:
 
 private:
 
+	FItemDataHandle WeaponItemDataHandle;
     TArray<FPetItemInstance> OwnedItems;
 
 	/** * @brief 현재 적용이 되는 모든 Stat 증감 아이템 수치 리스트 */
