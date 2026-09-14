@@ -27,9 +27,10 @@ void UObjectPoolSubsystem::InitializePoolForClass(TSubclassOf<AActor> ActorClass
 
     // AActor를 부모 클래스로 두기에 각 자식 클래스별로 관리할 수 있도록 사용
     UClass* ClassKey = ActorClass.Get();
+	UsePoolCount.FindOrAdd(ClassKey)++;
 
     // 이미 존재하면 무시
-    if (ActorPools.Contains(ClassKey)) return;
+	if (ActorPools.Contains(ClassKey)) return;
 
     PoolSizes.Add(ClassKey, PoolSize);
     TArray<AActor*>& Pool = ActorPools.FindOrAdd(ClassKey);
@@ -134,6 +135,14 @@ void UObjectPoolSubsystem::RemovePoolActor(TSubclassOf<AActor> RemovePoolActor)
     UClass* ClassKey = RemovePoolActor.Get();
 	UE_LOG(LogObjectPoolSubsystem, Display, TEXT("RemovePoolActor UObjectPoolSubsystem Class: %s"), *ClassKey->GetName());
 
+	int32* UseCount = UsePoolCount.Find(ClassKey);
+	if (UseCount)
+	{
+		(*UseCount)--;
+		if ((*UseCount) > 0) return;
+	}
+
+
 	// 현재 ActorPools에 존재하는 모든 정보를 이쁘게 출력
 	for (const auto& Pair : ActorPools)
 	{
@@ -158,6 +167,8 @@ void UObjectPoolSubsystem::RemovePoolActor(TSubclassOf<AActor> RemovePoolActor)
         }
     }
 	ActorPools.Remove(ClassKey);
+	PoolSizes.Remove(ClassKey);
+	UsePoolCount.Remove(ClassKey);
 
 	// 제거된 ActorPools에 존재하는 모든 정보를 이쁘게 출력
 	UE_LOG(LogObjectPoolSubsystem, Display, TEXT("After RemovePoolActor UObjectPoolSubsystem Class: %s"), *ClassKey->GetName());
