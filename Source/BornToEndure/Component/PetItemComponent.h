@@ -26,6 +26,8 @@ struct FPetItemInstance
     // 이 인스턴스의 고유 ID
     FGuid InstanceId;
 
+	FItemDataHandle ItemDataHandle;
+
     // 실제 아이템 데이터
     UPROPERTY()
     TObjectPtr<UPetItemDataAsset> LoadedData = nullptr;
@@ -170,4 +172,5 @@ public:
     // 디버그 및 UI용 Getter
     const TArray<FPetItemInstance>& GetOwnedItems() const { return OwnedItems; }
     const TArray<TObjectPtr<UPetSynergyDataAsset>>& GetActiveSynergies() const { return ActiveSynergies; }
+	const TArray<FItemDataHandle> GetOwnedItemRowHandles() const;
 };

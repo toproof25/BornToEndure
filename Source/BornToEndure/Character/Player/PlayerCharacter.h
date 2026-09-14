@@ -135,7 +135,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	void GetWeaponBase(ABaseWeapon*& OutWeaponBase) const { OutWeaponBase = WeaponBaseComp; }
 
-	void GetPerManagerComp(UPetManagerComponent*& OutPetManagerComp) const { OutPetManagerComp = PetManagerComp; }
+	UPetManagerComponent* GetPetManagerComp() const { return PetManagerComp; }
 	UPlayerHealthComponent* GetPlayerHealthComp() const { return HealthComp; }
 	
 

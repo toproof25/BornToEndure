@@ -55,7 +55,7 @@ APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(FName RowName, TSof
 	}
 
 	// Pet 추가 이벤트를 방송
-	OnPetAdded.Broadcast(NewPet);
+	OnPetAdded.Broadcast(this);
 	UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Pet spawned: %s (Total: %d)"), *NewPet->GetName(), PetList.Num());
 
 	return NewPet;
@@ -66,7 +66,7 @@ void UPetManagerComponent::RemovePet(APetCompanionCharacter* PetToRemove)
     if (!PetToRemove) return;
 
     PetList.RemoveSingle(PetToRemove);
-    OnPetRemoved.Broadcast(PetToRemove);
+    OnPetRemoved.Broadcast(this);
     PetToRemove->Destroy();
 }
 

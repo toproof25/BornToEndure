@@ -3,6 +3,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Stat/PetStatTypes.h"
+#include "Data/DataTableRow/ItemDataRow.h"
+
 #include "PetCompanionCharacter.generated.h"
 
 class USphereComponent;
@@ -101,4 +104,6 @@ public:
 	FText GetPetName() const;
 	TSoftObjectPtr<UTexture2D> GetIcon() const;
 
+	const TMap<EPetStatType, float>& GetFinalStats() const;
+	const TArray<FItemDataHandle> GetOwnedItemRowHandles() const;
 };

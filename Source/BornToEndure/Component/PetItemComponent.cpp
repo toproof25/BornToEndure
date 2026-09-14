@@ -32,6 +32,7 @@ void UPetItemComponent::AddItem(FItemDataHandle ItemData)
 	// 1. 아이템 인스턴스 생성
 	FPetItemInstance NewInstance;
 	NewInstance.InstanceId = FGuid::NewGuid();
+	NewInstance.ItemDataHandle = ItemData;
 	LastAddedInstanceId = NewInstance.InstanceId;
 
 	UWorld* World = GetWorld();
@@ -362,4 +363,14 @@ void UPetItemComponent::OnSynergyDataLoaded(TArray<FPrimaryAssetId> LoadedIds)
     }
 
     UE_LOG(LogTemp, Log, TEXT("[PetItemComponent] Synergy data loaded. Count: %d"), AllSynergyData.Num());
+}
+
+const TArray<FItemDataHandle> UPetItemComponent::GetOwnedItemRowHandles() const
+{
+	TArray<FItemDataHandle> ItemRowHandles;
+	for (const FPetItemInstance& ItemInstance : OwnedItems)
+	{
+		ItemRowHandles.Add(ItemInstance.ItemDataHandle);
+	}
+	return ItemRowHandles;
 }

@@ -18,10 +18,14 @@ class UTextBlock;
 class UProgressBar;
 class UPlayerHealthBarWidget;
 class APlayerCharacter;
+class APetCompanionCharacter;
 class UGameOverWidget;
 class UPlayerExpBarWidget;
 class UGameStatusWidget;
 class ULevelUpRewardWidget;
+class UPetSelectionWidget;
+class UPetManagerComponent;
+class UPetDetailWidget;
 
 UCLASS()
 class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
@@ -40,6 +44,12 @@ public:
 	UPlayerExpBarWidget* PlayerExpBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
+	UPetSelectionWidget* PetSelectionWidget;
+
+	UPROPERTY(meta = (BindWidget))
+	UPetDetailWidget* PetDetailWidget;
+
+	UPROPERTY(meta = (BindWidget))
 	UGameOverWidget* GameOverWidget;
 
 	UPROPERTY(meta = (BindWidget))
@@ -52,4 +62,12 @@ public:
 
 	void ShowLevelUpWidget(FLevelUpDataBundle LevelUpData);
 
+
+private:
+
+	UFUNCTION()
+	void HandlePetAddAndRemove(UPetManagerComponent* PetManagerComp);
+
+	UFUNCTION()
+	void HandlePetSelected(APetCompanionCharacter* InSelectedPet);
 };

@@ -12,6 +12,8 @@
 #include "Data/PetItemDataAsset.h"
 #include "Data/PetWeaponItemDataAsset.h"
 #include "Subsystem/ItemPoolSubsystem.h"
+#include "Data/DataTableRow/ItemDataRow.h"
+#include "Stat/PetStatTypes.h"
 #include "Data/DataTableRow/WeaponItemDataRow.h"
 
 APetCompanionCharacter::APetCompanionCharacter()
@@ -183,4 +185,15 @@ TSoftObjectPtr<UTexture2D> APetCompanionCharacter::GetIcon() const
 
 	const FPetDataRow* PetDataRow = ItemPoolSubsystem->GetPetDataRowByID(PetRowName);
 	return PetDataRow->PetIcon; //PetBaseData ? PetBaseData->Icon : nullptr;
+}
+
+const TMap<EPetStatType, float>& APetCompanionCharacter::GetFinalStats() const
+{ 
+	return PetStatComp->GetFinalStats(); 
+}
+
+
+const TArray<FItemDataHandle> APetCompanionCharacter::GetOwnedItemRowHandles() const
+{
+	return PetItemComp->GetOwnedItemRowHandles();
 }
