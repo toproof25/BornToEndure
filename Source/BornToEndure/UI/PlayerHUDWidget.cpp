@@ -62,7 +62,11 @@ void UPlayerHUDWidget::InitializeWidget(APlayerCharacter* PlayerCharacter)
 		UE_LOG(LogTemp, Warning, TEXT("[UPlayerHUDWidget] PetManagerComp 초기화 완료"));
 	}
 
-
+	if (PetDetailWidget && PetManagerComp)
+	{
+		PetManagerComp->OnPetItemReceived.AddUObject(PetDetailWidget, &UPetDetailWidget::UpdatePetDetail);
+		PetDetailWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void UPlayerHUDWidget::ShowLevelUpWidget(FLevelUpDataBundle LevelUpData)
@@ -72,9 +76,19 @@ void UPlayerHUDWidget::ShowLevelUpWidget(FLevelUpDataBundle LevelUpData)
 	if (LevelUpWidget)
 	{
 		LevelUpWidget->InitializeWithLevelUpData(LevelUpData); /// 레벨업 보상 창에 데이터 전달
-		LevelUpWidget->AddToViewport(1);
+		LevelUpWidget->AddToViewport(100);
 		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 레벨업 창 활성화"));
 	}
+}
+
+bool UPlayerHUDWidget::TogglePetDetailWidget()
+{
+	if (!PetDetailWidget) return false;
+
+	bIsPetDetailWidgetVisible = !bIsPetDetailWidgetVisible;
+	PetDetailWidget->SetVisibility(bIsPetDetailWidgetVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	UE_LOG(LogTemp, Warning, TEXT("[UPlayerHUDWidget] TogglePetDetailWidget: %s"), bIsPetDetailWidgetVisible ? TEXT("Visible") : TEXT("Hidden"));
+	return bIsPetDetailWidgetVisible;
 }
 
 void UPlayerHUDWidget::HandlePetAddAndRemove(UPetManagerComponent* PetManagerComp)

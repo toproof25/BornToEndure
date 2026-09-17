@@ -62,8 +62,11 @@ public:
 
 	void ShowLevelUpWidget(FLevelUpDataBundle LevelUpData);
 
+	bool TogglePetDetailWidget();
 
 private:
+
+	bool bIsPetDetailWidgetVisible = false;
 
 	UFUNCTION()
 	void HandlePetAddAndRemove(UPetManagerComponent* PetManagerComp);
