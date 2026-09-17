@@ -111,7 +111,7 @@ public:
     FOnPetRemoved OnPetRemoved;
 
     // Pet이 아이템을 받을 때 혹은 제거될 때 방송한다
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPetItemReceived, APetCompanionCharacter*, const UPetItemDataAsset*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetItemReceived, APetCompanionCharacter*);
     FOnPetItemReceived OnPetItemReceived;
 
 

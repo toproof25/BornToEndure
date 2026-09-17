@@ -104,6 +104,7 @@ void UPetManagerComponent::GiveItemToPet(APetCompanionCharacter* TargetPet, FIte
 	if (ItemComp)
 	{
 		ItemComp->AddItem(ItemData);
+		OnPetItemReceived.Broadcast(TargetPet);
 	}
 }
 
@@ -120,7 +121,7 @@ void UPetManagerComponent::RemoveItemFromPet(APetCompanionCharacter* TargetPet, 
     if (ItemComp)
     {
 		ItemComp->RemoveItem(InstanceId);
-        //OnPetItemReceived.Broadcast(TargetPet, nullptr);
+        OnPetItemReceived.Broadcast(TargetPet);
     }
 }
 
