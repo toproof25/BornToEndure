@@ -20,18 +20,18 @@ void UPetItemWidget::UpdateOwnedItems(TArray<FItemDataHandle> InOwnedItemRowHand
 
 	ItemGrid->ClearChildren();
 	constexpr int32 ColumnCount = 4;
+	int32 Index = 0;
 
-	for (int32 Index = 0; Index < InOwnedItemRowHandles.Num(); ++Index)
+	for (const FItemDataHandle& ItemDataHandle : InOwnedItemRowHandles)
 	{
-		UPetItemSlotWidget* ItemSlot = CreateWidget<UPetItemSlotWidget>(GetOwningPlayer(), PetItemSlotWidgetClass);
-		if (!ItemSlot) continue;
-
-		const FItemDataHandle& ItemDataHandle = InOwnedItemRowHandles[Index];
 		if (ItemDataHandle.ItemType == EItemType::Weapon)
 		{
 			PetWeaponSlotWidget->SetItemData(ItemDataHandle);
 			continue;
 		}
+
+		UPetItemSlotWidget* ItemSlot = CreateWidget<UPetItemSlotWidget>(GetOwningPlayer(), PetItemSlotWidgetClass);
+		if (!ItemSlot) continue;
 
 		ItemSlot->SetItemData(ItemDataHandle);
 		ItemSlot->OnItemSlotHovered.AddDynamic(this, &UPetItemWidget::HandleItemSlotHovered);
@@ -44,6 +44,8 @@ void UPetItemWidget::UpdateOwnedItems(TArray<FItemDataHandle> InOwnedItemRowHand
 			Row,
 			Column
 		);
+
+		++Index;
 	}
 }
 
