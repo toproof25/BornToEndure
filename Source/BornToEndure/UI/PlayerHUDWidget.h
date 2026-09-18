@@ -18,10 +18,14 @@ class UTextBlock;
 class UProgressBar;
 class UPlayerHealthBarWidget;
 class APlayerCharacter;
+class APetCompanionCharacter;
 class UGameOverWidget;
 class UPlayerExpBarWidget;
 class UGameStatusWidget;
 class ULevelUpRewardWidget;
+class UPetSelectionWidget;
+class UPetManagerComponent;
+class UPetDetailWidget;
 
 UCLASS()
 class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
@@ -31,19 +35,25 @@ class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UCanvasPanel* RootCanvasPanel;
+	TObjectPtr<UCanvasPanel> RootCanvasPanel;
 
 	UPROPERTY(meta = (BindWidget))
-	UPlayerHealthBarWidget* HealthBarWidget;
+	TObjectPtr<UPlayerHealthBarWidget> HealthBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UPlayerExpBarWidget* PlayerExpBarWidget;
+	TObjectPtr<UPlayerExpBarWidget> PlayerExpBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UGameOverWidget* GameOverWidget;
+	TObjectPtr<UPetSelectionWidget> PetSelectionWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UGameStatusWidget* GameStatusWidget;
+	TObjectPtr<UPetDetailWidget> PetDetailWidget;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UGameOverWidget> GameOverWidget;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UGameStatusWidget> GameStatusWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
 	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;
@@ -52,4 +62,15 @@ public:
 
 	void ShowLevelUpWidget(FLevelUpDataBundle LevelUpData);
 
+	bool TogglePetDetailWidget();
+
+private:
+
+	bool bIsPetDetailWidgetVisible = false;
+
+	UFUNCTION()
+	void HandlePetAddAndRemove(UPetManagerComponent* PetManagerComp);
+
+	UFUNCTION()
+	void HandlePetSelected(APetCompanionCharacter* InSelectedPet);
 };

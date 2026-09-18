@@ -26,6 +26,8 @@ struct FPetItemInstance
     // 이 인스턴스의 고유 ID
     FGuid InstanceId;
 
+	FItemDataHandle ItemDataHandle;
+
     // 실제 아이템 데이터
     UPROPERTY()
     TObjectPtr<UPetItemDataAsset> LoadedData = nullptr;
@@ -73,24 +75,6 @@ public:
 
     FGuid GetLastAddedInstanceId() const { return LastAddedInstanceId; }
 
-    /**
-     * @brief 보유 아이템의 발사체 modifier를 추가한다.
-     * - UPetProjectileItemData::ApplyToComponent에서 호출한다.
-     */
-
-    /**
-	 * @brief ProjectileModifier를 TMap에 추가
-     * @param Modifier 새로 추가할 발사체에 대한 modifire 구조체
-     * @param InstanceId 추가할 발사체의 고유 ID
-     */
-    //void AddWeaponModifier(const FWeaponModifierData& Modifier, const FGuid& InstanceId);
-
-    /**
-     * @brief Weapon modifier를 제거
-     * @param InstanceId 제거할 modifire의 고유한 FGuid
-     */
-    //void RemoveWeaponModifier(const FGuid& InstanceId);
-
 	/**
 	 * @brief Stat Modifier를 추가하고 해당 스탯을 재계산 후 최종 스탯 캐싱
 	 * @param Modifier StatModifier 구조체로, 어떤 스탯에 어떤 방식으로 얼마만큼의 증감할 지 정의함 (AttackPower +10% 등)
@@ -123,8 +107,8 @@ protected:
 
 private:
 
+	FItemDataHandle WeaponItemDataHandle;
     TArray<FPetItemInstance> OwnedItems;
-    //TMap<FGuid, FWeaponModifierData> WeaponModifiers;
 
 	/** * @brief 현재 적용이 되는 모든 Stat 증감 아이템 수치 리스트 */
 	TArray<FStatModifier> ActiveStatModifiers;
@@ -170,4 +154,5 @@ public:
     // 디버그 및 UI용 Getter
     const TArray<FPetItemInstance>& GetOwnedItems() const { return OwnedItems; }
     const TArray<TObjectPtr<UPetSynergyDataAsset>>& GetActiveSynergies() const { return ActiveSynergies; }
+	const TArray<FItemDataHandle> GetOwnedItemRowHandles() const;
 };

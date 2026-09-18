@@ -15,10 +15,6 @@ class UItemEntryWidget;
 class APetCompanionCharacter;
 
 
-// Pet과 Item 선택 시 포인터를 전달하기 위한 Delegate
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPetSelected, APetCompanionCharacter*, SelectedPet);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSelected, const FItemDataHandle&, SelectedItem);
-//FOnItemSelected OnItemSelectedDelegate;
 
 
 UCLASS()
@@ -29,19 +25,19 @@ class BORNTOENDURE_API ULevelUpRewardWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* RewardBackgroundImage;
+	TObjectPtr<UImage> RewardBackgroundImage;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* DescriptionText;
+	TObjectPtr<UTextBlock> DescriptionText;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* ExitButton;
+	TObjectPtr<UButton> ExitButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UHorizontalBox* PetListBox;
+	TObjectPtr<UHorizontalBox> PetListBox;
 
 	UPROPERTY(meta = (BindWidget))
-	UHorizontalBox* ItemListBox;
+	TObjectPtr<UHorizontalBox> ItemListBox;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI Classes")
 	TSubclassOf<UPetEntryWidget> PetEntryWidgetClass;

@@ -50,7 +50,7 @@ public:
 	 * - Pet을 성공적으로 스폰한 후 FOnPetAdded Delegate를 호출
      */
 	UFUNCTION(BlueprintCallable, Category = "Pet")
-	APetCompanionCharacter* SpawnAndAddPet(TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset = nullptr);
+	APetCompanionCharacter* SpawnAndAddPet(FName RowName, TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset = nullptr);
 
     /**
 	 * @brief Pet을 관리 목록에서 제거하고, Destroy하는 함수
@@ -103,15 +103,15 @@ public:
     int32 GetPetCount() const { return PetList.Num(); }
 
     // Pet이 추가될 때 방송한다
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetAdded, APetCompanionCharacter*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetAdded, UPetManagerComponent*);
     FOnPetAdded OnPetAdded;
 
     // Pet이 제거될 때 방송한다
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetRemoved, APetCompanionCharacter*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetRemoved, UPetManagerComponent*);
     FOnPetRemoved OnPetRemoved;
 
     // Pet이 아이템을 받을 때 혹은 제거될 때 방송한다
-    DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPetItemReceived, APetCompanionCharacter*, const UPetItemDataAsset*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnPetItemReceived, APetCompanionCharacter*);
     FOnPetItemReceived OnPetItemReceived;
 
 

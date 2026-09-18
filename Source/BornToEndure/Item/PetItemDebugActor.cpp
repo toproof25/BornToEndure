@@ -1,4 +1,4 @@
-#include "Item/PetItemDebugActor.h"
+﻿#include "Item/PetItemDebugActor.h"
 
 #if !UE_BUILD_SHIPPING
 #include "Character/Pet/PetCompanionCharacter.h"
@@ -20,6 +20,15 @@
 
 namespace PetItemDebug
 {
+	FString GetDisplayName(const APetCompanionCharacter* Pet)
+	{
+		UWorld* World = Pet->GetWorld();
+		UGameInstance* Instance = IsValid(World) ? World->GetGameInstance() : nullptr;
+		UItemPoolSubsystem* Pool = IsValid(Instance) ? Instance->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+		const FText Name = IsValid(Pool) && IsValid(Pool->PetDataTable) ? Pet->GetPetName() : FText::GetEmpty();
+		return Name.IsEmpty() ? Pet->GetName() : Name.ToString();
+	}
+
 	UDataTable* GetTable(UItemPoolSubsystem* Pool, EItemType Type)
 	{
 		if (!IsValid(Pool)) return nullptr;
@@ -157,7 +166,7 @@ void APetItemDebugActor::DrawPetSelection(UPetManagerComponent* Manager)
 			}
 		}
 	}
-	const FString Preview = SelectedPet.IsValid() ? SelectedPet->GetName() : TEXT("펫을 선택하세요");
+	const FString Preview = SelectedPet.IsValid() ? PetItemDebug::GetDisplayName(SelectedPet.Get()) : TEXT("펫을 선택하세요");
 	if (ImGui::BeginCombo("대상", TCHAR_TO_UTF8(*Preview)))
 	{
 		for (const auto& Entry : Pets)
@@ -165,7 +174,7 @@ void APetItemDebugActor::DrawPetSelection(UPetManagerComponent* Manager)
 			APetCompanionCharacter* Pet = Entry.Get();
 			if (!IsValid(Pet) || Pet->IsActorBeingDestroyed()) continue;
 			ImGui::PushID(Pet);
-			if (ImGui::Selectable(TCHAR_TO_UTF8(*Pet->GetName()), SelectedPet.Get() == Pet))
+			if (ImGui::Selectable(TCHAR_TO_UTF8(*PetItemDebug::GetDisplayName(Pet)), SelectedPet.Get() == Pet))
 			{
 				SelectedPet = Pet;
 				LastResult.Reset();
@@ -214,7 +223,7 @@ void APetItemDebugActor::GiveItem(EItemType Type, FName RowName)
 	}
 	TWeakObjectPtr<UPetItemComponent> ItemComponent = Pet->GetItemComponent();
 	const int32 Before = ItemComponent->GetOwnedItems().Num();
-	const FString PetName = Pet->GetName();
+	const FString PetName = PetItemDebug::GetDisplayName(Pet);
 	FItemDataHandle Handle;
 	Handle.ItemType = Type;
 	// FindRow resolves table row keys, not the optional ItemID field.

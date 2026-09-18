@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Data/DataTableRow/ItemDataRow.h"
 #include "Data/DataTableRow/StatItemDataRow.h"
+#include "Data/DataTableRow/PetDataRow.h"
 
 #include "Data/PetBaseDataAsset.h"
 #include "Subsystem/ItemPoolSubsystem.h"
@@ -25,7 +26,7 @@ void UPetManagerComponent::BeginPlay()
 
 }
 
-APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset)
+APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(FName RowName, TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset)
 {
 	if (!PetDataAsset)
 	{
@@ -42,7 +43,7 @@ APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSoftObjectPtr<UPet
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	APetCompanionCharacter* NewPet = World->SpawnActor<APetCompanionCharacter>(DefaultPetClass, SpawnTransform, SpawnParams);
-	NewPet->InitializeFromDataAsset(PetDataAsset.LoadSynchronous());
+	NewPet->InitializeFromDataAsset(RowName, PetDataAsset.LoadSynchronous());
 
 	// Pet 관리 목록에 추가
 	PetList.Add(NewPet);
@@ -54,7 +55,7 @@ APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(TSoftObjectPtr<UPet
 	}
 
 	// Pet 추가 이벤트를 방송
-	OnPetAdded.Broadcast(NewPet);
+	OnPetAdded.Broadcast(this);
 	UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Pet spawned: %s (Total: %d)"), *NewPet->GetName(), PetList.Num());
 
 	return NewPet;
@@ -65,7 +66,7 @@ void UPetManagerComponent::RemovePet(APetCompanionCharacter* PetToRemove)
     if (!PetToRemove) return;
 
     PetList.RemoveSingle(PetToRemove);
-    OnPetRemoved.Broadcast(PetToRemove);
+    OnPetRemoved.Broadcast(this);
     PetToRemove->Destroy();
 }
 
@@ -103,6 +104,7 @@ void UPetManagerComponent::GiveItemToPet(APetCompanionCharacter* TargetPet, FIte
 	if (ItemComp)
 	{
 		ItemComp->AddItem(ItemData);
+		OnPetItemReceived.Broadcast(TargetPet);
 	}
 }
 
@@ -119,7 +121,7 @@ void UPetManagerComponent::RemoveItemFromPet(APetCompanionCharacter* TargetPet, 
     if (ItemComp)
     {
 		ItemComp->RemoveItem(InstanceId);
-        //OnPetItemReceived.Broadcast(TargetPet, nullptr);
+        OnPetItemReceived.Broadcast(TargetPet);
     }
 }
 

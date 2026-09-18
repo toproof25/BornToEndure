@@ -21,7 +21,7 @@ class BORNTOENDURE_API UPlayerHealthBarWidget : public UUserWidget
 	
 public:
 	UPROPERTY(meta=(BindWidget))
-	UProgressBar* HealthBar;
+	TObjectPtr<UProgressBar> HealthBar;
 
 	void InitializeWidget(UPlayerHealthComponent* InHealthComp);
 	void UpdateHealthBar(float NewHealth, float MaxHealth);

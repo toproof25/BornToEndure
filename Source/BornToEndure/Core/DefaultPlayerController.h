@@ -31,11 +31,14 @@ public:
 	void SetGameAndUIInputMode(
 		UUserWidget* WidgetToFocus,
 		bool bIgnoreMoveInput = true,
-		bool bIgnoreLookInput = false
+		bool bIgnoreLookInput = false,
+		bool bInPauseGame = false
 	);
 	void RestoreGameInputMode();
 
 	void TravelToLobbyLevel();
+
+	void HandleTabToggleInput();
 
 protected:
 

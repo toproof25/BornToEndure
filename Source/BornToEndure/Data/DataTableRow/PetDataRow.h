@@ -17,6 +17,8 @@ USTRUCT(BlueprintType)
 struct BORNTOENDURE_API FPetDataRow : public FTableRowBase
 {
 	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pet")
+	FName RowID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pet")
 	FText Name;

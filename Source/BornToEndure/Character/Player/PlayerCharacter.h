@@ -87,6 +87,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<UInputAction> ClickLeftAction;
 
+	/** * @brief Tab을 눌러 디테일창 활성화/비활성화 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	TObjectPtr<UInputAction> PetDetailOpenAction;
+
 private:
 
 	UFUNCTION()
@@ -108,6 +112,8 @@ private:
 	UFUNCTION()
 	void ClickLeft(const FInputActionValue& Value);
 
+	UFUNCTION()
+	void TabToggle(const FInputActionValue& Value);
 
 private:
 
@@ -135,7 +141,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	void GetWeaponBase(ABaseWeapon*& OutWeaponBase) const { OutWeaponBase = WeaponBaseComp; }
 
-	void GetPerManagerComp(UPetManagerComponent*& OutPetManagerComp) const { OutPetManagerComp = PetManagerComp; }
+	UPetManagerComponent* GetPetManagerComp() const { return PetManagerComp; }
 	UPlayerHealthComponent* GetPlayerHealthComp() const { return HealthComp; }
 	
 

@@ -13,38 +13,12 @@ void UPetEntryWidget::InitializeWithPetData(ULevelUpRewardWidget* InParentWidget
 {
 	ParentWidget = InParentWidget;
 
-	FName PetName = InPet ? InPet->GetPetName() : NAME_None;
-	FText DisplayName = FText::FromName(PetName);
+	FText DisplayName = InPet->GetPetName();
 	PetNameText->SetText(DisplayName);
 	SelectedPet = InPet;
 
 	// 이미지 비동기 로딩
-	TSoftObjectPtr<UTexture2D> PetIcon = InPet->GetIcon();
-	if (PetIcon.IsNull())
-	{
-		// 추후 배경색을 빨강으로 혹은 X 표시 이미지로 적용
-		//PetIconImage->SetBrushFromTexture();
-	}
-	else if (PetIcon.IsValid())
-	{
-		//OnIconsLoaded(PetIcon);
-		PetIconImage->SetBrushFromTexture(PetIcon.Get());
-	}
-	else if (TextureLoadingHandle.IsValid() && TextureLoadingHandle->IsActive())
-	{
-		// 이미 로딩 중인 경우 처리
-		TextureLoadingHandle->CancelHandle();
-	}
-	else
-	{
-		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-		TextureLoadingHandle = Streamable.RequestAsyncLoad(
-			PetIcon.ToSoftObjectPath(),
-			FStreamableDelegate::CreateUObject(this, &UPetEntryWidget::OnIconsLoaded, PetIcon)
-		);
-	}
-
-	
+	SetPetIconImage(InPet->GetIcon());
 
 	// 버튼 클릭 시 OnPetSelectButtonClicked 함수가 호출
 	PetSelectButton->OnClicked.AddDynamic(this, &UPetEntryWidget::OnPetSelectButtonClicked);
@@ -70,7 +44,31 @@ void UPetEntryWidget::SetSelectedVisual(bool bSelected)
 	}
 }
 
-
+void UPetEntryWidget::SetPetIconImage(TSoftObjectPtr<UTexture2D> PetIcon)
+{
+	if (PetIcon.IsNull())
+	{
+		// 추후 배경색을 빨강으로 혹은 X 표시 이미지로 적용
+		//PetIconImage->SetBrushFromTexture();
+	}
+	else if (PetIcon.IsValid())
+	{
+		PetIconImage->SetBrushFromTexture(PetIcon.Get());
+	}
+	else if (TextureLoadingHandle.IsValid() && TextureLoadingHandle->IsActive())
+	{
+		// 이미 로딩 중인 경우 처리
+		TextureLoadingHandle->CancelHandle();
+	}
+	else
+	{
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		TextureLoadingHandle = Streamable.RequestAsyncLoad(
+			PetIcon.ToSoftObjectPath(),
+			FStreamableDelegate::CreateUObject(this, &UPetEntryWidget::OnIconsLoaded, PetIcon)
+		);
+	}
+}
 void UPetEntryWidget::OnIconsLoaded(TSoftObjectPtr<UTexture2D> LoadedIcons)
 {
 	UTexture2D* Icon = LoadedIcons.Get();
@@ -86,4 +84,3 @@ void UPetEntryWidget::OnIconsLoaded(TSoftObjectPtr<UTexture2D> LoadedIcons)
 
 	TextureLoadingHandle->CancelHandle();
 }
-

@@ -13,6 +13,7 @@
 #include "Item/Weapon/BaseWeapon.h"
 #include "Component/PetManagerComponent.h"
 #include "Component/PlayerHealthComponent.h"
+#include "Core/DefaultPlayerController.h"
 
 // Camera 관련 헤더 포함
 #include "Camera/CameraComponent.h"
@@ -94,6 +95,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		Input->BindAction(InteractionAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
 
 		Input->BindAction(ClickLeftAction, ETriggerEvent::Started, this, &APlayerCharacter::ClickLeft);
+
+		Input->BindAction(PetDetailOpenAction, ETriggerEvent::Started, this, &APlayerCharacter::TabToggle);
 
 
 		 
@@ -196,5 +199,23 @@ void APlayerCharacter::ClickLeft(const FInputActionValue& Value)
 	{
 		//WeaponBaseComp->Attack();
 	}
+}
+
+void APlayerCharacter::TabToggle(const FInputActionValue& Value)
+{
+	if (Controller == nullptr) return;
+
+	// Player Controoler에 연결하여 함수 호출
+	ADefaultPlayerController* PlayerController = Cast<ADefaultPlayerController>(Controller);
+	if (PlayerController)
+	{
+		PlayerController->HandleTabToggleInput();
+		UE_LOG(LogTemp, Log, TEXT("[APlayerCharacter] TabToggle Action Triggered"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[APlayerCharacter] Controller is not ADefaultPlayerController"));
+	}
+	
 }
 

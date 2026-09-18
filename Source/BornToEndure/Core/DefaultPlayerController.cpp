@@ -52,10 +52,10 @@ void ADefaultPlayerController::SetUIInputMode(UUserWidget* WidgetToFocus, bool b
 	SetIgnoreMoveInput(true);
 	SetIgnoreLookInput(true);
 
-	SetPause(bInPauseGame);
+	//SetPause(bInPauseGame);
 }
 
-void ADefaultPlayerController::SetGameAndUIInputMode(UUserWidget* WidgetToFocus, bool bIgnoreMoveInput, bool bIgnoreLookInput)
+void ADefaultPlayerController::SetGameAndUIInputMode(UUserWidget* WidgetToFocus, bool bIgnoreMoveInput, bool bIgnoreLookInput, bool bInPauseGame)
 {
 	if (!WidgetToFocus) return;
 
@@ -77,6 +77,8 @@ void ADefaultPlayerController::SetGameAndUIInputMode(UUserWidget* WidgetToFocus,
 	{
 		SetIgnoreLookInput(true);
 	}
+
+	SetPause(bInPauseGame);
 }
 
 void ADefaultPlayerController::RestoreGameInputMode()
@@ -99,6 +101,14 @@ void ADefaultPlayerController::TravelToLobbyLevel()
 		FString()
 	);
 	UE_LOG(LogTemp, Log, TEXT("Traveling to Lobby Level: %s"), *LobbyLevel.ToString());
+}
+
+void ADefaultPlayerController::HandleTabToggleInput()
+{
+	bool bIsPetDetailWidgetVisible = PlayerHUDWidgetInstance->TogglePetDetailWidget();
+	if (bIsPetDetailWidgetVisible) SetGameAndUIInputMode(PlayerHUDWidgetInstance, true, false, true);
+	else SetGameInputMode();
+	UE_LOG(LogTemp, Log, TEXT("[ADefaultPlayerController] TabToggle Input Handled: PetDetailWidget visibility toggled."));
 }
 
 void ADefaultPlayerController::BeginPlay()

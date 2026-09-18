@@ -12,6 +12,8 @@
 #include "Data/PetItemDataAsset.h"
 #include "Data/PetWeaponItemDataAsset.h"
 #include "Subsystem/ItemPoolSubsystem.h"
+#include "Data/DataTableRow/ItemDataRow.h"
+#include "Stat/PetStatTypes.h"
 #include "Data/DataTableRow/WeaponItemDataRow.h"
 
 APetCompanionCharacter::APetCompanionCharacter()
@@ -53,8 +55,9 @@ void APetCompanionCharacter::BeginPlay()
 }
 
 
-void APetCompanionCharacter::InitializeFromDataAsset(UPetBaseDataAsset* NewPetBaseData)
+void APetCompanionCharacter::InitializeFromDataAsset(FName RowName, UPetBaseDataAsset* NewPetBaseData)
 {
+	PetRowName = RowName;
 	PetBaseData = NewPetBaseData;
 	if (!PetBaseData) return;
 
@@ -155,14 +158,42 @@ UBehaviorTree* APetCompanionCharacter::GetBehaviorTree() const
 	return nullptr;
 }
 
-FName APetCompanionCharacter::GetPetName() const
+FName APetCompanionCharacter::GetPetRowName() const
 {
-	FText Name = PetBaseData->GetPetName();
-	FName NameAsFName(*Name.ToString());
-	return NameAsFName;
+	return PetRowName;
+}
+
+FText APetCompanionCharacter::GetPetName() const
+{
+	UWorld* World = GetWorld();
+	if (!World) return FText::GetEmpty();
+	UItemPoolSubsystem* ItemPoolSubsystem = World ? World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+	if (!ItemPoolSubsystem) return FText::GetEmpty();
+
+	const FPetDataRow* PetDataRow = ItemPoolSubsystem->GetPetDataRowByID(PetRowName);
+	if (PetDataRow)
+		return PetDataRow->Name;
+	return FText::GetEmpty();
 }
 
 TSoftObjectPtr<UTexture2D> APetCompanionCharacter::GetIcon() const
 {
-	return nullptr; //PetBaseData ? PetBaseData->Icon : nullptr;
+	UWorld* World = GetWorld();
+	if (!World) return nullptr;
+	UItemPoolSubsystem* ItemPoolSubsystem = World ? World->GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+	if (!ItemPoolSubsystem) return nullptr;
+
+	const FPetDataRow* PetDataRow = ItemPoolSubsystem->GetPetDataRowByID(PetRowName);
+	return PetDataRow->PetIcon; //PetBaseData ? PetBaseData->Icon : nullptr;
+}
+
+const TMap<EPetStatType, float>& APetCompanionCharacter::GetFinalStats() const
+{ 
+	return PetStatComp->GetFinalStats(); 
+}
+
+
+const TArray<FItemDataHandle> APetCompanionCharacter::GetOwnedItemRowHandles() const
+{
+	return PetItemComp->GetOwnedItemRowHandles();
 }

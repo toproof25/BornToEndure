@@ -72,6 +72,12 @@ private:
 	 */
 	TMap<TSubclassOf<AActor>, int32> PoolSizes;
 
+	/**
+	 * @brief AActor 타입과 풀 크기 관리 배열
+	 * @note Key: AActor 클래스 타입, Value: 해당 클래스 타입의 풀 크기
+	 */
+	TMap<TSubclassOf<AActor>, int32> UsePoolCount;
+
 	// World가 절대 nullptr이 아님을 보장 (이렇게 해야 안전하다고 함..?)
 	UWorld* GetWorldChecked();
 

@@ -23,16 +23,16 @@ class BORNTOENDURE_API UGameStatusRowWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* Icon;
+	TObjectPtr<UImage> Icon;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* Name;
+	TObjectPtr<UTextBlock> Name;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* TotalCount;
+	TObjectPtr<UTextBlock> TotalCount;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* TotalDamage;
+	TObjectPtr<UTextBlock> TotalDamage;
 
 	void InitializeWidget(UTexture2D* InIcon, FName InName, int32 InTotalCount, int32 InTotalDamage);
 

@@ -75,4 +75,6 @@ public:
      */
     void RecalculateStat(EPetStatType StatType);
     void InvalidateCache();
+
+	const TMap<EPetStatType, float>& GetFinalStats() const { return CachedFinalStats; }
 };

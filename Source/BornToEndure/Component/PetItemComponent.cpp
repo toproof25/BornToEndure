@@ -32,6 +32,7 @@ void UPetItemComponent::AddItem(FItemDataHandle ItemData)
 	// 1. 아이템 인스턴스 생성
 	FPetItemInstance NewInstance;
 	NewInstance.InstanceId = FGuid::NewGuid();
+	NewInstance.ItemDataHandle = ItemData;
 	LastAddedInstanceId = NewInstance.InstanceId;
 
 	UWorld* World = GetWorld();
@@ -60,14 +61,11 @@ void UPetItemComponent::AddItem(FItemDataHandle ItemData)
 		{
 			const FWeaponItemDataRow* WeaponItemDataRow = ItemPoolSubsystem->GetWeaponItemDataRowByID(ItemData.ItemRowName);
 			UPetCombatComponent* CombatComp = Cast<APetCompanionCharacter>(GetOwner())->GetCombatComponent();
+			WeaponItemDataHandle = ItemData;
 			if (CombatComp)
 			{
 				CombatComp->InitializeDefaultWeapon(*WeaponItemDataRow);
 			}
-			// 무기의 경우 비동기로 로드 후 ApplyToComponent 호출하도록 함
-			//UPetItemDataAsset* WeaponItemData = WeaponItemDataRow->WeaponItemDataAsset.LoadSynchronous();
-			//NewInstance.LoadedData = WeaponItemData;
-			//WeaponItemData->ApplyToComponent(this);
 			break;
 		}
 		default:
@@ -120,41 +118,6 @@ void UPetItemComponent::RemoveItem(const FGuid& InstanceId)
     OnItemRemoved.Broadcast(InstanceId);
 }
 
-/*
-void UPetItemComponent::AddWeaponModifier(const FWeaponModifierData& Modifier, const FGuid& InstanceId)
-{
-    WeaponModifiers.Add(InstanceId, Modifier);
-    
-    // 새로운 발사체 오브젝트 풀링
-    UWorld* World = GetWorld();
-    if(!World) return;
-    UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
-    if (ObjectPoolSubsystem)
-    {
-		UClass* Weapon = Modifier.OverrideWeaponClass.Get();
-        ObjectPoolSubsystem->InitializePoolForClass(Weapon, 10);
-    }
-}
-
-void UPetItemComponent::RemoveWeaponModifier(const FGuid& InstanceId)
-{
-    // 새로운 발사체 오브젝트 풀링에서 제거
-    UWorld* World = GetWorld();
-    if (!World) return;
-    UObjectPoolSubsystem* ObjectPoolSubsystem = World->GetSubsystem<UObjectPoolSubsystem>();
-    if (ObjectPoolSubsystem)
-    {
-        UClass* Weapon = WeaponModifiers[InstanceId].OverrideWeaponClass.Get();
-        if (Weapon)
-        {
-            ObjectPoolSubsystem->RemovePoolActor(Weapon);
-        }
-    }
-
-    WeaponModifiers.Remove(InstanceId);
-}
-*/
-
 void UPetItemComponent::AddStatModifier(const FStatModifier& Modifier)
 {
 	ActiveStatModifiers.Add(Modifier);
@@ -191,38 +154,7 @@ void UPetItemComponent::RemoveStatModifiersBySource(const FGuid& SourceId)
 		StatComp->RecalculateStat(StatType);
 	}
 }
-/*
-FWeaponModifierData UPetItemComponent::GetAggregatedWeaponModifier() const
-{
-    // 1.기본 발사체를 바탕으로 결과 발사체를 만든다
-    FWeaponModifierData Result;
-    Result.WeaponCountAdd = 1; // 기본 1발에서 시작
 
-    // 2.WeaponModifiers의 모든 요소를 순회
-    for (const auto& [Id, Modifier] : WeaponModifiers)
-    {
-        // 발사체 클래스 교체: 마지막에 추가된 것으로 덮어쓴다
-        if (!Modifier.OverrideWeaponClass.IsNull())
-        {
-            Result.OverrideWeaponClass = Modifier.OverrideWeaponClass;
-        }
-
-        // 추가 발사, 크기, 스피드 등 연산
-        Result.WeaponCountAdd += Modifier.WeaponCountAdd;
-        Result.SizeMultiplier *= Modifier.SizeMultiplier;
-        Result.SpeedMultiplier *= Modifier.SpeedMultiplier;
-		Result.ElementType = Modifier.ElementType;
-
-        // 패턴: 가장 마지막(우선순위 높은) 것이 적용
-        if (Modifier.Pattern != EWeaponPattern::Single)
-        {
-            Result.Pattern = Modifier.Pattern;
-        }
-    }
-
-    return Result;
-}
-*/
 FGameplayTag UPetItemComponent::GetDominantElementTag() const
 {
 
@@ -362,4 +294,14 @@ void UPetItemComponent::OnSynergyDataLoaded(TArray<FPrimaryAssetId> LoadedIds)
     }
 
     UE_LOG(LogTemp, Log, TEXT("[PetItemComponent] Synergy data loaded. Count: %d"), AllSynergyData.Num());
+}
+
+const TArray<FItemDataHandle> UPetItemComponent::GetOwnedItemRowHandles() const
+{
+	TArray<FItemDataHandle> ItemRowHandles;
+	for (const FPetItemInstance& ItemInstance : OwnedItems)
+	{
+		ItemRowHandles.Add(ItemInstance.ItemDataHandle);
+	}
+	return ItemRowHandles;
 }
