@@ -27,7 +27,8 @@ class BORNTOENDURE_API UPetSelectionWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UVerticalBox* PetVerticalBox;
+	TObjectPtr<UVerticalBox> PetVerticalBox;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
 	TSubclassOf<UPetStatusWidget> PetStatusWidgetClass;

@@ -20,13 +20,13 @@ class BORNTOENDURE_API ULobbyWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* BackgroundImage;
+	TObjectPtr<UImage> BackgroundImage;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* StartButton;
+	TObjectPtr<UButton> StartButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* StartButtonText;
+	TObjectPtr<UTextBlock> StartButtonText;
 
 protected:
 	virtual void NativeOnInitialized() override;

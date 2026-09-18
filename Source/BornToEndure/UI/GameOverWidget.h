@@ -22,10 +22,10 @@ class BORNTOENDURE_API UGameOverWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* ExitDescriptionText;
+	TObjectPtr<UTextBlock> ExitDescriptionText;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* ExitButton;
+	TObjectPtr<UButton> ExitButton;
 
 	void InitializeWidget(UPlayerHealthComponent* InPlayerHealthComp);
 

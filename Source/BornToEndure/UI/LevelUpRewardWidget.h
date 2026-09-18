@@ -25,19 +25,19 @@ class BORNTOENDURE_API ULevelUpRewardWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* RewardBackgroundImage;
+	TObjectPtr<UImage> RewardBackgroundImage;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* DescriptionText;
+	TObjectPtr<UTextBlock> DescriptionText;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* ExitButton;
+	TObjectPtr<UButton> ExitButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UHorizontalBox* PetListBox;
+	TObjectPtr<UHorizontalBox> PetListBox;
 
 	UPROPERTY(meta = (BindWidget))
-	UHorizontalBox* ItemListBox;
+	TObjectPtr<UHorizontalBox> ItemListBox;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI Classes")
 	TSubclassOf<UPetEntryWidget> PetEntryWidgetClass;

@@ -35,25 +35,25 @@ class BORNTOENDURE_API UPlayerHUDWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UCanvasPanel* RootCanvasPanel;
+	TObjectPtr<UCanvasPanel> RootCanvasPanel;
 
 	UPROPERTY(meta = (BindWidget))
-	UPlayerHealthBarWidget* HealthBarWidget;
+	TObjectPtr<UPlayerHealthBarWidget> HealthBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UPlayerExpBarWidget* PlayerExpBarWidget;
+	TObjectPtr<UPlayerExpBarWidget> PlayerExpBarWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UPetSelectionWidget* PetSelectionWidget;
+	TObjectPtr<UPetSelectionWidget> PetSelectionWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UPetDetailWidget* PetDetailWidget;
+	TObjectPtr<UPetDetailWidget> PetDetailWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UGameOverWidget* GameOverWidget;
+	TObjectPtr<UGameOverWidget> GameOverWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	UGameStatusWidget* GameStatusWidget;
+	TObjectPtr<UGameStatusWidget> GameStatusWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
 	TSubclassOf<ULevelUpRewardWidget> LevelUpWidgetClass;

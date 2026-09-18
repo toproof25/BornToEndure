@@ -22,7 +22,7 @@ class BORNTOENDURE_API UPetDetailWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UPetItemWidget* PetItemWidget;
+	TObjectPtr<UPetItemWidget> PetItemWidget;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UPetStatWidget> PetStatWidget;

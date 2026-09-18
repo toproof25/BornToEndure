@@ -24,6 +24,8 @@ void UPetSelectionWidget::InitializeWidget(const UPetManagerComponent* PetManage
 		UE_LOG(LogTemp, Warning, TEXT("[UPetSelectionWidget] InitializeWidget: PetVerticalBox is not bound."));
 		return;
 	}
+
+	// Pet 리스트를 가져와 저장
 	const TArray<TObjectPtr<APetCompanionCharacter>>& PetList = PetManagerComponent->GetPetList();
 
 	PetVerticalBox->ClearChildren();

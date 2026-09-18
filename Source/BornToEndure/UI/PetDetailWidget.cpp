@@ -15,6 +15,4 @@ void UPetDetailWidget::UpdatePetDetail(APetCompanionCharacter* InPet)
 
 	if (PetStatWidget) PetStatWidget->UpdatePetStats(InPet->GetFinalStats());
 	if (PetItemWidget) PetItemWidget->UpdateOwnedItems(InPet->GetOwnedItemRowHandles());
-
-
 }

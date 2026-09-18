@@ -27,13 +27,13 @@ class BORNTOENDURE_API UPetStatusWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* PetSelectButton;
+	TObjectPtr<UButton> PetSelectButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* PetIconImage;
+	TObjectPtr<UImage> PetIconImage;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* PetNameText;
+	TObjectPtr<UTextBlock> PetNameText;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPetStatusSelected, APetCompanionCharacter*, SelectedPet);
 	FOnPetStatusSelected OnPetStatusSelected;

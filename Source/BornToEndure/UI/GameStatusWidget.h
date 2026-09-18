@@ -25,7 +25,7 @@ class BORNTOENDURE_API UGameStatusWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UVerticalBox* GameStatusList;
+	TObjectPtr<UVerticalBox> GameStatusList;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameStatus")
 	TSubclassOf<UGameStatusRowWidget> GameStatusRowWidgetClass;

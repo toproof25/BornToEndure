@@ -23,10 +23,10 @@ class BORNTOENDURE_API UPlayerExpBarWidget : public UUserWidget
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* LevelText;
+	TObjectPtr<UTextBlock> LevelText;
 
 	UPROPERTY(meta = (BindWidget))
-	UProgressBar* ExpBar;
+	TObjectPtr<UProgressBar> ExpBar;
 
 	void InitializeWidget(UPlayerExperienceComponent* InPlayerExperienceComponent);
 
