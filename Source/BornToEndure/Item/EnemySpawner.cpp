@@ -15,6 +15,30 @@ AEnemySpawner::AEnemySpawner()
     PrimaryActorTick.bCanEverTick = false;
 }
 
+void AEnemySpawner::StartWeaveSpawning()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	// 스폰 시작
+	World->GetTimerManager().SetTimer(
+		SpawnTimerHandle,
+		this,
+		&AEnemySpawner::SpawnEnemy,
+		SpawnInterval,
+		true
+	);
+}
+
+void AEnemySpawner::StopWeaveSpawning()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	// 스폰 중지
+	World->GetTimerManager().ClearTimer(SpawnTimerHandle);
+}
+
 void AEnemySpawner::BeginPlay()
 {
     Super::BeginPlay();
@@ -29,15 +53,6 @@ void AEnemySpawner::BeginPlay()
     {
         Pool->InitializePoolForClass(EnemyClass, PoolSize);
     }
-
-    // 스폰 시작
-    World->GetTimerManager().SetTimer(
-        SpawnTimerHandle,
-        this,
-        &AEnemySpawner::SpawnEnemy,
-        SpawnInterval,
-        true
-    );
 
     // DataTable 로드
     TestEnemyDataTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTableRow/DT_EnemyData.DT_EnemyData"));

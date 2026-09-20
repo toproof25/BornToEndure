@@ -28,6 +28,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Spawner")
     TSoftObjectPtr<UDataTable> TestEnemyDataTable;
 
+	void StartWeaveSpawning();
+	void StopWeaveSpawning();
+
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
