@@ -1,5 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+﻿/**
+* @file GameDebugActor.h
+* @brief 게임의 전체 흐름을 디버깅 및 테스트를 위한 액터
+*/
 #pragma once
 
 #include "CoreMinimal.h"
@@ -28,7 +30,7 @@ private:
 	{
 		None,
 		StartGame,
-		SpawnWave,
+		StartWave,
 		EndGame
 	};
 

@@ -90,6 +90,8 @@ void ABaseEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
             EffectSubsystem->UnloadEffectAssets(FPrimaryAssetId(NiagaraType, HitEnemyNiagaraId.PrimaryAssetName));
         }
     }
+	GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+
     Super::EndPlay(EndPlayReason);
 }
 
@@ -133,6 +135,8 @@ void ABaseEnemyCharacter::ActivateActor_Implementation()
 void ABaseEnemyCharacter::DeactivateActor_Implementation()
 {
 	// 제거(비활성화)될 때 ObjectPoolSubsystem에서 호출되는 함수
+
+	GetWorldTimerManager().ClearTimer(AttackTimerHandle);
 
     SetActorHiddenInGame(true);
     SetActorEnableCollision(false);
@@ -300,7 +304,7 @@ void ABaseEnemyCharacter::AttackPlayer()
         // 플레이어에게 데미지 적용
         UGameplayStatics::ApplyDamage(
             TargetPlayerCharacter.Get(),
-            0.f,
+            10.f,
             GetInstigatorController(),
             this,
             UDamageType::StaticClass()
