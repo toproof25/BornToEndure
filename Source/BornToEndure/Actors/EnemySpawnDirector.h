@@ -21,6 +21,8 @@ public:
 	void StartWeaveSpawning();
 	void StopWeaveSpawning();
 
+	void KillAllEnemies();
+
 protected:
 	virtual void BeginPlay() override;
 

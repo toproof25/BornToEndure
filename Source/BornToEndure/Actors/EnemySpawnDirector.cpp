@@ -2,6 +2,8 @@
 #include "Item/EnemySpawner.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item/EnemySpawner.h"
+#include "Subsystem/ObjectPoolSubsystem.h"
+#include "Character/Enemy/BaseEnemyCharacter.h"
 
 AEnemySpawnDirector::AEnemySpawnDirector()
 {
@@ -27,6 +29,24 @@ void AEnemySpawnDirector::StopWeaveSpawning()
 		if (Spawner)
 		{
 			Spawner->StopWeaveSpawning();
+		}
+	}
+}
+
+void AEnemySpawnDirector::KillAllEnemies()
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+	UObjectPoolSubsystem* Pool = World->GetSubsystem<UObjectPoolSubsystem>(); 
+	if (!Pool) return;
+
+	TArray<AActor*> TempEnemies;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseEnemyCharacter::StaticClass(), TempEnemies);
+	for (AActor* Actor : TempEnemies)
+	{
+		if (Actor)
+		{
+			Pool->ReturnPoolActor(Actor);
 		}
 	}
 }
