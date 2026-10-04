@@ -39,6 +39,11 @@ void AEnemySpawner::StopWeaveSpawning()
 	World->GetTimerManager().ClearTimer(SpawnTimerHandle);
 }
 
+void AEnemySpawner::KillAllEnemies()
+{
+
+}
+
 void AEnemySpawner::BeginPlay()
 {
     Super::BeginPlay();
@@ -157,8 +162,7 @@ bool AEnemySpawner::GetRandomSpawnLocation(FVector& OutLocation) const
     if (!NavSys) return false;
 
     FNavLocation NavLocation;
-    const bool bFound = NavSys->GetRandomReachablePointInRadius(
-        GetActorLocation(), SpawnRadius, NavLocation);
+    const bool bFound = NavSys->GetRandomReachablePointInRadius(GetActorLocation(), SpawnRadius, NavLocation);
 
     if (bFound)
     {

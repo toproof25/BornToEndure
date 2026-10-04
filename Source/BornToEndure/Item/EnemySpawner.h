@@ -16,6 +16,7 @@
 #include "EnemySpawner.generated.h"
 
 class UDataTable;
+class ABaseEnemyCharacter;
 
 UCLASS()
 class BORNTOENDURE_API AEnemySpawner : public AActor
@@ -30,6 +31,8 @@ public:
 
 	void StartWeaveSpawning();
 	void StopWeaveSpawning();
+
+	void KillAllEnemies();
 
 protected:
     virtual void BeginPlay() override;
@@ -56,6 +59,8 @@ private:
     /** @brief 초기 풀 크기 */
     UPROPERTY(EditAnywhere, Category = "Spawner")
     int32 PoolSize = 50;
+
+	TArray<TObjectPtr<ABaseEnemyCharacter>> EnemyPool; // 적 풀링 시스템
 
     FTimerHandle SpawnTimerHandle;
 
