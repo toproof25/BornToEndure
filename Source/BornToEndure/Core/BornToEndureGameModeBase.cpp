@@ -11,13 +11,13 @@ void ABornToEndureGameModeBase::StartGame()
 
 	GameState = EGameState::Playing;
 	StartPlayTime = GetWorld()->GetTimeSeconds();
+	SetSpawnEnemies();
 
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &ABornToEndureGameModeBase::StartWave, 10.0f, true);
 	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 10초 뒤 %d 웨이브가 시작된다!"), CurrentWave);
 }
 void ABornToEndureGameModeBase::EndGame()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 게임 종료!"));
 	if (EnemySpawnDirector)
 	{
 		EnemySpawnDirector->StopWeaveSpawning();
@@ -29,6 +29,7 @@ void ABornToEndureGameModeBase::EndGame()
 	}
 
 	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
+	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 게임 종료!"));
 }
 
 void ABornToEndureGameModeBase::StartWave()
@@ -52,9 +53,15 @@ void ABornToEndureGameModeBase::EndWave()
 
 	// 웨이브 증가 및 보상 등의 로직 추가 가능
 	CurrentWave++;
+	SetSpawnEnemies();
 	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &ABornToEndureGameModeBase::StartWave, 10.0f, true);
 	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 10초 뒤 %d 웨이브가 다시 시작된다!"), CurrentWave);
+}
+
+void ABornToEndureGameModeBase::SetSpawnEnemies()
+{
+	EnemySpawnDirector->SetSpawnEnemies(CurrentWave);
 }
 
 

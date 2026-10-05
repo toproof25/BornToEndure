@@ -35,6 +35,7 @@ public:
 	void StartWave();
 	void EndWave();
 	
+	void SetSpawnEnemies();
 
 	int32 GetCurrentWave() const { return CurrentWave; }
 	EGameState GetGameState() const { return GameState; }

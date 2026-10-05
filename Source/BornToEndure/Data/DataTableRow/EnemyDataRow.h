@@ -60,6 +60,9 @@ public:
 	TSoftObjectPtr<UDataAsset> EnemyDataAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
+	FPrimaryAssetId EnemyPrimaryDataAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
 	float Health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")

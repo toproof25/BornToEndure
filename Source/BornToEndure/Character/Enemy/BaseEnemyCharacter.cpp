@@ -14,6 +14,7 @@
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
+#include "Data/EnemyDataAsset.h"
 #include "Component/ElementCombatComponent.h"
 #include "Item/Projectile/BaseProjectile.h"
 
@@ -51,6 +52,13 @@ void ABaseEnemyCharacter::InitializeEnemy(const FEnemyDataRow& EnemyData)
 
 	ElementCombatComp->InitializeElementResistance(EnemyData.ElementResistances);
 
+	UEnemyDataAsset* EnemyDataAsset = Cast<UEnemyDataAsset>(EnemyData.EnemyDataAsset.LoadSynchronous());
+
+	GetMesh()->SetSkeletalMesh(EnemyDataAsset->EnemyMesh.LoadSynchronous());
+	GetMesh()->SetMaterial(0, EnemyDataAsset->EnemyMaterial.LoadSynchronous());
+
+    HitEnemySoundId = EnemyDataAsset->HitEnemySoundId;
+    HitEnemyNiagaraId = EnemyDataAsset->HitEnemyNiagaraId;
 
     UE_LOG(LogBaseEnemyCharacter, Display, TEXT("ABaseEnemyCharacter::InitializeEnemy : %s | ExpReward: %.1f, GoldReward: %d"),
         *GetName(), EnemyRewardPayload.ExpReward, EnemyRewardPayload.GoldReward);
