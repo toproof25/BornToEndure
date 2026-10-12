@@ -52,6 +52,8 @@ void ABornToEndureGameModeBase::StartWave()
 }
 void ABornToEndureGameModeBase::EndWave()
 {
+	EnemySpawnDirector->StopWeaveSpawning();
+
 	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 웨이브 종료!"));
 	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
 
