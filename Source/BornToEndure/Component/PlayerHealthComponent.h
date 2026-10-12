@@ -39,7 +39,11 @@ public:
 		AController* EventInstigator,
 		AActor* DamageCauser);
 
+	void SetInvincible(bool bInvincible);
+
+
 	FOnPlayerHealthUpdate OnPlayerHealthUpdate;
+	FOnPlayerDeath OnPlayerDeath;
 
 protected:
 	virtual void BeginPlay() override;
@@ -53,12 +57,12 @@ private:
 
 	bool bIsDead = false;
 
+	bool bIsInvincible = false;
+
 public:
 
-	//void Heal(float HealAmount);
 	float GetCurrentHealth() const { return CurrentHealth; }
 	float GetMaxHealth() const { return MaxHealth; }
-
-	FOnPlayerDeath OnPlayerDeath;
-		
+	bool GetIsDead() const { return bIsDead; }
+	bool GetIsInvincible() const { return bIsInvincible; }
 };
