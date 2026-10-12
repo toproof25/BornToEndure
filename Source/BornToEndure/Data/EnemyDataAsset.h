@@ -20,10 +20,10 @@ class BORNTOENDURE_API UEnemyDataAsset : public UPrimaryDataAsset
 public:
 
 	// 적이 사용하는 Mesh, Hit Sound, HitNiagara 등의 데이터를 정의
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (AssetBundles = "Game"))
 	TSoftObjectPtr<USkeletalMesh> EnemyMesh;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (AssetBundles = "Game"))
 	TSoftObjectPtr<UMaterial> EnemyMaterial;
 
 	UPROPERTY(EditAnywhere)

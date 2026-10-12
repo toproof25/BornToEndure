@@ -48,16 +48,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
 	FText Description;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
-	int32 SpawnLevel;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
+	//int32 SpawnLevel;
 
 	/**
 	 * @brief 적이 사용하는 Mesh, Sound, Niagara 등의 데이터를 담고 있는 DataAsset에 대한 SoftObjectPtr
 	 * - DataTable은 로드할 때 TObjectPtr을 사용하면 모두 로드한 상태가 됨 (성능 저하 및 메모리 낭비)
 	 * - TSoftObjectPtr을 사용하면 실제로 필요한 시점에 로드할 수 있다
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
-	TSoftObjectPtr<UDataAsset> EnemyDataAsset;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
+	//TSoftObjectPtr<UDataAsset> EnemyDataAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Data")
 	FPrimaryAssetId EnemyPrimaryDataAsset;

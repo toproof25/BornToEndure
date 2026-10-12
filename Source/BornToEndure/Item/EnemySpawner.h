@@ -13,6 +13,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
+#include "Core/BornToEndureGameModeBase.h"
+
 #include "EnemySpawner.generated.h"
 
 class UDataTable;
@@ -29,7 +31,7 @@ public:
     //UPROPERTY(EditAnywhere, Category = "Spawner")
     //TSoftObjectPtr<UDataTable> TestEnemyDataTable;
 
-	void StartWeaveSpawning(const FEnemyDataRow* EnemyDataRow);
+	void StartWeaveSpawning(const FEnemyDataRow* EnemyDataRow, const FWaveDifficultyValues& DifficultyValues);
 	void StopWeaveSpawning();
 
 protected:
@@ -62,6 +64,8 @@ private:
     FTimerHandle SpawnTimerHandle;
 
 	const FEnemyDataRow* CachedEnemyDataRow; // 현재 스폰할 적 데이터 구조체
+
+	FWaveDifficultyValues CurrentDifficulty;
 
     void SpawnEnemy();
     bool GetRandomSpawnLocation(FVector& OutLocation) const;

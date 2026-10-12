@@ -13,6 +13,10 @@
 #include "Data/DataTableRow/EnemyDataRow.h"
 #include "Data/DataTableRow/SpawnEnemyDataRow.h"
 
+#include "Core/BornToEndureGameModeBase.h"
+
+#include "Algo/SelectRandomWeighted.h"
+
 AEnemySpawnDirector::AEnemySpawnDirector() { PrimaryActorTick.bCanEverTick = false; }
 
 
@@ -28,7 +32,18 @@ void AEnemySpawnDirector::StartWeaveSpawning()
 	{
 		if (Spawner)
 		{
-			Spawner->StartWeaveSpawning(CachedEnemyRowDatas[0]);
+			// 가중치 배열에서 랜덤 적 선택
+			const FSpawnEnemyData* SelectedEnemy = Algo::SelectRandomWeightedBy(
+				CachedEnemyRowDatas,
+				[](const FSpawnEnemyData& Data)
+				{
+					return Data.Weight;
+				}
+			);
+
+			if (SelectedEnemy) Spawner->StartWeaveSpawning(SelectedEnemy->EnemyRowData, CurrentDifficulty);
+	
+
 		}
 	}
 }
@@ -43,7 +58,7 @@ void AEnemySpawnDirector::StopWeaveSpawning()
 	}
 }
 
-void AEnemySpawnDirector::SetSpawnEnemies(int32 WaveNumber)
+void AEnemySpawnDirector::SetSpawnEnemies(int32 WaveNumber, const FWaveDifficultyValues& DifficultyValues)
 {	
 	if (!SpawnEnemyDataTable || !EnemyDataTable)
 	{
@@ -65,12 +80,14 @@ void AEnemySpawnDirector::SetSpawnEnemies(int32 WaveNumber)
 	}
 
 
+	CachedEnemyRowDatas.Empty();
+
 	for (const FEnemySpawnEntry& EnemyData : CachedSpawnEnemyDatas)
 	{
 		FEnemyDataRow* EnemyDataRow = EnemyDataTable->FindRow<FEnemyDataRow>(EnemyData.EnemyRowName, TEXT("SetSpawnEnemies"));
 		if (EnemyDataRow)
 		{
-			CachedEnemyRowDatas.Add(EnemyDataRow);
+			CachedEnemyRowDatas.Add(FSpawnEnemyData(EnemyDataRow, EnemyData.Weight));
 			UE_LOG(LogTemp, Warning, TEXT("[AEnemySpawnDirector] Wave(%s) %d에 스폰할 적: %s"), *WaveRowName.ToString(), WaveNumber, *EnemyDataRow->EnemyName.ToString());
 
 			// 여기서 해당 웨이브에 필요한 적들을 모두 비동기 로드
@@ -78,7 +95,7 @@ void AEnemySpawnDirector::SetSpawnEnemies(int32 WaveNumber)
 
 			AssetManager.LoadPrimaryAsset(
 				EnemyDataRow->EnemyPrimaryDataAsset, 
-				{}, 
+				{ FName(TEXT("Game")) },
 				FStreamableDelegate::CreateUObject(this, &AEnemySpawnDirector::OnEnemyAssetLoaded), 
 				FStreamableManager::DefaultAsyncLoadPriority
 			);
@@ -90,6 +107,7 @@ void AEnemySpawnDirector::SetSpawnEnemies(int32 WaveNumber)
 		}
 	}
 
+	this->CurrentDifficulty = DifficultyValues;
 
 	
 }

@@ -7,6 +7,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Engine/CurveTable.h"
+
 #include "BornToEndureGameModeBase.generated.h"
 
 class AEnemySpawnDirector;
@@ -22,6 +24,21 @@ enum EGameState : uint8
 
 };
 
+USTRUCT(BlueprintType)
+struct FWaveDifficultyValues
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	float HealthMultiplier = 1.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float GoldMultiplier = 1.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float ExpMultiplier = 1.0f;
+};
+
 UCLASS()
 class BORNTOENDURE_API ABornToEndureGameModeBase : public AGameModeBase
 {
@@ -34,13 +51,9 @@ public:
 
 	void StartWave();
 	void EndWave();
-	
-	void SetSpawnEnemies();
+	bool SkipToNextWave(); /// 디버그용 함수
 
-	int32 GetCurrentWave() const { return CurrentWave; }
-	EGameState GetGameState() const { return GameState; }
-	double GetStartPlayTime() const { return StartPlayTime; }
-	const FTimerHandle& GetWaveTimerHandle() const { return WaveTimerHandle; }
+	void SetSpawnEnemies();
 
 protected:
 	virtual void BeginPlay() override;
@@ -52,7 +65,29 @@ private:
 	double StartPlayTime;
 	//double CurrentPlayTime;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave|Difficulty", meta = (AllowPrivateAccess = "true"))
+	FCurveTableRowHandle HealthCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave|Difficulty", meta = (AllowPrivateAccess = "true"))
+	FCurveTableRowHandle GoldCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wave|Difficulty", meta = (AllowPrivateAccess = "true"))
+	FCurveTableRowHandle ExpCurve;
+
+	FWaveDifficultyValues CurrentDifficulty;
+
 	TObjectPtr<AEnemySpawnDirector> EnemySpawnDirector;
 
 	FTimerHandle WaveTimerHandle;
+
+	void UpdateWaveDifficulty(int32 Wave);
+
+public:
+
+	int32 GetCurrentWave() const { return CurrentWave; }
+	EGameState GetGameState() const { return GameState; }
+	double GetStartPlayTime() const { return StartPlayTime; }
+	const FTimerHandle& GetWaveTimerHandle() const { return WaveTimerHandle; }
+	const FWaveDifficultyValues& GetCurrentWaveDifficulty() const { return CurrentDifficulty; }
+
 };

@@ -9,12 +9,22 @@
 
 #include "Data/DataTableRow/EnemyDataRow.h"
 #include "Data/DataTableRow/SpawnEnemyDataRow.h"
+#include "Core/BornToEndureGameModeBase.h"
 
 #include "EnemySpawnDirector.generated.h"
 
 class AEnemySpawner;
 class UDataTable;
+class UEnemyDataAsset;
 
+USTRUCT()
+struct FSpawnEnemyData
+{
+	GENERATED_BODY()
+
+	FEnemyDataRow* EnemyRowData;
+	float Weight;
+};
 
 UCLASS()
 class BORNTOENDURE_API AEnemySpawnDirector : public AActor
@@ -27,7 +37,7 @@ public:
 	void StartWeaveSpawning();
 	void StopWeaveSpawning();
 
-	void SetSpawnEnemies(int32 WaveNumber);
+	void SetSpawnEnemies(int32 WaveNumber, const FWaveDifficultyValues& DifficultyValues);
 
 	void KillAllEnemies();
 
@@ -55,10 +65,11 @@ private:
 	 * @brief 실제 스포너에게 전달하기 위한 Row 구조체를 담아두는 변수
 	 * - 스포너에게 Row 구조체를 전달하여, 스포너는 해당 구조체를 바탕으로 적을 스폰한다
 	 */
-	TArray<FEnemyDataRow*> CachedEnemyRowDatas;
+	TArray<FSpawnEnemyData> CachedEnemyRowDatas;
 
 	TArray<TObjectPtr<AEnemySpawner>> EnemySpawnPoints;
 
+	FWaveDifficultyValues CurrentDifficulty;
 
 	void OnEnemyAssetLoaded();
 

@@ -17,6 +17,8 @@
 #include "Data/EnemyDataAsset.h"
 #include "Component/ElementCombatComponent.h"
 #include "Item/Projectile/BaseProjectile.h"
+#include "Data/EnemyDataAsset.h"
+#include "Core/BornToEndureGameModeBase.h"
 
 DEFINE_LOG_CATEGORY(LogBaseEnemyCharacter);
 
@@ -39,26 +41,53 @@ ABaseEnemyCharacter::ABaseEnemyCharacter()
 	AttackRangeCollision->SetGenerateOverlapEvents(true);
 }
 
-void ABaseEnemyCharacter::InitializeEnemy(const FEnemyDataRow& EnemyData)
+void ABaseEnemyCharacter::InitializeEnemy(const FEnemyDataRow& EnemyData, const FWaveDifficultyValues& DifficultyValues)
 {
-    MaxHealth = EnemyData.Health;
+	MaxHealth = EnemyData.Health * DifficultyValues.HealthMultiplier;
 	CurrentHealth = MaxHealth;
 
-    MoveSpeed = EnemyData.MovementSpeed;
-    GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	MoveSpeed = EnemyData.MovementSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 
-    EnemyRewardPayload.ExpReward = EnemyData.RewardExp;
-    EnemyRewardPayload.GoldReward = EnemyData.RewardGold;
+	EnemyRewardPayload.ExpReward = EnemyData.RewardExp * DifficultyValues.ExpMultiplier;
+	EnemyRewardPayload.GoldReward = EnemyData.RewardGold * DifficultyValues.GoldMultiplier;
 
 	ElementCombatComp->InitializeElementResistance(EnemyData.ElementResistances);
 
-	UEnemyDataAsset* EnemyDataAsset = Cast<UEnemyDataAsset>(EnemyData.EnemyDataAsset.LoadSynchronous());
+	UAssetManager& AssetManager = UAssetManager::Get();
+	UEnemyDataAsset* EnemyDataAsset = Cast<UEnemyDataAsset>(AssetManager.GetPrimaryAssetObject(EnemyData.EnemyPrimaryDataAsset));
 
-	GetMesh()->SetSkeletalMesh(EnemyDataAsset->EnemyMesh.LoadSynchronous());
-	GetMesh()->SetMaterial(0, EnemyDataAsset->EnemyMaterial.LoadSynchronous());
+	if (CurrentEnemyDataAsset == EnemyDataAsset)
+	{
+		UE_LOG(LogBaseEnemyCharacter, Warning, TEXT("ABaseEnemyCharacter::InitializeEnemy : %s | 이미 초기화된 EnemyDataAsset입니다. 중복 초기화를 방지합니다."), *GetName());
+		UE_LOG(LogBaseEnemyCharacter, Display, TEXT("ABaseEnemyCharacter::InitializeEnemy : %s | ExpReward: %.1f, GoldReward: %d"),
+			*GetName(), EnemyRewardPayload.ExpReward, EnemyRewardPayload.GoldReward);
+		return; // 이미 초기화된 경우, 중복 초기화를 방지	
+	}
+	CurrentEnemyDataAsset = EnemyDataAsset;
 
-    HitEnemySoundId = EnemyDataAsset->HitEnemySoundId;
-    HitEnemyNiagaraId = EnemyDataAsset->HitEnemyNiagaraId;
+
+	// EnemySpawnDiretor에서 미리 로드된 EnemyDataAsset을 가져와서 Mesh와 Material 설정
+	if (CurrentEnemyDataAsset)
+	{
+		//UEnemyDataAsset* EnemyDataAsset = Cast<UEnemyDataAsset>(EnemyData.EnemyPrimaryDataAsset.Get());
+		USkeletalMesh* DA_Mesh = CurrentEnemyDataAsset->EnemyMesh.Get();
+		UMaterialInterface* DA_Material = CurrentEnemyDataAsset->EnemyMaterial.Get();
+
+		GetMesh()->EmptyOverrideMaterials(); /// 기존에 사용하던 Material 제거
+		GetMesh()->SetSkeletalMesh(DA_Mesh);
+		GetMesh()->SetMaterial(0, DA_Material);
+
+		HitEnemySoundId = CurrentEnemyDataAsset->HitEnemySoundId;
+		HitEnemyNiagaraId = CurrentEnemyDataAsset->HitEnemyNiagaraId;
+
+		UWorld* World = GetWorld();
+		if (!World) return;
+		UEffectSubsystem* EffectSubsystem = World->GetSubsystem<UEffectSubsystem>();
+		if (!EffectSubsystem) return;
+		EffectSubsystem->PreloadEffectAssets(HitEnemySoundId);
+		EffectSubsystem->PreloadEffectAssets(HitEnemyNiagaraId);
+	}
 
     UE_LOG(LogBaseEnemyCharacter, Display, TEXT("ABaseEnemyCharacter::InitializeEnemy : %s | ExpReward: %.1f, GoldReward: %d"),
         *GetName(), EnemyRewardPayload.ExpReward, EnemyRewardPayload.GoldReward);
@@ -274,7 +303,6 @@ float ABaseEnemyCharacter::ResolveDamage(float DamageAmount, const FPetAttackInf
 
 	return FinalDamage;
 }
-
 
 void ABaseEnemyCharacter::DelegateBindng()
 {

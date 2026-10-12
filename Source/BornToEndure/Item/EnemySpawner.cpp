@@ -9,15 +9,17 @@
 #include "Engine/DataTable.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
 #include "PlayerState/CombatPlayerState.h"
+#include "Core/BornToEndureGameModeBase.h"
 
 AEnemySpawner::AEnemySpawner()
 {
     PrimaryActorTick.bCanEverTick = false;
 }
 
-void AEnemySpawner::StartWeaveSpawning(const FEnemyDataRow* EnemyDataRow)
+void AEnemySpawner::StartWeaveSpawning(const FEnemyDataRow* EnemyDataRow, const FWaveDifficultyValues& DifficultyValues)
 {
 	CachedEnemyDataRow = EnemyDataRow;
+	CurrentDifficulty = DifficultyValues;
 
 	UWorld* World = GetWorld();
 	if (!World) return;
@@ -76,7 +78,7 @@ void AEnemySpawner::SpawnEnemy()
         if (PlayerXP) PlayerXP->RegisterEnemyPayload(BaseEnemy);
 
 		// DataTable에서 가져온 적에 대한 보상, 스탯 설정을 BaseEnemyCharacter로 전달하여 초기화하는 로직도 추가 예정
-		BaseEnemy->InitializeEnemy(*CachedEnemyDataRow);
+		BaseEnemy->InitializeEnemy(*CachedEnemyDataRow, CurrentDifficulty);
 
 		/*
         const FEnemyDataRow* EnemyData = CachedEnemyDataMap.Find(FName("Test_1"));
