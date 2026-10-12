@@ -9,15 +9,18 @@ void ABornToEndureGameModeBase::StartGame()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 게임 시작!"));
 
+	CurrentWave = 1;
 	GameState = EGameState::Playing;
 	StartPlayTime = GetWorld()->GetTimeSeconds();
+	UpdateWaveDifficulty(CurrentWave);
+	SetSpawnEnemies();
 
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &ABornToEndureGameModeBase::StartWave, 10.0f, true);
 	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 10초 뒤 %d 웨이브가 시작된다!"), CurrentWave);
 }
 void ABornToEndureGameModeBase::EndGame()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 게임 종료!"));
+	GameState = EGameState::GameOver;
 	if (EnemySpawnDirector)
 	{
 		EnemySpawnDirector->StopWeaveSpawning();
@@ -29,6 +32,7 @@ void ABornToEndureGameModeBase::EndGame()
 	}
 
 	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
+	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 게임 종료!"));
 }
 
 void ABornToEndureGameModeBase::StartWave()
@@ -49,12 +53,26 @@ void ABornToEndureGameModeBase::StartWave()
 void ABornToEndureGameModeBase::EndWave()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 웨이브 종료!"));
+	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
 
 	// 웨이브 증가 및 보상 등의 로직 추가 가능
 	CurrentWave++;
-	GetWorldTimerManager().ClearTimer(WaveTimerHandle);
+	UpdateWaveDifficulty(CurrentWave);
+	SetSpawnEnemies();
 	GetWorldTimerManager().SetTimer(WaveTimerHandle, this, &ABornToEndureGameModeBase::StartWave, 10.0f, true);
 	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 10초 뒤 %d 웨이브가 다시 시작된다!"), CurrentWave);
+}
+
+bool ABornToEndureGameModeBase::SkipToNextWave()
+{
+	EndWave();
+	StartWave();
+	return true;
+}
+
+void ABornToEndureGameModeBase::SetSpawnEnemies()
+{
+	EnemySpawnDirector->SetSpawnEnemies(CurrentWave, CurrentDifficulty);
 }
 
 
@@ -85,4 +103,32 @@ void ABornToEndureGameModeBase::BeginPlay()
 	GameState = EGameState::WatingToStart;
 
 
+}
+
+void ABornToEndureGameModeBase::UpdateWaveDifficulty(int32 Wave)
+{
+	HealthCurve.Eval(
+		static_cast<float>(Wave),
+		&CurrentDifficulty.HealthMultiplier,
+		TEXT("HealthCurve")
+	);
+
+	GoldCurve.Eval(
+		static_cast<float>(Wave),
+		&CurrentDifficulty.GoldMultiplier,
+		TEXT("GoldCurve")
+	);
+
+	ExpCurve.Eval(
+		static_cast<float>(Wave),
+		&CurrentDifficulty.ExpMultiplier,
+		TEXT("ExpCurve")
+	);
+
+	UE_LOG(LogTemp, Warning, TEXT("[ABornToEndureGameModeBase] 웨이브 %d 난이도 업데이트: 체력 배율 %.2f, 골드 배율 %.2f, 경험치 배율 %.2f"),
+		Wave,
+		CurrentDifficulty.HealthMultiplier,
+		CurrentDifficulty.GoldMultiplier,
+		CurrentDifficulty.ExpMultiplier
+	);
 }

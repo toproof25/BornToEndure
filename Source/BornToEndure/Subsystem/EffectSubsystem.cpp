@@ -73,6 +73,7 @@ void UEffectSubsystem::UnloadEffectAssets(FPrimaryAssetId PrimaryAssetId)
 			if (Asset->StreamableHandle.IsValid())
 			{
 				Asset->StreamableHandle->ReleaseHandle(); // 핸들 해제
+				UAssetManager::Get().UnloadPrimaryAsset(PrimaryAssetId);
 			}
 			PreloadAsset.Remove(PrimaryAssetId);		   // TMap에서 제거
 		}

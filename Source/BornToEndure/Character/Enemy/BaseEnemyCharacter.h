@@ -24,6 +24,8 @@ class UBehaviorTree;
 class ABaseEnemyCharacter;
 class UPrimitiveComponent;
 class UElementCombatComponent;
+class UEnemyDataAsset;
+struct FWaveDifficultyValues;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogBaseEnemyCharacter, Log, All);
 
@@ -46,7 +48,7 @@ public:
 	 * @brief EnemyDataTable에서 가져온 데이터를 기반으로 적 초기화
 	 * @param EnemyData EnemyDataRow 구조체로 DataTable에서 가져온 적 데이터
 	 */
-	void InitializeEnemy(const FEnemyDataRow& EnemyData);
+	void InitializeEnemy(const FEnemyDataRow& EnemyData, const FWaveDifficultyValues& DifficultyValues);
     
     /**
      * @brief Pool System에서 활성화, 비활성화 호출 함수로 IPoolable Interface에서 선언되며, 오버라이드하여 사용
@@ -151,6 +153,8 @@ private:
 	TWeakObjectPtr<APlayerCharacter> TargetPlayerCharacter = nullptr;
 
 	FPetAttackInfo CurrentHitInfo;
+
+	TObjectPtr<UEnemyDataAsset> CurrentEnemyDataAsset = nullptr;
 
 	void DelegateBindng();
 	void DelegateUnbinding();

@@ -30,12 +30,16 @@ private:
 	{
 		None,
 		StartGame,
-		StartWave,
-		EndGame
+		EndGame,
+		SkipToNextWave,
+		EnableInvincibility,
+		DisableInvincibility
 	};
 
 	void DrawDebugWindow();
 	EGameDebugAction DrawGameFlowTab(ABornToEndureGameModeBase* GameMode);
+	EGameDebugAction DrawPlayerTab();
+	void DrawGameStatus(ABornToEndureGameModeBase* GameMode);
 	void ExecuteGameAction(EGameDebugAction Action);
 
 	FImGuiDelegateHandle ImGuiDelegateHandle;

@@ -4,8 +4,11 @@
 #include "DebugCode/GameDebugActor.h"
 
 #if !UE_BUILD_SHIPPING
+#include "Character/Player/PlayerCharacter.h"
+#include "Component/PlayerHealthComponent.h"
 #include "Core/BornToEndureGameModeBase.h"
 #include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "ImGuiModule.h"
 #include "TimerManager.h"
 #include "imgui.h"
@@ -22,7 +25,7 @@ void AGameDebugActor::BeginPlay()
 
 #if !UE_BUILD_SHIPPING
 	WindowTitle = FString::Printf(TEXT("게임 종합 디버그 | %s###GameDebug_%s"), *GetName(), *GetPathName());
-	LastActionMessage = TEXT("아직 호출한 함수가 없습니다.");
+	LastActionMessage = TEXT("대기");
 	if (FImGuiModule::IsAvailable() && IsValid(GetWorld()))
 	{
 		const FImGuiDelegate Delegate = FImGuiDelegate::CreateUObject(this, &AGameDebugActor::DrawDebugWindow);
@@ -59,17 +62,19 @@ void AGameDebugActor::DrawDebugWindow()
 	}
 
 	EGameDebugAction RequestedAction = EGameDebugAction::None;
-	ImGui::SetNextWindowSize(ImVec2(670.0f, 460.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(530.0f, 370.0f), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin(TCHAR_TO_UTF8(*WindowTitle)))
 	{
-		ImGui::TextUnformatted("게임 진행 테스트 및 상태 확인");
-		ImGui::TextDisabled("마우스 입력: 콘솔에서 ImGui.InputEnabled 1 (해제: 0)");
-		ImGui::Separator();
 		if (ImGui::BeginTabBar("GameDebugTabs"))
 		{
 			if (ImGui::BeginTabItem("게임 진행"))
 			{
 				RequestedAction = DrawGameFlowTab(World->GetAuthGameMode<ABornToEndureGameModeBase>());
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("플레이어"))
+			{
+				RequestedAction = DrawPlayerTab();
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
@@ -87,105 +92,162 @@ void AGameDebugActor::DrawDebugWindow()
 AGameDebugActor::EGameDebugAction AGameDebugActor::DrawGameFlowTab(ABornToEndureGameModeBase* GameMode)
 {
 	const bool bCanCall = IsValid(GameMode) && !GameMode->IsActorBeingDestroyed() && GameMode->HasActorBegunPlay();
-	ImGui::Text("월드: %s", TCHAR_TO_UTF8(*GetWorld()->GetName()));
-	ImGui::Text("월드 경과 시간: %.1f초", GetWorld()->GetTimeSeconds());
-	if (bCanCall)
-	{
-		ImGui::TextColored(ImVec4(0.3f, 0.9f, 0.4f, 1.0f), "게임 모드 API 호출 가능");
-		ImGui::Text("게임 모드: %s", TCHAR_TO_UTF8(*GameMode->GetClass()->GetName()));
-	}
-	else
-	{
-		ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "게임 모드 API 호출 불가");
-		ImGui::TextWrapped("현재 월드에 초기화된 BornToEndureGameModeBase가 필요합니다. 싱글 플레이 또는 서버에서 테스트하세요.");
-	}
-
+	DrawGameStatus(bCanCall ? GameMode : nullptr);
 	ImGui::Separator();
 	EGameDebugAction Action = EGameDebugAction::None;
 	ImGui::BeginDisabled(!bCanCall);
-	if (ImGui::Button("게임 시작"))
+	if (ImGui::Button("게임 시작", ImVec2(125.0f, 0.0f)))
 	{
 		Action = EGameDebugAction::StartGame;
 	}
 	ImGui::SameLine();
-	if (ImGui::Button("웨이브 시작"))
-	{
-		Action = EGameDebugAction::StartWave;
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("게임 종료"))
+	if (ImGui::Button("게임 종료", ImVec2(125.0f, 0.0f)))
 	{
 		Action = EGameDebugAction::EndGame;
 	}
 	ImGui::EndDisabled();
-	ImGui::TextWrapped("게임 시작: StartGame()이 웨이브 시작 타이머를 등록합니다. 웨이브 시작: StartWave()를 직접 호출합니다.");
-	ImGui::TextWrapped("게임 종료: EndGame()이 웨이브 타이머를 해제하고 스폰을 중지합니다. 에디터 플레이(PIE)는 종료하지 않습니다.");
-	ImGui::TextWrapped("스폰 테스트에는 레벨에 배치된 EnemySpawnDirector와 설정된 EnemySpawner가 필요합니다.");
-	ImGui::Separator();
-	if (ImGui::CollapsingHeader("게임 및 타이머 상태", ImGuiTreeNodeFlags_DefaultOpen))
+	const bool bCanSkip = bCanCall && GameMode->GetGameState() == EGameState::Playing
+		&& GetWorld()->GetTimerManager().TimerExists(GameMode->GetWaveTimerHandle());
+	ImGui::BeginDisabled(!bCanSkip);
+	if (ImGui::Button("다음 웨이브로 건너뛰기", ImVec2(260.0f, 0.0f)))
 	{
-		if (bCanCall)
-		{
-			const EGameState State = GameMode->GetGameState();
-			const char* StateLabel = "알 수 없음";
-			switch (State)
-			{
-			case EGameState::WatingToStart: StateLabel = "시작 대기"; break;
-			case EGameState::Playing: StateLabel = "플레이 중"; break;
-			case EGameState::Paused: StateLabel = "일시정지"; break;
-			case EGameState::GameOver: StateLabel = "게임 오버"; break;
-			default: break;
-			}
-
-			ImGui::Text("게임 상태: %s", StateLabel);
-			ImGui::Text("현재 웨이브: %d", GameMode->GetCurrentWave());
-			if (State != EGameState::WatingToStart && GameMode->GetStartPlayTime() <= GetWorld()->GetTimeSeconds())
-			{
-				const double Elapsed = GetWorld()->GetTimeSeconds() - GameMode->GetStartPlayTime();
-				ImGui::Text("게임 시작 후 경과: %.1f초", Elapsed);
-				ImGui::TextDisabled("시작 시각 기준이며, 종료 후에도 증가할 수 있습니다.");
-			}
-			else
-			{
-				ImGui::TextDisabled("게임 시작 후 경과: 시작 전 / 확인 불가");
-			}
-
-			ImGui::Separator();
-			const FTimerHandle& WaveTimer = GameMode->GetWaveTimerHandle();
-			const FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-			if (TimerManager.IsTimerActive(WaveTimer))
-			{
-				ImGui::TextColored(ImVec4(0.3f, 0.9f, 0.4f, 1.0f), "웨이브 타이머: 실행 중");
-			}
-			else if (TimerManager.IsTimerPaused(WaveTimer))
-			{
-				ImGui::TextColored(ImVec4(1.0f, 0.75f, 0.2f, 1.0f), "웨이브 타이머: 일시정지");
-			}
-			else if (TimerManager.TimerExists(WaveTimer))
-			{
-				ImGui::TextDisabled("웨이브 타이머: 등록됨 (실행 대기)");
-			}
-			else
-			{
-				ImGui::TextDisabled("웨이브 타이머: 등록되지 않음");
-			}
-			if (TimerManager.TimerExists(WaveTimer))
-			{
-				ImGui::Text("남은 시간: %.1f초", TimerManager.GetTimerRemaining(WaveTimer));
-				ImGui::Text("타이머 주기: %.1f초", TimerManager.GetTimerRate(WaveTimer));
-			}
-			ImGui::TextDisabled("다음 타이머 동작은 공개 API로 확인할 수 없습니다.");
-		}
-		else
-		{
-			ImGui::TextDisabled("게임 모드 상태를 조회할 수 없습니다.");
-		}
-		ImGui::TextDisabled("스포너별 타이머 상태 / 남은 시간: 조회 API 없음");
+		Action = EGameDebugAction::SkipToNextWave;
 	}
-	ImGui::Separator();
-	ImGui::TextWrapped("마지막 요청: %s", TCHAR_TO_UTF8(*LastActionMessage));
-	ImGui::TextDisabled("마지막 요청은 호출 내역이며 실제 게임·스폰 상태를 뜻하지 않습니다.");
+	ImGui::EndDisabled();
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip("게임 진행 중 웨이브 타이머가 있을 때 사용할 수 있습니다.");
+	}
+	ImGui::TextDisabled("최근 호출: %s", TCHAR_TO_UTF8(*LastActionMessage));
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::SetTooltip("호출 기록입니다. 실제 처리 결과는 출력 로그를 확인하세요.");
+	}
 	return Action;
+}
+
+AGameDebugActor::EGameDebugAction AGameDebugActor::DrawPlayerTab()
+{
+	APlayerController* Controller = GetWorld()->GetFirstPlayerController();
+	APlayerCharacter* Player = IsValid(Controller) ? Cast<APlayerCharacter>(Controller->GetPawn()) : nullptr;
+	UPlayerHealthComponent* Health = IsValid(Player) && !Player->IsActorBeingDestroyed()
+		? Player->GetPlayerHealthComp() : nullptr;
+	const bool bAvailable = IsValid(Health) && Health->HasBegunPlay() && Player->HasAuthority();
+
+	if (bAvailable)
+	{
+		ImGui::Text("%s", TCHAR_TO_UTF8(*Player->GetName()));
+		const float MaxHealth = Health->GetMaxHealth();
+		const float CurrentHealth = Health->GetCurrentHealth();
+		const float Fraction = MaxHealth > 0.0f ? FMath::Clamp(CurrentHealth / MaxHealth, 0.0f, 1.0f) : 0.0f;
+		const FString Overlay = FString::Printf(TEXT("체력 %.0f / %.0f"), CurrentHealth, MaxHealth);
+		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.3f, 0.9f, 0.4f, 1.0f));
+		ImGui::ProgressBar(Fraction, ImVec2(-1.0f, 22.0f), TCHAR_TO_UTF8(*Overlay));
+		ImGui::PopStyleColor();
+	}
+	else
+	{
+		ImGui::TextDisabled("조작 가능한 플레이어 없음 (서버 권한 필요)");
+	}
+
+	ImGui::Separator();
+	const bool bInvincible = bAvailable && Health->GetIsInvincible();
+	if (bAvailable)
+	{
+		ImGui::TextColored(bInvincible ? ImVec4(0.3f, 0.9f, 0.4f, 1.0f) : ImVec4(0.6f, 0.6f, 0.6f, 1.0f),
+			"● 무적: %s", bInvincible ? "켜짐" : "꺼짐");
+	}
+	else
+	{
+		ImGui::TextDisabled("무적: 확인 불가");
+	}
+	EGameDebugAction Action = EGameDebugAction::None;
+	ImGui::BeginDisabled(!bAvailable || bInvincible);
+	if (ImGui::Button("무적 켜기", ImVec2(125.0f, 0.0f)))
+	{
+		Action = EGameDebugAction::EnableInvincibility;
+	}
+	ImGui::EndDisabled();
+	ImGui::SameLine();
+	ImGui::BeginDisabled(!bAvailable || !bInvincible);
+	if (ImGui::Button("무적 끄기", ImVec2(125.0f, 0.0f)))
+	{
+		Action = EGameDebugAction::DisableInvincibility;
+	}
+	ImGui::EndDisabled();
+	ImGui::TextDisabled("최근 호출: %s", TCHAR_TO_UTF8(*LastActionMessage));
+	return Action;
+}
+
+void AGameDebugActor::DrawGameStatus(ABornToEndureGameModeBase* GameMode)
+{
+	if (!GameMode)
+	{
+		ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "게임 모드 없음");
+		ImGui::TextDisabled("BornToEndureGameModeBase가 있는 서버 월드가 필요합니다.");
+		return;
+	}
+
+	const EGameState State = GameMode->GetGameState();
+	const char* StateLabel = "알 수 없음";
+	ImVec4 StateColor(0.6f, 0.6f, 0.6f, 1.0f);
+	switch (State)
+	{
+	case EGameState::WatingToStart: StateLabel = "시작 대기"; break;
+	case EGameState::Playing: StateLabel = "진행 중"; StateColor = ImVec4(0.3f, 0.9f, 0.4f, 1.0f); break;
+	case EGameState::Paused: StateLabel = "일시정지"; StateColor = ImVec4(1.0f, 0.75f, 0.2f, 1.0f); break;
+	case EGameState::GameOver: StateLabel = "게임 오버"; StateColor = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); break;
+	default: break;
+	}
+	ImGui::TextColored(StateColor, "● %s", StateLabel);
+	ImGui::SameLine(190.0f);
+	ImGui::Text("WAVE %02d", GameMode->GetCurrentWave());
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::SetTooltip("%s", TCHAR_TO_UTF8(*GameMode->GetPathName()));
+	}
+	const FWaveDifficultyValues& Difficulty = GameMode->GetCurrentWaveDifficulty();
+	ImGui::TextDisabled("배율  체력 x%.2f   골드 x%.2f   경험치 x%.2f",
+		Difficulty.HealthMultiplier, Difficulty.GoldMultiplier, Difficulty.ExpMultiplier);
+
+	const double WorldTime = GetWorld()->GetTimeSeconds();
+	if (State != EGameState::WatingToStart && GameMode->GetStartPlayTime() <= WorldTime)
+	{
+		const double Elapsed = WorldTime - GameMode->GetStartPlayTime();
+		const int32 Minutes = FMath::FloorToInt(Elapsed / 60.0);
+		const int32 Seconds = FMath::FloorToInt(FMath::Fmod(Elapsed, 60.0));
+		ImGui::Text("경과  %02d:%02d", Minutes, Seconds);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("시작 시각 기준. 게임 종료 후에도 증가할 수 있습니다.");
+	}
+	else
+	{
+		ImGui::TextDisabled("경과  --:--");
+	}
+
+	ImGui::Spacing();
+	const FTimerHandle& WaveTimer = GameMode->GetWaveTimerHandle();
+	const FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	const bool bExists = TimerManager.TimerExists(WaveTimer);
+	const bool bActive = bExists && TimerManager.IsTimerActive(WaveTimer);
+	const bool bPaused = bExists && TimerManager.IsTimerPaused(WaveTimer);
+	const ImVec4 TimerColor = bActive ? ImVec4(0.3f, 0.9f, 0.4f, 1.0f)
+		: bPaused ? ImVec4(1.0f, 0.75f, 0.2f, 1.0f) : ImVec4(0.6f, 0.6f, 0.6f, 1.0f);
+	ImGui::TextColored(TimerColor, "● 웨이브 타이머: %s", bActive ? "진행" : bPaused ? "일시정지" : bExists ? "대기" : "꺼짐");
+	if (bExists)
+	{
+		const float Rate = TimerManager.GetTimerRate(WaveTimer);
+		const float Remaining = TimerManager.GetTimerRemaining(WaveTimer);
+		const float Progress = Rate > 0.0f ? FMath::Clamp(1.0f - Remaining / Rate, 0.0f, 1.0f) : 0.0f;
+		const FString Overlay = FString::Printf(TEXT("%.1f / %.1f초"), Remaining, Rate);
+		ImGui::PushStyleColor(ImGuiCol_PlotHistogram, TimerColor);
+		ImGui::ProgressBar(Progress, ImVec2(-1.0f, 22.0f), TCHAR_TO_UTF8(*Overlay));
+		ImGui::PopStyleColor();
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("남은 시간 / 타이머 주기. 다음 호출 함수는 조회할 수 없습니다.");
+	}
+	else
+	{
+		ImGui::ProgressBar(0.0f, ImVec2(-1.0f, 22.0f), "--");
+	}
 }
 
 void AGameDebugActor::ExecuteGameAction(EGameDebugAction Action)
@@ -195,10 +257,28 @@ void AGameDebugActor::ExecuteGameAction(EGameDebugAction Action)
 	{
 		return;
 	}
+	if (Action == EGameDebugAction::EnableInvincibility || Action == EGameDebugAction::DisableInvincibility)
+	{
+		APlayerController* Controller = World->GetFirstPlayerController();
+		APlayerCharacter* Player = IsValid(Controller) ? Cast<APlayerCharacter>(Controller->GetPawn()) : nullptr;
+		UPlayerHealthComponent* Health = IsValid(Player) && !Player->IsActorBeingDestroyed()
+			? Player->GetPlayerHealthComp() : nullptr;
+		if (IsValid(Health) && Health->HasBegunPlay() && Player->HasAuthority())
+		{
+			const bool bEnable = Action == EGameDebugAction::EnableInvincibility;
+			Health->SetInvincible(bEnable);
+			LastActionMessage = bEnable ? TEXT("SetInvincible(true)") : TEXT("SetInvincible(false)");
+		}
+		else
+		{
+			LastActionMessage = TEXT("실패 · 플레이어 없음");
+		}
+		return;
+	}
 	ABornToEndureGameModeBase* GameMode = World->GetAuthGameMode<ABornToEndureGameModeBase>();
 	if (!IsValid(GameMode) || GameMode->IsActorBeingDestroyed() || !GameMode->HasActorBegunPlay())
 	{
-		LastActionMessage = TEXT("호출하지 못했습니다. 게임 모드를 사용할 수 없습니다.");
+		LastActionMessage = TEXT("실패 · 게임 모드 없음");
 		return;
 	}
 
@@ -206,16 +286,29 @@ void AGameDebugActor::ExecuteGameAction(EGameDebugAction Action)
 	switch (Action)
 	{
 	case EGameDebugAction::StartGame:
-		LastActionMessage = TEXT("StartGame() 호출 요청을 전달했습니다. 실제 결과는 출력 로그를 확인하세요.");
+		LastActionMessage = TEXT("StartGame()");
 		GameMode->StartGame();
 		break;
-	case EGameDebugAction::StartWave:
-		LastActionMessage = TEXT("StartWave() 호출 요청을 전달했습니다. 실제 결과는 출력 로그를 확인하세요.");
-		GameMode->StartWave();
-		break;
 	case EGameDebugAction::EndGame:
-		LastActionMessage = TEXT("EndGame() 호출 요청을 전달했습니다. 실제 결과는 출력 로그를 확인하세요.");
+		LastActionMessage = TEXT("EndGame()");
 		GameMode->EndGame();
+		break;
+	case EGameDebugAction::SkipToNextWave:
+		if (GameMode->GetGameState() == EGameState::Playing
+			&& World->GetTimerManager().TimerExists(GameMode->GetWaveTimerHandle()))
+		{
+			const int32 PreviousWave = GameMode->GetCurrentWave();
+			const bool bSkipped = GameMode->SkipToNextWave();
+			const int32 NewWave = IsValid(GameMode) ? GameMode->GetCurrentWave() : PreviousWave;
+			const TCHAR* Result = !bSkipped ? TEXT("실패")
+				: NewWave > PreviousWave ? TEXT("반영") : TEXT("값 미변경");
+			LastActionMessage = FString::Printf(TEXT("스킵 %d → %d (%s)"),
+				PreviousWave, NewWave, Result);
+		}
+		else
+		{
+			LastActionMessage = TEXT("건너뛰기 불가");
+		}
 		break;
 	default:
 		break;

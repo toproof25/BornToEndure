@@ -13,6 +13,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Data/DataTableRow/EnemyDataRow.h"
+#include "Core/BornToEndureGameModeBase.h"
+
 #include "EnemySpawner.generated.h"
 
 class UDataTable;
@@ -26,16 +28,13 @@ class BORNTOENDURE_API AEnemySpawner : public AActor
 public:	
 	AEnemySpawner();
 
-    UPROPERTY(EditAnywhere, Category = "Spawner")
-    TSoftObjectPtr<UDataTable> TestEnemyDataTable;
+    //UPROPERTY(EditAnywhere, Category = "Spawner")
+    //TSoftObjectPtr<UDataTable> TestEnemyDataTable;
 
-	void StartWeaveSpawning();
+	void StartWeaveSpawning(const FEnemyDataRow* EnemyDataRow, const FWaveDifficultyValues& DifficultyValues);
 	void StopWeaveSpawning();
 
-	void KillAllEnemies();
-
 protected:
-    virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 
@@ -64,12 +63,16 @@ private:
 
     FTimerHandle SpawnTimerHandle;
 
+	const FEnemyDataRow* CachedEnemyDataRow; // 현재 스폰할 적 데이터 구조체
+
+	FWaveDifficultyValues CurrentDifficulty;
+
     void SpawnEnemy();
     bool GetRandomSpawnLocation(FVector& OutLocation) const;
 
     /** @brief 현재 활성화된 적 수 반환 */
     int32 GetActiveEnemyCount() const;
 
-	TMap<FName, FEnemyDataRow> CachedEnemyDataMap; // 데이터 테이블에서 읽어온 적 데이터 맵
+	//TMap<FName, FEnemyDataRow> CachedEnemyDataMap; // 데이터 테이블에서 읽어온 적 데이터 맵
 
 };

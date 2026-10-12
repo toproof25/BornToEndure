@@ -14,6 +14,8 @@ void UPlayerHealthComponent::BeginPlay()
 
 float UPlayerHealthComponent::HealthTakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bIsInvincible) return 0.0f;
+
 	if (bIsDead) return 0.0f;
 
 	CurrentHealth -= DamageAmount;
@@ -28,5 +30,11 @@ float UPlayerHealthComponent::HealthTakeDamage(float DamageAmount, FDamageEvent 
 	}
 
 	return DamageAmount;
+}
+
+void UPlayerHealthComponent::SetInvincible(bool bInvincible)
+{
+	bIsInvincible = bInvincible;
+	UE_LOG(LogTemp, Warning, TEXT("[UPlayerHealthComponent] SetInvincible called. bIsInvincible: %s"), bIsInvincible ? TEXT("true") : TEXT("false"));
 }
 
