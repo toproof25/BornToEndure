@@ -4,6 +4,7 @@
 #include "Component/InteractionComponent.h"
 #include "Interface/Interactable.h"
 #include "Character/Player/PlayerCharacter.h"
+#include "Core/DefaultPlayerController.h"
 
 UInteractionComponent::UInteractionComponent()
 {
@@ -18,7 +19,7 @@ void UInteractionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	Owner = Cast<APawn>(GetOwner());
-	PlayerController = Cast<APlayerController>(Owner->GetController());
+	PlayerController = Cast<ADefaultPlayerController>(Owner->GetController());
 }
 
 void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -31,7 +32,7 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	// 2. 플레이어 컨트롤러가 없으면 다시 시도 (BeginPlay에서 못찾을 수 있다고 함)
 	if (PlayerController == nullptr)
 	{
-		PlayerController = Cast<APlayerController>(Owner->GetController());
+		PlayerController = Cast<ADefaultPlayerController>(Owner->GetController());
 		if (PlayerController == nullptr) return;
 	}
 
@@ -82,8 +83,8 @@ void UInteractionComponent::TestInteraction()
 	{
 		if (IInteractable* Interactable = Cast<IInteractable>(HitResult.GetActor()))
 		{
-			Interactable->Execute_Interact(HitResult.GetActor(), Cast<APlayerCharacter>(Owner));
-			//DrawDebugLine(GetWorld(), HitResult.TraceStart, HitResult.TraceEnd, FColor::Red, false, 2.f);
+			Interactable->Execute_Interact(HitResult.GetActor(), Cast<APlayerCharacter>(Owner), PlayerController);
+			DrawDebugLine(GetWorld(), HitResult.TraceStart, HitResult.TraceEnd, FColor::Red, false, 2.f);
 		}
 	}
 }

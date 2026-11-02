@@ -1,4 +1,9 @@
-﻿
+﻿/**
+ * @file ItemPoolSubsystem.cpp
+ * @brief 아이템 조회와 회차 내 중복 없는 무기 추첨을 처리합니다.
+ */
+
+
 #include "Subsystem/ItemPoolSubsystem.h"
 #include "Engine/DataTable.h"
 #include "Data/DataTableRow/ItemDataRow.h"
@@ -63,15 +68,21 @@ void UItemPoolSubsystem::InitializePetDataTable(UDataTable* InPetDataTable)
 
 TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomItemData(int32 Count)
 {
+	return GetRandomWeaponItemData(Count);
+}
+
+TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomWeaponItemData(int32 Count)
+{
 	TArray<FItemDataHandle> ResultObjects;
 
 	// 아이템 데이터가 없으면 빈 배열 반환
-	if (StatItemDataList.IsEmpty() && WeaponItemDataList.IsEmpty()) return ResultObjects;
+	if (StatItemDataList.IsEmpty() && WeaponItemDataList.IsEmpty())
+	{
+		return ResultObjects;
+	}
 
 	// Count 만큼 랜덤 추출
 	TArray<FItemDataRow*> TempList = WeaponItemDataList;
-	//TArray<FItemDataRow*> TempList = StatItemDataList;
-	//TempList.Append(WeaponItemDataList);
 	int32 ActualCount = FMath::Min(Count, TempList.Num());
 
 	for (int32 i = 0; i < ActualCount; ++i)
@@ -80,7 +91,7 @@ TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomItemData(int32 Count)
 		int32 RandomIndex = FMath::RandRange(0, TempList.Num() - 1);
 		FItemDataRow* SelectedRow = TempList[RandomIndex];
 
-		// UObject 래퍼 생성
+		// 선택한 행의 식별 정보를 핸들에 저장합니다.
 		FItemDataHandle NewItemHandle;
 		if (SelectedRow)
 		{
@@ -89,7 +100,7 @@ TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomItemData(int32 Count)
 			ResultObjects.Add(NewItemHandle);
 		}
 
-		// 아이템 제거
+		// 같은 호출에서 선택 인덱스가 다시 추첨되지 않도록 임시 목록에서 제거합니다.
 		TempList.RemoveAtSwap(RandomIndex);
 	}
 
@@ -170,6 +181,10 @@ const FStatItemDataRow* UItemPoolSubsystem::GetStatItemDataRowByID(const FName& 
 }
 const FWeaponItemDataRow* UItemPoolSubsystem::GetWeaponItemDataRowByID(const FName& ItemID)
 {
+	if (!WeaponDataTable)
+	{
+		return nullptr;
+	}
 	const FWeaponItemDataRow* WeaponRow =
 		WeaponDataTable->FindRow<FWeaponItemDataRow>(
 			ItemID,

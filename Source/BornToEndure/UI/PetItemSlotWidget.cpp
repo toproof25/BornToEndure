@@ -1,6 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
+/**
+ * @file PetItemSlotWidget.cpp
+ * @brief 아이템 아이콘과 Hover·Click 이벤트를 제공하는 공용 슬롯입니다.
+ */
+
 #include "UI/PetItemSlotWidget.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -42,7 +47,7 @@ void UPetItemSlotWidget::NativeOnInitialized()
 	Super::NativeOnInitialized();
 	if (ItemButton)
 	{
-		//ItemButton->OnClicked.AddDynamic(this, &UPetItemSlotWidget::OnItemButtonClicked);
+		ItemButton->OnClicked.AddDynamic(this, &UPetItemSlotWidget::OnItemButtonClicked);
 		ItemButton->OnHovered.AddDynamic(this, &UPetItemSlotWidget::OnItemButtonHovered);
 		ItemButton->OnUnhovered.AddDynamic(this, &UPetItemSlotWidget::OnItemButtonUnhovered);
 	}
@@ -50,43 +55,53 @@ void UPetItemSlotWidget::NativeOnInitialized()
 
 void UPetItemSlotWidget::SetPetIconImage(TSoftObjectPtr<UTexture2D> PetIcon)
 {
+	if (TextureLoadingHandle.IsValid())
+	{
+		TextureLoadingHandle->CancelHandle();
+		TextureLoadingHandle.Reset();
+	}
+
+	if (!IsValid(ItemImage))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UPetItemSlotWidget] 아이콘 표시 위젯이 없습니다."));
+		return;
+	}
+
+	ItemImage->SetBrushFromTexture(nullptr);
 	if (PetIcon.IsNull())
 	{
-		// 추후 배경색을 빨강으로 혹은 X 표시 이미지로 적용
-		//PetIconImage->SetBrushFromTexture();
+		return;
 	}
-	else if (PetIcon.IsValid())
+
+	if (PetIcon.IsValid())
 	{
 		ItemImage->SetBrushFromTexture(PetIcon.Get());
+		return;
 	}
-	else if (TextureLoadingHandle.IsValid() && TextureLoadingHandle->IsActive())
-	{
-		// 이미 로딩 중인 경우 처리
-		TextureLoadingHandle->CancelHandle();
-	}
-	else
-	{
-		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-		TextureLoadingHandle = Streamable.RequestAsyncLoad(
-			PetIcon.ToSoftObjectPath(),
-			FStreamableDelegate::CreateUObject(this, &UPetItemSlotWidget::OnIconsLoaded, PetIcon)
-		);
-	}
+
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	TextureLoadingHandle = Streamable.RequestAsyncLoad(
+		PetIcon.ToSoftObjectPath(),
+		FStreamableDelegate::CreateUObject(this, &UPetItemSlotWidget::OnIconsLoaded, PetIcon)
+	);
 }
+
 void UPetItemSlotWidget::OnIconsLoaded(TSoftObjectPtr<UTexture2D> LoadedIcons)
 {
 	UTexture2D* Icon = LoadedIcons.Get();
-	if (Icon)
+	if (IsValid(Icon) && IsValid(ItemImage))
 	{
 		ItemImage->SetBrushFromTexture(Icon);
-		UE_LOG(LogTemp, Log, TEXT("UPetEntryWidget: Successfully loaded icon for pet: %s"), *LoadedIcons.ToString());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UPetEntryWidget: Failed to load icon for pet: %s"), *LoadedIcons.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("[UPetItemSlotWidget] 아이콘 표시 실패: %s"), *LoadedIcons.ToString());
 	}
 
-	TextureLoadingHandle->CancelHandle();
+	if (TextureLoadingHandle.IsValid())
+	{
+		TextureLoadingHandle.Reset();
+	}
 }
 
 void UPetItemSlotWidget::OnItemButtonHovered()
@@ -97,4 +112,20 @@ void UPetItemSlotWidget::OnItemButtonHovered()
 void UPetItemSlotWidget::OnItemButtonUnhovered()
 {
 	OnItemSlotHovered.Broadcast(CachedItemDataHandle, false);
+}
+
+void UPetItemSlotWidget::NativeDestruct()
+{
+	if (TextureLoadingHandle.IsValid())
+	{
+		TextureLoadingHandle->CancelHandle();
+		TextureLoadingHandle.Reset();
+	}
+
+	Super::NativeDestruct();
+}
+
+void UPetItemSlotWidget::OnItemButtonClicked()
+{
+	OnItemSlotClicked.Broadcast(CachedItemDataHandle);
 }

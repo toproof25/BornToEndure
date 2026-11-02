@@ -1,4 +1,10 @@
-﻿#include "Core/DefaultPlayerController.h"
+﻿/**
+ * @file DefaultPlayerController.cpp
+ * @brief 플레이어 입력과 상점 구매 및 UI 전환을 처리합니다.
+ */
+
+#include "Core/DefaultPlayerController.h"
+#include "UI/ItemStoreWidget.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
@@ -105,10 +111,55 @@ void ADefaultPlayerController::TravelToLobbyLevel()
 
 void ADefaultPlayerController::HandleTabToggleInput()
 {
+	if (bStoreOpen) return;
 	bool bIsPetDetailWidgetVisible = PlayerHUDWidgetInstance->TogglePetDetailWidget();
 	if (bIsPetDetailWidgetVisible) SetGameAndUIInputMode(PlayerHUDWidgetInstance, true, false, true);
 	else SetGameInputMode();
 	UE_LOG(LogTemp, Log, TEXT("[ADefaultPlayerController] TabToggle Input Handled: PetDetailWidget visibility toggled."));
+}
+
+void ADefaultPlayerController::HandleMerchantInteraction()
+{
+	if (IsPaused() || bStoreOpen || !IsLocalController() || !ItemStoreWidgetClass)
+	{
+		return;
+	}
+
+	ACombatPlayerState* PS = GetPlayerState<ACombatPlayerState>();
+	PlayerExpComp = PS ? PS->GetPlayerExperienceComponent() : nullptr;
+	if (!PlayerExpComp)
+	{
+		return;
+	}
+
+	ItemStoreWidgetInstance = CreateWidget<UItemStoreWidget>(this, ItemStoreWidgetClass);
+	if (!ItemStoreWidgetInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] ItemStoreWidgetInstance 생성 실패"));
+		return;
+	}
+
+	bStoreOpen = true;
+	SelectedStorePet.Reset();
+	ItemStoreWidgetInstance->BindCurrency(PlayerExpComp);
+
+	UPetManagerComponent* PetManager = GetPawn() ? GetPawn()->FindComponentByClass<UPetManagerComponent>() : nullptr;
+	const TArray<TObjectPtr<APetCompanionCharacter>> Pets = PetManager ? PetManager->GetPetList() : TArray<TObjectPtr<APetCompanionCharacter>>();
+	if (!ItemStoreWidgetInstance->DisplayPets(Pets))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 상점 Pet 목록 표시 실패: 위젯 설정을 확인하세요."));
+		CloseItemStore();
+		return;
+	}
+
+	RerollStoreItems();
+	if (!bStoreOpen)
+	{
+		return;
+	}
+
+	ItemStoreWidgetInstance->AddToViewport(50);
+	SetGameAndUIInputMode(ItemStoreWidgetInstance, true, true, false);
 }
 
 void ADefaultPlayerController::BeginPlay()
@@ -129,6 +180,7 @@ void ADefaultPlayerController::OnPossess(APawn* InPawn)
 
 void ADefaultPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	CloseItemStore(false);
 	if (PlayerExpComp && PlayerHUDWidgetInstance)
 	{
 		PlayerExpComp->OnChangeExpDelegate.RemoveAll(PlayerHUDWidgetInstance);
@@ -206,6 +258,7 @@ void ADefaultPlayerController::SetUpPlayerHUDWidget()
 
 void ADefaultPlayerController::HandlePlayerDeath()
 {
+	CloseItemStore(false);
 	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] Player has died. Handling death."));
 	// 플레이어가 죽었을 때 처리할 로직을 여기에 추가
 	// 예: 게임 오버 화면 표시, 리스폰 처리 등
@@ -213,6 +266,7 @@ void ADefaultPlayerController::HandlePlayerDeath()
 
 void ADefaultPlayerController::LevelUpHandler(int32 NewLevel)
 {
+	CloseItemStore();
 	// Pet 목록 가져오기
 	FLevelUpDataBundle LevelUpData;
 	UPetManagerComponent* PetManager = GetPawn()->FindComponentByClass<UPetManagerComponent>();
@@ -227,4 +281,132 @@ void ADefaultPlayerController::LevelUpHandler(int32 NewLevel)
 	UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] LevelUpHandler: 가져온 랜덤 아이템 개수 - %d"), LevelUpData.RandomItemHandles.Num());
 
 	PlayerHUDWidgetInstance->ShowLevelUpWidget(LevelUpData); /// PlayerHUDWidget에 레벨업 보상 창 활성화 요청
+}
+
+void ADefaultPlayerController::RerollStoreItems()
+{
+	if (!bStoreOpen || bStorePurchaseInProgress || !ItemStoreWidgetInstance)
+	{
+		return;
+	}
+
+	UItemPoolSubsystem* Pool = GetGameInstance() ? GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+	if (!Pool || !Pool->WeaponDataTable)
+	{
+		CloseItemStore();
+		return;
+	}
+
+	TArray<FItemDataHandle> Offers;
+	TArray<int32> Prices;
+	StoreItemIDs.Empty();
+	StoreSold.Empty();
+
+	for (const FItemDataHandle& Handle : Pool->GetRandomWeaponItemData(StoreOfferCount))
+	{
+		const FWeaponItemDataRow* Row = Pool->GetWeaponItemDataRowByID(Handle.ItemRowName);
+		if (!Row || Handle.ItemType != EItemType::Weapon || Row->ItemCost < 0)
+		{
+			continue;
+		}
+
+		Offers.Add(Handle);
+		Prices.Add(Row->ItemCost);
+		StoreItemIDs.Add(Handle.ItemRowName);
+		StoreSold.Add(false);
+	}
+
+	if (Offers.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 상점 상품 표시 실패: 무기 데이터가 없습니다."));
+		CloseItemStore();
+		return;
+	}
+
+	if (!ItemStoreWidgetInstance->DisplayOffers(Offers, Prices))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 상점 상품 표시 실패: !ItemStoreWidgetInstance->DisplayOffers(Offers, Prices) 무기 데이터와 위젯 클래스 설정을 확인하세요."));
+		CloseItemStore();
+	}
+
+
+}
+
+void ADefaultPlayerController::PurchaseStoreItem(int32 Index)
+{
+	if (!bStoreOpen || bStorePurchaseInProgress || !PlayerExpComp ||
+		!StoreItemIDs.IsValidIndex(Index) || !StoreSold.IsValidIndex(Index) || StoreSold[Index])
+	{
+		return;
+	}
+
+	APetCompanionCharacter* Pet = SelectedStorePet.Get();
+	UPetManagerComponent* PetManager = GetPawn() ? GetPawn()->FindComponentByClass<UPetManagerComponent>() : nullptr;
+	if (!IsValid(Pet) || !PetManager || !PetManager->GetPetList().Contains(Pet))
+	{
+		return;
+	}
+
+	UItemPoolSubsystem* Pool = GetGameInstance() ? GetGameInstance()->GetSubsystem<UItemPoolSubsystem>() : nullptr;
+	const FWeaponItemDataRow* Row = Pool ? Pool->GetWeaponItemDataRowByID(StoreItemIDs[Index]) : nullptr;
+	if (!Row || Row->ItemCost < 0)
+	{
+		return;
+	}
+
+	// 골드 변경 알림이 동기 방송되는 동안 재구매 요청을 차단합니다.
+	TGuardValue<bool> PurchaseGuard(bStorePurchaseInProgress, true);
+	const FName PurchasedID = StoreItemIDs[Index];
+	const int32 Cost = Row->ItemCost;
+	const FString PetName = Pet->GetPetName().ToString();
+	const FString PetActorName = Pet->GetName();
+	if (!PlayerExpComp->TrySpendGold(Cost))
+	{
+		return;
+	}
+	if (StoreSold.IsValidIndex(Index))
+	{
+		StoreSold[Index] = true;
+	}
+	if (ItemStoreWidgetInstance)
+	{
+		ItemStoreWidgetInstance->MarkSold(Index);
+	}
+
+	PetManager->GiveItemToPet(Pet, FItemDataHandle(EItemType::Weapon, PurchasedID));
+
+	UE_LOG(LogTemp, Log, TEXT("[ADefaultPlayerController] 상점 구매: Pet=%s (%s), 아이템=%s, 비용=%d, 남은 골드=%d"),
+		*PetName, *PetActorName, *PurchasedID.ToString(), Cost, PlayerExpComp->GetCurrentGold());
+}
+
+void ADefaultPlayerController::CloseItemStore(bool bRestoreInput)
+{
+	const bool bWasOpen = bStoreOpen;
+	bStoreOpen = false;
+	SelectedStorePet.Reset();
+	if (ItemStoreWidgetInstance)
+	{
+		ItemStoreWidgetInstance->Shutdown();
+		ItemStoreWidgetInstance->RemoveFromParent();
+		ItemStoreWidgetInstance = nullptr;
+	}
+
+	StoreItemIDs.Empty();
+	StoreSold.Empty();
+	if (bWasOpen && bRestoreInput)
+	{
+		RestoreGameInputMode();
+	}
+}
+
+bool ADefaultPlayerController::SelectStorePet(APetCompanionCharacter* Pet)
+{
+	UPetManagerComponent* PetManager = GetPawn() ? GetPawn()->FindComponentByClass<UPetManagerComponent>() : nullptr;
+	if (!bStoreOpen || !IsValid(Pet) || !PetManager || !PetManager->GetPetList().Contains(Pet))
+	{
+		return false;
+	}
+
+	SelectedStorePet = Pet;
+	return true;
 }

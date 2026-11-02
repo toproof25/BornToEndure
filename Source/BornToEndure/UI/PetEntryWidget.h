@@ -1,9 +1,6 @@
 ﻿/**
 * @file PetEntryWidget.h
-* @date 2026-06-16
-* @modified 2026-06-16
-* @author toproof (kmnlmn123@gmail.com)
-* @brief PetEntryWidget.h 레벨업 보상 창에서 각 Pet을 나타내는 위젯 클래스
+* @brief Pet 아이콘과 선택 이벤트를 제공하는 공용 항목입니다.
 * - Pet의 이름과 선택 버튼을 포함
 */
 
@@ -43,31 +40,42 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* PetSelectButton;
 
-	APetCompanionCharacter* SelectedPet;
+	UPROPERTY()
+	APetCompanionCharacter* SelectedPet = nullptr;
 
+	/** 클릭 시 Pet을 방송합니다. 상점은 DisplayPets에서 구독하고 ClearPets에서 해제합니다. */
 	FOnPetSelected OnPetSelectedDelegate;
 
+	/**
+	 * Pet 표시를 초기화합니다.
+	 * @param InParentWidget 레벨업 부모. 상점은 nullptr로 전달하고 Delegate로 선택을 처리합니다.
+	 * @param InPet 표시할 유효 Pet. 유효하지 않거나 필수 위젯이 없으면 초기화하지 않습니다.
+	 */
 	void InitializeWithPetData(ULevelUpRewardWidget* InParentWidget, TObjectPtr<APetCompanionCharacter> InPet);
 
 	UFUNCTION()
 	void OnPetSelectButtonClicked();
 
 	/**
-	 * @brief 선택된 아이템 UI를 시각적으로 표시하기 위한 함수로, bool 값에 따라 Border의 상태가 변경됨
+	 * @brief Pet의 선택 상태에 따라 테두리를 표시합니다.
 	 * @param bSelected 선택 유무를 true/false로 전달
 	 */
 	void SetSelectedVisual(bool bSelected);
 
+protected:
+	virtual void NativeDestruct() override;
+
 private:
 
-	/** * @brief 이미지를 비동기 로드 후 GC를 방지하기 위한 캐싱 변수 */
+	/** * @brief 진행 중 아이콘 요청의 수명을 관리하는 핸들입니다. */
 	TSharedPtr<FStreamableHandle> TextureLoadingHandle;
 
-	/** * @brief 선택된 아이템의 시각적 효과를 나타내는 변수 */
+	/** * @brief Pet 선택 표시 상태입니다. */
 	bool bIsSelected = false;
 
-	/** * @brief 부모 Widtet을 참조하기 위한 변수 */
-	ULevelUpRewardWidget* ParentWidget;
+	/** * @brief 선택 사항인 레벨업 부모입니다. 상점에서는 nullptr입니다. */
+	UPROPERTY()
+	ULevelUpRewardWidget* ParentWidget = nullptr;
 
 
 	void SetPetIconImage(TSoftObjectPtr<UTexture2D> InTexture);
