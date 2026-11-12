@@ -1,4 +1,9 @@
-﻿#include "Component/PlayerExperienceComponent.h"
+﻿/**
+ * @file PlayerExperienceComponent.cpp
+ * @brief 경험치와 골드를 변경하고 변경 알림을 전달합니다.
+ */
+
+#include "Component/PlayerExperienceComponent.h"
 #include "Character/Enemy/BaseEnemyCharacter.h"
 #include "Data/GameTypes.h"
 #include "PlayerState/CombatPlayerState.h"
@@ -40,6 +45,7 @@ void UPlayerExperienceComponent::OnEnemyKilledHandler(const FEnemyRewardPayload&
 	OnChangeExpDelegate.Broadcast(CurrentEXP, MaxExpForLevelUp);
 
 	CurrentGold += Payload.GoldReward;
+	OnGoldChanged.Broadcast(CurrentGold);
 
 	if (CurrentEXP >= MaxExpForLevelUp)
 	{
@@ -61,4 +67,18 @@ void UPlayerExperienceComponent::OnEnemyKilledHandler(const FEnemyRewardPayload&
 		PS->UpdateDamageStats(Payload.KillerPetId, Payload.PetDamageMap, Payload.TotalDamageReceiced);
 	}
 
+}
+
+bool UPlayerExperienceComponent::TrySpendGold(int32 Amount)
+{
+	if (Amount < 0 || CurrentGold < Amount)
+	{
+		return false;
+	}
+
+	CurrentGold -= Amount;
+
+	OnGoldChanged.Broadcast(CurrentGold);
+
+	return true;
 }

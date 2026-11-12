@@ -1,6 +1,6 @@
 ﻿/**
 * @file PetItemSlotWidget.h
-* @brief PetItemWidget 내부에서 Grid 내부에 Item 하나를 표시하는 위젯
+* @brief 아이템 아이콘과 Hover·Click 이벤트를 제공하는 공용 슬롯입니다.
 */
 #pragma once
 
@@ -25,10 +25,15 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnItemSlotHovered, const FItemDataHandle&, ItemDataHandle, bool, bIsHovered);
 	FOnItemSlotHovered OnItemSlotHovered;
 
+	/** 아이콘 클릭 시 아이템 핸들을 전달합니다. Entry가 초기화 시 구독합니다. */
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSlotClicked, const FItemDataHandle&, ItemDataHandle);
+	FOnItemSlotClicked OnItemSlotClicked;
+
 	void SetItemData(const FItemDataHandle& InItemDataHandle);
 
 protected:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 private:
 
@@ -43,6 +48,9 @@ private:
 	TSharedPtr<FStreamableHandle> TextureLoadingHandle;
 	void SetPetIconImage(TSoftObjectPtr<UTexture2D> PetIcon);
 	void OnIconsLoaded(TSoftObjectPtr<UTexture2D> LoadedIcons);
+
+	UFUNCTION()
+	void OnItemButtonClicked();
 
 	UFUNCTION()
 	void OnItemButtonHovered();

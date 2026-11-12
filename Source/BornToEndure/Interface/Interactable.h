@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
@@ -23,5 +21,5 @@ public:
 
 	// 상호작용 공통 함수 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interaction")
-	void Interact(class APlayerCharacter* InstigatorCharacter);
+	void Interact(class APlayerCharacter* InstigatorCharacter, class ADefaultPlayerController* PlayerController);
 };

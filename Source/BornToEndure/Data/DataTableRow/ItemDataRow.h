@@ -64,5 +64,8 @@ public:
 	EItemType ItemType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
+	int32 ItemCost;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Data")
 	TSoftObjectPtr<UTexture2D> ItemIcon;
 };
