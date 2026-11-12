@@ -1,6 +1,6 @@
 ﻿/**
  * @file PlayerExperienceComponent.h
- * @brief 플레이어의 경험치와 골드를 관리하는 컴포넌트 헤더
+ * @brief 플레이어 경험치와 골드를 관리합니다.
  * @author toproof (kmnlmn123@gmail.com)
  * @date 2026-04-27
  * @details
@@ -61,6 +61,21 @@ public:
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUp, int32, NewLevel);
 	FOnLevelUp OnLevelUpDelegate;
+
+	/**
+	 * 차감 성공 또는 적 처치 보상 반영 후 변경된 골드 잔액을 전달합니다.
+	 * @note 상점 HandleGoldChanged가 BindCurrency에서 구독합니다.
+	 * 재바인딩·Shutdown·NativeDestruct에서 구독을 해제합니다.
+	 */
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGoldChanged, int32, Gold);
+	FOnGoldChanged OnGoldChanged;
+
+	/**
+	 * 잔액을 검증하고 골드를 차감합니다.
+	 * @param Amount 차감할 골드. 0도 유효하며 음수는 거부합니다.
+	 * @return 음수 또는 잔액 부족이면 변경·방송 없이 false, 성공하면 변경된 잔액을 방송하고 true입니다.
+	 */
+	bool TrySpendGold(int32 Amount);
 
 private:
 

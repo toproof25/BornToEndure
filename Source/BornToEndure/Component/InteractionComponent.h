@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "InteractionComponent.generated.h"
 
+class ADefaultPlayerController;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BORNTOENDURE_API UInteractionComponent : public UActorComponent
@@ -27,7 +28,7 @@ private:
 	UPROPERTY()
 	APawn* Owner;
 	UPROPERTY()
-	APlayerController* PlayerController;
+	ADefaultPlayerController* PlayerController;
 
 	FCollisionShape SphereShape;
 	FCollisionQueryParams QueryParams;
