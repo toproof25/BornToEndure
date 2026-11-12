@@ -132,6 +132,7 @@ void ADefaultPlayerController::HandleMerchantInteraction()
 		return;
 	}
 
+	// 에디터에서 지정한 상점 위젯 클래스로 인스턴스를 생성합니다.
 	ItemStoreWidgetInstance = CreateWidget<UItemStoreWidget>(this, ItemStoreWidgetClass);
 	if (!ItemStoreWidgetInstance)
 	{
@@ -139,6 +140,7 @@ void ADefaultPlayerController::HandleMerchantInteraction()
 		return;
 	}
 
+	// 상점을 열림 상태로 전환하고 위젯을 골드 변경 알림에 연결합니다.
 	bStoreOpen = true;
 	SelectedStorePet.Reset();
 	ItemStoreWidgetInstance->BindCurrency(PlayerExpComp);
@@ -302,6 +304,7 @@ void ADefaultPlayerController::RerollStoreItems()
 	StoreItemIDs.Empty();
 	StoreSold.Empty();
 
+	// 추첨한 무기 중 유효한 상품만 이번 상점 목록에 등록합니다.
 	for (const FItemDataHandle& Handle : Pool->GetRandomWeaponItemData(StoreOfferCount))
 	{
 		const FWeaponItemDataRow* Row = Pool->GetWeaponItemDataRowByID(Handle.ItemRowName);
@@ -323,6 +326,7 @@ void ADefaultPlayerController::RerollStoreItems()
 		return;
 	}
 
+	// 구성한 상품 목록을 위젯에 전달합니다.
 	if (!ItemStoreWidgetInstance->DisplayOffers(Offers, Prices))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ADefaultPlayerController] 상점 상품 표시 실패: !ItemStoreWidgetInstance->DisplayOffers(Offers, Prices) 무기 데이터와 위젯 클래스 설정을 확인하세요."));
@@ -354,7 +358,7 @@ void ADefaultPlayerController::PurchaseStoreItem(int32 Index)
 		return;
 	}
 
-	// 골드 변경 알림이 동기 방송되는 동안 재구매 요청을 차단합니다.
+	// 골드 변경 알림을 동기 방송할 때 구매와 리롤이 재진입하지 않도록 합니다.
 	TGuardValue<bool> PurchaseGuard(bStorePurchaseInProgress, true);
 	const FName PurchasedID = StoreItemIDs[Index];
 	const int32 Cost = Row->ItemCost;

@@ -83,6 +83,7 @@ bool UItemStoreWidget::DisplayOffers(const TArray<FItemDataHandle>& Offers, cons
 		return false;
 	}
 
+	// 상품마다 항목 위젯을 생성합니다.
 	for (int32 Index = 0; Index < Offers.Num(); ++Index)
 	{
 		UItemStoreEntryWidget* Entry = CreateWidget<UItemStoreEntryWidget>(GetOwningPlayer(), EntryWidgetClass);
@@ -92,6 +93,7 @@ bool UItemStoreWidget::DisplayOffers(const TArray<FItemDataHandle>& Offers, cons
 			return false;
 		}
 
+		// 상품 항목을 초기화하고 구매 요청과 설명 표시 이벤트를 연결합니다.
 		Entry->InitializeEntry(Index, Offers[Index], Prices[Index]);
 		Entry->OnPurchaseRequested.AddUObject(this, &UItemStoreWidget::HandlePurchase);
 		Entry->OnItemHovered.AddUObject(this, &UItemStoreWidget::HandleHover);
@@ -197,6 +199,7 @@ bool UItemStoreWidget::DisplayPets(const TArray<TObjectPtr<APetCompanionCharacte
 		return false;
 	}
 
+	// 유효한 보유 펫마다 선택 항목을 구성합니다.
 	for (APetCompanionCharacter* Pet : Pets)
 	{
 		if (!IsValid(Pet))
@@ -212,7 +215,7 @@ bool UItemStoreWidget::DisplayPets(const TArray<TObjectPtr<APetCompanionCharacte
 		}
 
 		Entry->InitializeWithPetData(nullptr, Pet);
-		Entry->OnPetSelectedDelegate.AddUniqueDynamic(this, &UItemStoreWidget::HandlePetSelected);
+		Entry->OnPetSelectedDelegate.AddUniqueDynamic(this, &UItemStoreWidget::HandlePetSelected); // 펫 선택 요청을 상점 위젯에 전달합니다.
 		PetListBox->AddChildToHorizontalBox(Entry);
 		PetEntries.Add(Entry);
 	}
@@ -222,6 +225,7 @@ bool UItemStoreWidget::DisplayPets(const TArray<TObjectPtr<APetCompanionCharacte
 
 void UItemStoreWidget::ClearPets()
 {
+	// 펫 목록을 비우기 전에 선택 이벤트 구독을 해제합니다.
 	for (UPetEntryWidget* Entry : PetEntries)
 	{
 		if (Entry)

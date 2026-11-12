@@ -43,6 +43,7 @@ void UItemStoreEntryWidget::InitializeEntry(int32 InIndex, const FItemDataHandle
 
 void UItemStoreEntryWidget::UpdateAvailability(int32 Gold)
 {
+	// 품절이 아니고 유효한 가격을 지불할 수 있을 때 구매 버튼을 활성화합니다.
 	if (PurchaseButton)
 	{
 		PurchaseButton->SetIsEnabled(!bSold && Price >= 0 && Gold >= Price);
