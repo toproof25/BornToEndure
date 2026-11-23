@@ -11,6 +11,7 @@
 class UImage;
 class UButton;
 class UTextBlock;
+class ULobbyPetSelectionWidget;
 
 UCLASS()
 class BORNTOENDURE_API ULobbyWidget : public UUserWidget
@@ -29,10 +30,14 @@ public:
 	TObjectPtr<UTextBlock> StartButtonText;
 
 protected:
-	virtual void NativeOnInitialized() override;
+	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 private:
+	UPROPERTY(meta = (BindWidgetOptional))
+	TObjectPtr<ULobbyPetSelectionWidget> PetSelectionWidget = nullptr;
+
+	void RefreshStartButton(FName RowName);
 
 	UFUNCTION()
 	void OnStartButtonClicked();

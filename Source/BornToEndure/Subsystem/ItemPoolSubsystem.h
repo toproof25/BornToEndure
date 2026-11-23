@@ -3,7 +3,7 @@
 * @date 2026-06-06
 * @modified 2026-06-06
 * @author toproof (kmnlmn123@gmail.com)
-* @brief 아이템 데이터를 보관하고 조회와 무기 추첨을 제공합니다.
+* @brief Pet과 아이템 데이터를 보관하고 조회와 무기 추첨을 제공합니다.
 * - Level Up 시 랜덤 아이템을 제공하는 기능 구현에 활용
 */
 
@@ -31,7 +31,8 @@ class BORNTOENDURE_API UItemPoolSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 public:
-	UDataTable* PetDataTable;
+	UPROPERTY(Transient)
+	TObjectPtr<UDataTable> PetDataTable = nullptr;
 	TArray<FPetDataRow*> PetDataList;
 
 
@@ -44,6 +45,9 @@ public:
 
 	void InitializeItemPoolSubsystem(UDataTable* ItemDataTable, int32 DataType);
 	void InitializePetDataTable(UDataTable* InPetDataTable);
+
+	/** @return 실제 Pet 행 이름을 이름순으로 반환합니다. 테이블이 없으면 빈 배열입니다. */
+	TArray<FName> GetPetRowNames() const;
 
 	/**
 	 * 기존 호출자를 위해 현재 무기 추첨 API로 위임합니다.

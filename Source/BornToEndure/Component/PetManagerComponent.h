@@ -45,7 +45,7 @@ public:
     /**
      * @brief Pet을 관리 목록에 추가한 후 레벨에 스폰하는 함수
      * @param PetDataAsset DataTableRow의 PetBaseDataAsset을 전달하면 해당 Pet을 스폰하고 관리 목록에 추가
-     * @return 스폰된 Pet의 포인터
+     * @return 스폰 및 등록에 성공한 Pet의 포인터입니다. 클래스, 데이터 또는 스폰에 문제가 있으면 nullptr입니다.
      * @details
 	 * - Pet을 성공적으로 스폰한 후 FOnPetAdded Delegate를 호출
      */

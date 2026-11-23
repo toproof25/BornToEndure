@@ -1,4 +1,8 @@
-﻿#pragma once
+﻿/**
+ * @file PetCompanionCharacter.h
+ * @brief 플레이어를 따라 전투하는 Pet 캐릭터의 동작과 데이터 초기화 계약을 정의합니다.
+ */
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"

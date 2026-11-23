@@ -1,4 +1,12 @@
-﻿#include "Core/LobbyPlayerController.h"
+﻿/**
+ * @file LobbyPlayerController.cpp
+ * @brief 로비 입력과 UI를 초기화하고 스타트 Pet 선택을 확인해 본 게임으로 이동합니다.
+ */
+#include "Core/LobbyPlayerController.h"
+
+#include "Core/BornToEndureGameInstance.h"
+#include "Engine/Engine.h"
+#include "Misc/PackageName.h"
 #include "UI/LobbyWidget.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
@@ -10,6 +18,11 @@ ALobbyPlayerController::ALobbyPlayerController()
 void ALobbyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UBornToEndureGameInstance* GameInstance = GetGameInstance<UBornToEndureGameInstance>())
+	{
+		GameInstance->ResetStarterPetSelection();
+	}
 
 	SetUpLobbyInputMappingContext();
 	SetUpLobbyHUDWidget();
@@ -59,9 +72,16 @@ void ALobbyPlayerController::SetUpLobbyHUDWidget()
 
 void ALobbyPlayerController::TravelToGameplayLevel()
 {
-	if (GameplayLevel.IsNull())
+	if (GameplayLevel.IsNull() || !GetWorld() || !GEngine)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GameplayLevel is not set. Please set a valid level in the LobbyPlayerController."));
+		UE_LOG(LogTemp, Warning, TEXT("[ALobbyPlayerController] 본 게임 레벨 또는 이동 컨텍스트가 설정되지 않았습니다."));
+		return;
+	}
+
+	const FName MapPackageName(*FPackageName::ObjectPathToPackageName(GameplayLevel.ToString()));
+	UBornToEndureGameInstance* GameInstance = GetGameInstance<UBornToEndureGameInstance>();
+	if (!GameInstance || !GameInstance->QueueStarterPetTravel(MapPackageName))
+	{
 		return;
 	}
 
@@ -71,6 +91,5 @@ void ALobbyPlayerController::TravelToGameplayLevel()
 		true,
 		FString()
 	);
-	UE_LOG(LogTemp, Log, TEXT("Traveling to Gameplay Level: %s"), *GameplayLevel.ToString());
-
+	UE_LOG(LogTemp, Log, TEXT("[ALobbyPlayerController] 본 게임 레벨로 이동 요청: %s"), *MapPackageName.ToString());
 }

@@ -1,6 +1,6 @@
 ﻿/**
  * @file ItemPoolSubsystem.cpp
- * @brief 아이템 조회와 회차 내 중복 없는 무기 추첨을 처리합니다.
+ * @brief Pet과 아이템 조회 및 회차 내 중복 없는 무기 추첨을 처리합니다.
  */
 
 
@@ -40,30 +40,29 @@ void UItemPoolSubsystem::InitializeItemPoolSubsystem(UDataTable* ItemDataTable, 
 
 void UItemPoolSubsystem::InitializePetDataTable(UDataTable* InPetDataTable)
 {
-	PetDataTable = InPetDataTable;
-	if (PetDataTable)
+	PetDataList.Reset();
+	PetDataTable = nullptr;
+	if (!IsValid(InPetDataTable) || !InPetDataTable->GetRowStruct()
+		|| !InPetDataTable->GetRowStruct()->IsChildOf(FPetDataRow::StaticStruct()))
 	{
-		PetDataTable->GetAllRows<FPetDataRow>(
-			TEXT("UItemPoolSubsystem InitializePetDataTableDebug: Pet Load"), 
-			PetDataList
-		);
-	}
-	else
-	{
-		UE_LOG(LogItemPoolSubsystem, Error, TEXT("[UItemPoolSubsystem] InitializePetDataTable: PetDataTable이 nullptr입니다."));
+		UE_LOG(LogItemPoolSubsystem, Error, TEXT("[UItemPoolSubsystem] Pet 데이터 테이블 또는 행 타입이 올바르지 않습니다."));
+		return;
 	}
 
-	for (const FPetDataRow* PetRow : PetDataList)
+	PetDataTable = InPetDataTable;
+	PetDataTable->GetAllRows<FPetDataRow>(TEXT("InitializePetDataTable"), PetDataList);
+}
+
+TArray<FName> UItemPoolSubsystem::GetPetRowNames() const
+{
+	TArray<FName> RowNames;
+	if (IsValid(PetDataTable))
 	{
-		if (PetRow)
-		{
-			UE_LOG(LogItemPoolSubsystem, Log, TEXT("[UItemPoolSubsystem] InitializePetDataTable: Name: %s"), *PetRow->Name.ToString());
-		}
-		else
-		{
-			UE_LOG(LogItemPoolSubsystem, Warning, TEXT("[UItemPoolSubsystem] InitializePetDataTable: PetRow이 nullptr입니다."));
-		}
+		RowNames = PetDataTable->GetRowNames();
+		RowNames.Sort(FNameLexicalLess());
 	}
+
+	return RowNames;
 }
 
 TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomItemData(int32 Count)
@@ -109,15 +108,12 @@ TArray<FItemDataHandle> UItemPoolSubsystem::GetRandomWeaponItemData(int32 Count)
 
 const FPetDataRow* UItemPoolSubsystem::GetPetDataRowByID(const FName& PetID)
 {
-	// PetDataTable에서 PetID에 해당하는 FPetDataRow를 찾아 반환
-	const FPetDataRow* PetRow =
-		PetDataTable->FindRow<FPetDataRow>(
-			PetID,
-			TEXT("Apply Pet Data")
-		);
+	if (!IsValid(PetDataTable) || PetID.IsNone())
+	{
+		return nullptr;
+	}
 
-	if (PetRow) return PetRow;
-	return nullptr;
+	return PetDataTable->FindRow<FPetDataRow>(PetID, TEXT("GetPetDataRowByID"), false);
 }
 
 const FItemDataRow* UItemPoolSubsystem::GetItemDataRowByID(const EItemType ItemType, const FName& ItemID)

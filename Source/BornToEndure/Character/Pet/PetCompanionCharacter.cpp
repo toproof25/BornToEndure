@@ -1,7 +1,12 @@
-﻿#include "Character/Pet/PetCompanionCharacter.h"
+﻿/**
+ * @file PetCompanionCharacter.cpp
+ * @brief Pet 캐릭터에 데이터 에셋을 적용하고 추적과 전투 컴포넌트를 연결합니다.
+ */
+#include "Character/Pet/PetCompanionCharacter.h"
 
 #include "Character/Pet/PetCompanionAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h" 
@@ -68,10 +73,12 @@ void APetCompanionCharacter::InitializeFromDataAsset(FName RowName, UPetBaseData
 	if (!ItemPoolSubsystem) return;
 
 	// Pet Character의 SkeletalMesh를 DataAsset 기반으로 설정
-	USkeletalMesh* SkeletalMesh = GetMesh() ? GetMesh()->SkeletalMesh : nullptr;
-	if (SkeletalMesh && PetBaseData && PetBaseData->PetMesh)
+	if (USkeletalMeshComponent* MeshComponent = GetMesh())
 	{
-		GetMesh()->SetSkeletalMesh(PetBaseData->PetMesh.LoadSynchronous());
+		if (USkeletalMesh* LoadedMesh = PetBaseData->PetMesh.LoadSynchronous())
+		{
+			MeshComponent->SetSkeletalMesh(LoadedMesh);
+		}
 	}
 
 	// StatComponent 초기화
