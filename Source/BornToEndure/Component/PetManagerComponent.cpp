@@ -1,4 +1,8 @@
-﻿#include "Component/PetManagerComponent.h"
+﻿/**
+ * @file PetManagerComponent.cpp
+ * @brief 플레이어의 Pet 스폰과 소유 목록 및 Pet 아이템 전달을 관리합니다.
+ */
+#include "Component/PetManagerComponent.h"
 
 #include "Character/Pet/PetCompanionCharacter.h"
 #include "Data/PetItemDataAsset.h"
@@ -28,36 +32,42 @@ void UPetManagerComponent::BeginPlay()
 
 APetCompanionCharacter* UPetManagerComponent::SpawnAndAddPet(FName RowName, TSoftObjectPtr<UPetBaseDataAsset> PetDataAsset)
 {
-	if (!PetDataAsset)
+	UWorld* World = GetWorld();
+	if (!World || !IsValid(DefaultPetClass.Get()))
 	{
-		UE_LOG(LogPetManager, Warning, TEXT("[PetManagerComponent] PetDataAsset is null."));
+		UE_LOG(LogPetManager, Warning, TEXT("[UPetManagerComponent] Pet을 스폰할 월드 또는 클래스가 없습니다: %s"), *RowName.ToString());
 		return nullptr;
 	}
 
-	UWorld* World = GetWorld();
-	if (!World) return nullptr;
+	UPetBaseDataAsset* LoadedPetData = PetDataAsset.LoadSynchronous();
+	if (!IsValid(LoadedPetData))
+	{
+		UE_LOG(LogPetManager, Warning, TEXT("[UPetManagerComponent] Pet DataAsset 로드 실패: %s"), *RowName.ToString());
+		return nullptr;
+	}
 
-	// 플레이어 근방에 Pet을 스폰
 	const FTransform SpawnTransform = CalculateSpawnTransform(PetList.Num());
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	APetCompanionCharacter* NewPet = World->SpawnActor<APetCompanionCharacter>(DefaultPetClass, SpawnTransform, SpawnParams);
-	NewPet->InitializeFromDataAsset(RowName, PetDataAsset.LoadSynchronous());
 
-	// Pet 관리 목록에 추가
+	APetCompanionCharacter* NewPet = World->SpawnActor<APetCompanionCharacter>(DefaultPetClass, SpawnTransform, SpawnParams);
+	if (!IsValid(NewPet))
+	{
+		UE_LOG(LogPetManager, Warning, TEXT("[UPetManagerComponent] Pet 스폰 실패: %s"), *RowName.ToString());
+		return nullptr;
+	}
+
+	NewPet->InitializeFromDataAsset(RowName, LoadedPetData);
 	PetList.Add(NewPet);
 
-	// Pet의 주인(플레이어)을 설정
 	if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
 	{
 		NewPet->SetFollowOwner(OwnerPawn);
 	}
 
-	// Pet 추가 이벤트를 방송
+	UE_LOG(LogPetManager, Log, TEXT("[UPetManagerComponent] Pet 추가 완료: %s (보유 %d)"), *RowName.ToString(), PetList.Num());
 	OnPetAdded.Broadcast(this);
-	UE_LOG(LogPetManager, Log, TEXT("[PetManagerComponent] Pet spawned: %s (Total: %d)"), *NewPet->GetName(), PetList.Num());
-
 	return NewPet;
 }
 
