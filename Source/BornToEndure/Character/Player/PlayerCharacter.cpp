@@ -1,6 +1,13 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+/**
+ * @file PlayerCharacter.cpp
+ * @brief 플레이어 조작과 초기화 및 로비에서 선택한 스타트 Pet 추가를 처리합니다.
+ */
 #include "Character/Player/PlayerCharacter.h"
+
+#include "Core/BornToEndureGameInstance.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 
 // Enhanced Input 관련 헤더 포함
@@ -67,6 +74,38 @@ void APlayerCharacter::BeginPlay()
 	StatComp->RecalculateSpeed(GetCharacterMovement(), false);
 
 	InteractionComp = FindComponentByClass<UInteractionComponent>();
+
+	TrySpawnStarterPet();
+}
+
+void APlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	TrySpawnStarterPet();
+}
+
+void APlayerCharacter::TrySpawnStarterPet()
+{
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!HasAuthority() || !HasActorBegunPlay() || !PlayerController || !PlayerController->IsLocalController())
+	{
+		return;
+	}
+
+	UBornToEndureGameInstance* GameInstance = GetGameInstance<UBornToEndureGameInstance>();
+	FName RowName;
+	FPetDataRow Row;
+	if (!GameInstance || !GameInstance->TakePendingStarterPet(GetWorld(), RowName, Row))
+	{
+		return;
+	}
+
+	UPetManagerComponent* PetManager = GetPetManagerComp();
+	if (!IsValid(PetManager) || !PetManager->SpawnAndAddPet(RowName, Row.PetBaseDataAsset))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[APlayerCharacter] 스타트 Pet 추가 실패: %s"), *RowName.ToString());
+	}
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

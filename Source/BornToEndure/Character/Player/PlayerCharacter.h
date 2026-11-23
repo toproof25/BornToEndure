@@ -1,5 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+/**
+ * @file PlayerCharacter.h
+ * @brief 플레이어의 입력과 컴포넌트 및 본 게임 진입 시 스타트 Pet 초기화를 담당합니다.
+ */
 #pragma once
 
 #include "CoreMinimal.h"
@@ -46,6 +50,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -92,6 +97,8 @@ protected:
 	TObjectPtr<UInputAction> PetDetailOpenAction;
 
 private:
+	/** 플레이어 준비가 끝나면 이 맵에 예약된 스타트 Pet을 한 번 추가합니다. */
+	void TrySpawnStarterPet();
 
 	UFUNCTION()
 	void Moving(const FInputActionValue& Value);
