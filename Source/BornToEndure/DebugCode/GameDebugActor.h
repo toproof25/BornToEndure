@@ -42,7 +42,7 @@ private:
 	void DrawGameStatus(ABornToEndureGameModeBase* GameMode);
 	void ExecuteGameAction(EGameDebugAction Action);
 
-	FImGuiDelegateHandle ImGuiDelegateHandle;
+	FDelegateHandle ImGuiDelegateHandle;
 	FString WindowTitle;
 	FString LastActionMessage;
 #endif

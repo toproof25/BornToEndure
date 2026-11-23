@@ -1,5 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+/**
+ * @file PetAddAndRemoveDebugActor.h
+ * @brief 펫 목록을 조회하고 펫 추가를 테스트하는 ImGui 디버그 액터입니다.
+ */
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -28,7 +33,7 @@ public:
 private:
 #if !UE_BUILD_SHIPPING
 	void RenderImGui();
-	FImGuiDelegateHandle ImGuiDelegateHandle;
+	FDelegateHandle ImGuiDelegateHandle;
 	FString LastResult;
 #endif
 

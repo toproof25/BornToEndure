@@ -1,3 +1,8 @@
+﻿/**
+ * @file PetItemDebugActor.h
+ * @brief 펫 아이템과 시너지 적용을 테스트하는 ImGui 디버그 액터입니다.
+ */
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -56,7 +61,7 @@ private:
 	TSharedPtr<FStreamableHandle> CatalogLoadHandle;
 	EItemType ListedType = EItemType::Stat;
 	bool bCatalogLoading = false;
-	FImGuiDelegateHandle ImGuiDelegateHandle;
+	FDelegateHandle ImGuiDelegateHandle;
 	TWeakObjectPtr<APetCompanionCharacter> SelectedPet;
 	TWeakObjectPtr<UDataTable> ListedTable;
 	TArray<FName> RowNames;

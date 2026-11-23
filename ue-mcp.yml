@@ -1,0 +1,31 @@
+ue-mcp:
+  version: 1
+  disable:
+    - material
+    - animation
+    - landscape
+    - pcg
+    - foliage
+    - niagara
+    - audio
+    - pie
+    - gameplay
+    - gas
+    - networking
+    - demo
+    - statetree
+    - chooser
+    - epic
+    - fab
+    - datasmith
+    - metahuman
+    - dataflow
+    - conversation
+    - source_control
+    - canvas
+    - feedback
+    - plugins:epic
+  contentRoots:
+    - /Game/
+tasks: {}
+flows: {}

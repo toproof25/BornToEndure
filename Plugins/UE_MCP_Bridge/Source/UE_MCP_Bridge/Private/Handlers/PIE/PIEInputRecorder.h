@@ -1,0 +1,189 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Handlers/PIE/PIEFrameSampler.h"
+#include "Handlers/PIE/PIESequenceFormat.h"
+#include "Handlers/PIE/PIEMaxFPSPin.h"
+#include "Handlers/PIE/PIEUIPointer.h"
+#include "UObject/WeakObjectPtrTemplates.h"
+
+class UWorld;
+class AActor;
+class APlayerController;
+
+/**
+ * PIE input recorder: opt-in arm-then-record. Module-owned singleton, hooked
+ * to FEditorDelegates::BeginPIE / EndPIE and FCoreDelegates::OnEndFrame. The
+ * recorder is dormant in Idle state; only after pie_record_arm does it bind
+ * the end-of-frame tick.
+ *
+ * Recording artifacts land in <Saved>/MCPRecordings/<id>/:
+ *   manifest.json, sequence.json, recording.csv
+ *
+ * State machine:
+ *   Idle              No recording armed; no end-frame tick.
+ *   Armed             Will start on the next BeginPIE.
+ *   WaitingForPawn    BeginPIE fired; sampler waiting for the player pawn.
+ *   Recording         Sampler attached; emit one row per end-of-frame.
+ *                     Returns to Idle (and writes artifacts) on EndPIE
+ *                     or pie_record_stop.
+ */
+namespace MCPPIE
+{
+	enum class ERecorderState : uint8
+	{
+		Idle,
+		Armed,
+		WaitingForPawn,
+		Recording
+	};
+
+	struct FRecorderArmConfig
+	{
+		FString Id;                       // empty = auto-generate
+		FString RecordingsRoot;           // empty = ProjectSavedDir/MCPRecordings
+		TArray<FString> ActionPaths;      // empty = record every bound action
+		TArray<FString> TrackedValuePaths;
+		// Tracked world actors. Each id is matched against an actor in the PIE
+		// world by exact name, by class name, or by full path. First match
+		// wins; misses are recorded as { resolved: false } and re-tried each
+		// frame.
+		TArray<FString> TrackedActorIds;
+		// When true the recorder also dispatches StartRecording / StopRecording
+		// on the open Take Recorder panel in lockstep with BeginPIE / EndPIE.
+		// Requires the Take Recorder plugin + an open panel; falls back to
+		// a no-op with a diagnostic in TakeRecorderStatus otherwise.
+		bool bTakeRecord = false;
+		// Selected PIE world and local-player index. PIEInstance >= 0 selects
+		// exact FWorldContext::PIEInstance; INDEX_NONE prefers active PlayWorld
+		// when eligible, then first eligible PIE/Game world.
+		int32 ClientId = 0;
+		int32 PIEInstance = INDEX_NONE;
+		float AxisThreshold = 0.15f;
+		int32 SampleHz = 60;
+		int32 PinFPS = 60;                // 0 to skip the t.MaxFPS pin
+		bool bCapturePawnState = true;
+		bool bCaptureMontage = true;
+		int64 RngSeed = 0;                // 0 = auto-generate
+		bool bUserSuppliedSeed = false;
+		int32 RunGapFrames = 6;           // sequence run-extraction gap tolerance
+		// Also record the mouse at the Slate layer (cursor moves, UMG hover,
+		// clicks, drag-and-drop, wheel) as ui_input steps while the player
+		// shows its cursor (#1822). Off by default: a click that is also
+		// bound to an Enhanced Input action would replay twice.
+		bool bCaptureUIPointer = false;
+	};
+
+	struct FRecorderStatus
+	{
+		ERecorderState State = ERecorderState::Idle;
+		FString Id;
+		FString RecordingDir;
+		int32 CurrentFrame = 0;
+		double ElapsedSeconds = 0.0;
+		int32 TrackedActionCount = 0;
+		FString LastError;
+		// Attach-time problems: unmatched actions, unresolved track_values.
+		TArray<FString> Warnings;
+		// While waiting_for_pawn: no player target yet, or the player's pawn
+		// is missing or has no input component.
+		FString WaitingFor;
+		int32 PIEInstance = INDEX_NONE;
+		bool bPIEActive = false;
+		bool bCaptureUIPointer = false;
+		int32 UIPointerEvents = 0;
+	};
+
+	struct FRecorderFinishResult
+	{
+		bool bSuccess = false;
+		FString Error;
+		FString Id;
+		FString RecordingDir;
+		FString ManifestPath;
+		FString CSVPath;
+		FString SequencePath;
+		int32 TotalFrames = 0;
+		double DurationSeconds = 0.0;
+		TArray<FString> DiscoveredActions;
+		TArray<FMarker> Markers;
+		bool bTakeRecordAttempted = false;
+		FString TakeRecorderStatus;
+		TArray<FString> Warnings;
+		// ui_input steps written to sequence.json (0 when not captured).
+		int32 UIPointerSteps = 0;
+	};
+
+	class FPIEInputRecorder
+	{
+	public:
+		static FPIEInputRecorder& Get();
+
+		// Lifecycle. Init binds the editor delegates; Shutdown clears them.
+		void Init();
+		void Shutdown();
+
+		// Arm a recording for the next BeginPIE (or immediately if PIE is
+		// already running). Returns true on success and writes a short
+		// description into OutMessage; on failure (already recording, etc.)
+		// returns false with OutError populated.
+		bool Arm(const FRecorderArmConfig& Cfg, FString& OutError, FString& OutMessage);
+		bool Disarm(FString& OutError);
+
+		// Force-finalise the in-flight recording even if EndPIE has not
+		// fired. Returns the same shape EndPIE would have produced.
+		FRecorderFinishResult ForceStop();
+
+		// Insert a marker into the current frame's edge events. Returns
+		// false (and writes "not recording" diagnostic) when idle.
+		bool Mark(const FString& Label, FRecorderStatus& OutStatus);
+
+		FRecorderStatus GetStatus() const;
+
+		bool IsActive() const { return State != ERecorderState::Idle; }
+
+	private:
+		void OnBeginPIE(bool bIsSimulating);
+		void OnEndPIE(bool bIsSimulating);
+		void OnEndFrame();
+
+		FRecorderFinishResult FinaliseCurrent();
+		void ApplyFPSPin(UWorld* PIEWorld);
+		void StopUICapture();
+
+		// Run-extraction encoder: builds sequence.json steps from the row buffer.
+		void BuildSequenceSteps(FSequence& OutSequence) const;
+
+		FRecorderArmConfig Pending;
+		bool bArmed = false;
+		ERecorderState State = ERecorderState::Idle;
+		FPIEFrameSampler Sampler;
+		FPIEMaxFPSPin FPSPin;
+		TWeakObjectPtr<UWorld> TargetWorld;
+		TWeakObjectPtr<APlayerController> TargetPlayerController;
+		TSharedPtr<FPIEUIPointerCapture> UICapture;
+		// Real time of the first row, the zero point of ui_input delays.
+		double FirstRowRealTime = -1.0;
+		int32 ResolvedPIEInstance = INDEX_NONE;
+		bool bTargetResolved = false;
+		double TargetResolveStartSeconds = 0.0;
+		FString TargetResolveError;
+		FString LastError;
+		FString CurrentId;
+		FString CurrentDir;
+		FString CSVHeader;
+		FString CSVBody;
+		FCSVHeader CSVHdr;
+		TArray<FCSVRow> Rows;
+		TArray<FTrackedActorRow> ActorRows;
+		TMap<FString, TWeakObjectPtr<AActor>> TrackedActorCache;
+		TArray<FMarker> Markers;
+		double StartTime = 0.0;
+		FString StartedAt;
+
+		FDelegateHandle BeginPIEHandle;
+		FDelegateHandle EndPIEHandle;
+		FDelegateHandle OnEndFrameHandle;
+		bool bEndFrameBound = false;
+	};
+}

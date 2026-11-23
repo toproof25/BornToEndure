@@ -1,9 +1,12 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+/**
+ * @file DebugImGuiComponent.cpp
+ * @brief 플레이어와 연관 시스템의 상태를 ImGui로 표시하는 디버그 컴포넌트입니다.
+ */
 
 #include "DebugImGuiComponent.h"
 
-#include "Data/DebugFont/KoreanFont.h"
 #include "imgui.h"
 #include "ImGuiModule.h"     
 #include "ImGuiDelegates.h" 
@@ -99,8 +102,6 @@ void UDebugImGuiComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	LoadKoreanFontToImGui();
-
 	AActor* Owner = GetOwner();
 	if (!Owner) return;
 
@@ -130,10 +131,8 @@ void UDebugImGuiComponent::BeginPlay()
 
 	if (FImGuiModule::IsAvailable() && IsValid(GetWorld()))
 	{
-		LoadKoreanFontToImGui();
-		FImGuiDelegate Delegate = FImGuiDelegate::CreateUObject(this, &UDebugImGuiComponent::DebugDrawPlayerInfo);
-		ImGuiDelegateHandle = FImGuiModule::Get().AddWorldImGuiDelegate(GetWorld(), Delegate);
-		UE_LOG(LogTemp, Log, TEXT("ImGui Delegate subscribed!"));
+		ImGuiDelegateHandle = FImGuiDelegates::OnWorldDebug(GetWorld()).AddUObject(this, &UDebugImGuiComponent::DebugDrawPlayerInfo);
+		UE_LOG(LogTemp, Log, TEXT("[UDebugImGuiComponent] ImGui 디버그 패널을 등록했습니다."));
 	}
 
 	APawn* OwningPawn = Cast<APawn>(GetOwner());
@@ -149,43 +148,15 @@ void UDebugImGuiComponent::BeginPlay()
 
 void UDebugImGuiComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (FImGuiModule::IsAvailable() && ImGuiDelegateHandle.IsValid())
+	if (FImGuiModule::IsAvailable() && IsValid(GetWorld()) && ImGuiDelegateHandle.IsValid())
 	{
-		FImGuiModule::Get().RemoveImGuiDelegate(ImGuiDelegateHandle);
+		FImGuiDelegates::OnWorldDebug(GetWorld()).Remove(ImGuiDelegateHandle);
 	}
 	ImGuiDelegateHandle.Reset();
 	InspectedPet.Reset();
 	PetActionResult.Reset();
 
 	Super::EndPlay(EndPlayReason);
-}
-
-void UDebugImGuiComponent::LoadKoreanFontToImGui()
-{
-	if (!FImGuiModule::IsAvailable() || ImGui::GetCurrentContext() == nullptr) return;
-	if (FImGuiModule::Get().GetProperties().GetCustomFonts().Contains(FName(TEXT("KoreanFont")))) return;
-
-	// 1. ImFontConfig 객체 할당 (플러그인 수명 관리에 맞춰 TSharedPtr 사용)
-	TSharedPtr<ImFontConfig> KoreanFontConfig = MakeShareable(new ImFontConfig());
-
-	if (KoreanFontConfig.IsValid())
-	{
-		// 2. 한국어 글리프(문자) 범위 할당 [매우 중요]
-		// ImGui에 내장된 한국어 범위(초성/중성/종성 조합) 포인터를 가져온다.
-		static const ImWchar* KoreanRanges = ImGui::GetIO().Fonts->GetGlyphRangesKorean();
-
-		KoreanFontConfig->FontDataOwnedByAtlas = false; // 바이너리 배열(KoreanFont_data)은 전역 정적 메모리이므로 해제 금지
-		KoreanFontConfig->FontData = (void*)KoreanFont_data; // 생성된 헤더의 배열 이름
-		KoreanFontConfig->FontDataSize = KoreanFont_size;        // 생성된 헤더의 사이즈 상수
-		KoreanFontConfig->SizePixels = 18.0f; // 폰트 렌더링 사이즈 (가독성을 위해 16~18 권장)
-		KoreanFontConfig->MergeMode = true; // 기본 폰트로 사용할 경우 false. 기존 영문 폰트 위에 병합하려면 true
-		KoreanFontConfig->GlyphRanges = KoreanRanges; // 한국어 문자 대역 지정
-		KoreanFontConfig->PixelSnapH = true;  // 픽셀 그리드 정렬로 렌더링 품질 향상
-
-		// 3. 플러그인 모듈에 폰트 등록 및 아틀라스 갱신
-		FImGuiModule::Get().GetProperties().AddCustomFont("KoreanFont", KoreanFontConfig);
-		FImGuiModule::Get().RebuildFontAtlas();
-	}
 }
 
 void UDebugImGuiComponent::DebugDrawPlayerInfo()

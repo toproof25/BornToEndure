@@ -356,7 +356,7 @@ void ABaseEnemyCharacter::AttackPlayer()
         );
 
         bCanAttack = false;
-        UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[ABaseEnemyCharacter] : [%s] 에게 공격 수행"), *GetName(), *TargetPlayerCharacter->GetName());
+        UE_LOG(LogBaseEnemyCharacter, Display, TEXT("[ABaseEnemyCharacter] : [%s] 에게 공격 수행 %s"), *GetName(), *TargetPlayerCharacter->GetName());
     }
 }
 

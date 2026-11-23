@@ -1,0 +1,97 @@
+#pragma once
+
+#include "CoreMinimal.h"
+
+class APawn;
+class APlayerController;
+class ULocalPlayer;
+class UMCPPIERemoteControl;
+class UWorld;
+
+/**
+ * The players of a multiplayer PIE session that the editor reaches through the game connection.
+ *
+ * The editor is the server (listen or dedicated). Every player whose controller is not local to it gets a
+ * UMCPPIERemoteControl at login, and is addressed by `client`: 1..N in join order. Client 0 is the editor's own
+ * player: the host on a listen server, the first client window when the server is dedicated (FindOwnLocalPlayer).
+ * This works the same whether clients run in the editor process or in their own.
+ */
+namespace MCPPIE::PIERemotePlayers
+{
+	struct FRemotePlayer
+	{
+		int32 Client = 0;
+		APlayerController* PlayerController = nullptr;
+		UMCPPIERemoteControl* Control = nullptr;
+		FString PlayerName;
+		FString LogFile;
+		bool bReady = false;
+	};
+
+	void Init();
+	void Shutdown();
+
+	/** The PIE world acting as server, or null when no networked PIE session is running. */
+	UWorld* FindServerWorld();
+
+	/** Client 0's world: the server world, else the editor's play world. Null when PIE is not running. */
+	UWorld* FindLocalPlayerWorld();
+
+	/**
+	 * Client 0's local player, the one a script step's act with no client drives.
+	 *
+	 * With PIEInstance 0 or more, local player LocalPlayerIndex of that PIE instance. Otherwise the editor's own
+	 * player: the listen-server host's local player, else the PIE world with the lowest PIE instance that has one
+	 * (the only world when playing standalone, the first client window when the server is dedicated). Never "the
+	 * active play world", which in a multi-world session is whichever world ticked last (#1814).
+	 */
+	ULocalPlayer* FindOwnLocalPlayer(int32 PIEInstance, int32 LocalPlayerIndex, FString& OutError);
+
+	/** "pie_instance N local player L in <world> (<net mode>)", for results that say which player was driven. */
+	FString DescribeLocalPlayer(const ULocalPlayer* LocalPlayer);
+
+	/**
+	 * The controller with authority over PC's player: PC itself when its world is not a net client, else the
+	 * server world's controller whose PlayerState carries the same player id. Null when no server world in this
+	 * process holds one.
+	 */
+	APlayerController* FindAuthorityController(APlayerController* PC);
+
+	/**
+	 * Moves PC's pawn where the server keeps it: on a net client, the server world's pawn for the same player
+	 * first, then the client's own copy so it does not wait for the correction (#2010). A client-only move is
+	 * undone by the server within a few frames. Returns the pawn the server holds (Pawn itself off a net client),
+	 * or null with OutError when a client's player has no pawn on a server in this process; nothing moves then.
+	 */
+	APawn* TeleportOnAuthority(APlayerController* PC, APawn* Pawn, const FVector& Location, const FRotator& Rotation, FString& OutError);
+
+	/**
+	 * Runs Command as client 0, the same way core's editor(execute_command, world=pie) does: inside the PIE
+	 * instance that owns World, through its local player controller, or against the world on a dedicated server.
+	 * Returns the route taken ("playerController" or "engine").
+	 */
+	FString RunLocalConsole(UWorld* World, const FString& Command);
+
+	/** Every remote player, numbered from 1 in join order. */
+	TArray<FRemotePlayer> List();
+
+	/** The remote control for `Client`, which must be ready; null with an error otherwise. */
+	UMCPPIERemoteControl* Find(int32 Client, FString& OutError);
+
+	/** Records which remote player an injection id was sent to, so updates and stops reach the same player. */
+	void RememberId(const FString& Id, UMCPPIERemoteControl* Control);
+	UMCPPIERemoteControl* FindById(const FString& Id);
+
+	/**
+	 * Whether a caller may send a request under an id it chose to Control: no longer than
+	 * FMCPPIERemoteReports::MaxIdLength, and not an id another remote player still holds a request under, so one
+	 * caller's id cannot redirect or read another player's request. False with an error otherwise.
+	 */
+	bool CanClaimId(const FString& Id, const UMCPPIERemoteControl* Control, FString& OutError);
+
+	/** How many request ids are remembered, for a read-back of the pruning. */
+	int32 NumRememberedIds();
+
+	/** A new request id, unique for the session. */
+	FString NewId(const TCHAR* Prefix);
+}

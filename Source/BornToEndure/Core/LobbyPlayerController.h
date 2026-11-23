@@ -9,6 +9,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+
 #include "LobbyPlayerController.generated.h"
 
 class ULobbyWidget;
@@ -33,7 +34,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputMappingContext> UIMappingContext;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true", AllowedClasses = "LobbyWidget"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (AllowPrivateAccess = "true", AllowedClasses = "/Script/BornToEndure.LobbyWidget"))
 	TSubclassOf<ULobbyWidget> LobbyWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Lobby|Travel", meta = (AllowPrivateAccess = "true"))

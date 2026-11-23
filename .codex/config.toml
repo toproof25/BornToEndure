@@ -1,0 +1,5 @@
+[mcp_servers.ue-mcp]
+command = "npx"
+args = ["-y", "--min-release-age=0", "ue-mcp@latest", "D:/UnrealEngineProject/BornToEndure/BornToEndure.uproject"]
+cwd = "D:/UnrealEngineProject/BornToEndure"
+enabled = true

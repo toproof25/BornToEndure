@@ -28,7 +28,7 @@ struct FWeaponItemDataRow : public FItemDataRow
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponItem Data", meta = (AllowedClasses = "PetWeaponItemDataAsset"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponItem Data", meta = (AllowedClasses = "/Script/BornToEndure.PetWeaponItemDataAsset"))
 	TSoftObjectPtr<UPetWeaponItemDataAsset> WeaponItemDataAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponItem Data")

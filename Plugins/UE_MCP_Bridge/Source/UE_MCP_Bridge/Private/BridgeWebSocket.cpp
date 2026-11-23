@@ -1,0 +1,340 @@
+#include "BridgeWebSocket.h"
+#include "BridgeServer.h"
+#include "BridgeSessionToken.h"
+#include "UE_MCP_BridgeModule.h"
+#include "MCPSocketPlatform.h"
+#include "HAL/PlatformTime.h"
+#include "Misc/Base64.h"
+#include "Misc/SecureHash.h"
+
+// The HTTP upgrade handshake. The frame codec is BridgeFrameCodec.cpp, and the
+// connection loop that drives both lives in BridgeServer.cpp.
+//
+// Every log line here goes through UE_MCP_LOG_WIRE, which redacts credentials:
+// these lines quote what the client sent, and the request carries the session
+// token in its Authorization header (#1866).
+
+FString FMCPBridgeServer::PerformWebSocketHandshake(FMCPSocketHandle ClientSocketFD, TArray<uint8>& OutPipelinedBytes)
+{
+	FString Request;
+	if (!ReadHttpRequest(ClientSocketFD, Request, OutPipelinedBytes))
+	{
+		return TEXT("");
+	}
+
+	// Validate the request before honouring it. Answering every request that
+	// merely carries a Sec-WebSocket-Key with a 101 means a mistyped path, a
+	// POST, or a client speaking an older WebSocket draft all get told the
+	// upgrade succeeded and then fail incomprehensibly on the first frame.
+	{
+		int32 RequestLineEnd = Request.Find(TEXT("\r\n"));
+		const FString RequestLine = (RequestLineEnd == INDEX_NONE)
+			? Request.TrimStartAndEnd()
+			: Request.Left(RequestLineEnd).TrimStartAndEnd();
+
+		if (!RequestLine.StartsWith(TEXT("GET "), ESearchCase::CaseSensitive))
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Rejected non-GET upgrade request: %s"), *RequestLine.Left(80));
+			SendHttpError(ClientSocketFD, 405, TEXT("Method Not Allowed"), TEXT("The UE-MCP bridge only accepts GET WebSocket upgrades."));
+			return TEXT("");
+		}
+		if (!RequestLine.EndsWith(TEXT("HTTP/1.1"), ESearchCase::IgnoreCase))
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Rejected upgrade request with unsupported HTTP version: %s"), *RequestLine.Left(80));
+			SendHttpError(ClientSocketFD, 505, TEXT("HTTP Version Not Supported"), TEXT("WebSocket upgrades require HTTP/1.1."));
+			return TEXT("");
+		}
+
+		FString UpgradeHeader;
+		if (!FindHeaderValue(Request, TEXT("Upgrade"), UpgradeHeader) || !UpgradeHeader.Contains(TEXT("websocket"), ESearchCase::IgnoreCase))
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Rejected request with no WebSocket Upgrade header"));
+			SendHttpError(ClientSocketFD, 426, TEXT("Upgrade Required"), TEXT("The UE-MCP bridge speaks WebSocket only."));
+			return TEXT("");
+		}
+
+		FString ConnectionHeader;
+		if (!FindHeaderValue(Request, TEXT("Connection"), ConnectionHeader) || !ConnectionHeader.Contains(TEXT("upgrade"), ESearchCase::IgnoreCase))
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Rejected upgrade request with no 'Connection: Upgrade'"));
+			SendHttpError(ClientSocketFD, 400, TEXT("Bad Request"), TEXT("A WebSocket upgrade needs 'Connection: Upgrade'."));
+			return TEXT("");
+		}
+
+		FString VersionHeader;
+		if (!FindHeaderValue(Request, TEXT("Sec-WebSocket-Version"), VersionHeader) || FCString::Atoi(*VersionHeader) != 13)
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Rejected upgrade with Sec-WebSocket-Version '%s' (13 required)"), *VersionHeader);
+			SendHttpError(ClientSocketFD, 426, TEXT("Upgrade Required"), TEXT("The UE-MCP bridge speaks WebSocket version 13."));
+			return TEXT("");
+		}
+	}
+
+	// Refuse every browser-originated upgrade.
+	//
+	// The bridge exposes execute_python and every editor mutation, so a page
+	// gets no say even before the token check below. Allowing loopback origins meant
+	// any page served by any dev server on the machine could scan the port
+	// range and drive the editor, because the browser supplies
+	// Sec-WebSocket-Key itself and the page never has to see the response to
+	// cause the damage.
+	//
+	// A browser cannot suppress or forge the Origin header on a WebSocket
+	// upgrade, so its presence is a reliable "this came from a page". Native
+	// clients (the npm client, curl, editor tooling) omit it and are unaffected.
+	{
+		FString Origin;
+		if (FindHeaderValue(Request, TEXT("Origin"), Origin))
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Rejected browser-originated WebSocket upgrade from Origin: %s"), *Origin);
+			SendHttpError(ClientSocketFD, 403, TEXT("Forbidden"),
+				TEXT("The UE-MCP bridge does not accept upgrades from web pages. Connect from a local process instead."));
+			return TEXT("");
+		}
+	}
+
+	// Require this session's token. Loopback and the Origin refusal keep out
+	// other machines and web pages; neither keeps out another local process
+	// or another account on the same machine, and the bridge runs Python as
+	// the editor's user. The token file is readable by that user alone.
+	const FString AuthSchemeLine = FString::Printf(TEXT("%s: %s\r\n"),
+		UEMCPBridgeSessionToken::AuthSchemeHeaderName(), UEMCPBridgeSessionToken::AuthSchemeHeaderValue());
+	{
+		FString Authorization;
+		const bool bHasAuthorization = FindHeaderValue(Request, TEXT("Authorization"), Authorization);
+		const EMCPBridgeAuthDecision Decision =
+			UEMCPBridgeSessionToken::EvaluateAuthorization(bHasAuthorization, Authorization, SessionToken);
+		if (Decision != EMCPBridgeAuthDecision::Accepted)
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Refused WebSocket upgrade: %s"),
+				Decision == EMCPBridgeAuthDecision::Missing ? TEXT("no session token (the client predates it)")
+				: Decision == EMCPBridgeAuthDecision::Malformed ? TEXT("malformed Authorization header")
+				: Decision == EMCPBridgeAuthDecision::Mismatch ? TEXT("session token does not match")
+				: TEXT("this editor has no session token"));
+			SendHttpError(ClientSocketFD, 401, TEXT("Unauthorized"),
+				UEMCPBridgeSessionToken::DescribeRefusal(Decision, ServerPort),
+				AuthSchemeLine + TEXT("WWW-Authenticate: Bearer realm=\"ue-mcp-bridge\"\r\n"));
+			return TEXT("");
+		}
+	}
+
+	// Extract WebSocket-Key from request
+	FString WebSocketKey;
+	FindHeaderValue(Request, TEXT("Sec-WebSocket-Key"), WebSocketKey);
+
+	UE_MCP_LOG_WIRE(Log, TEXT("[UE-MCP] Extracted WebSocket-Key: %s"), *WebSocketKey);
+
+	TArray<uint8> DecodedKey;
+	if (WebSocketKey.IsEmpty() || !FBase64::Decode(WebSocketKey, DecodedKey) || DecodedKey.Num() != 16)
+	{
+		UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Rejected upgrade with a missing or malformed Sec-WebSocket-Key"));
+		SendHttpError(ClientSocketFD, 400, TEXT("Bad Request"), TEXT("Sec-WebSocket-Key must be 16 base64-encoded bytes."));
+		return TEXT("");
+	}
+
+	// Create accept key
+	const FString AcceptKey = CreateWebSocketAcceptKey(WebSocketKey);
+
+	// Build response (WebSocket spec requires exact format)
+	// Must be: HTTP/1.1 101 Switching Protocols\r\n
+	//          Upgrade: websocket\r\n
+	//          Connection: Upgrade\r\n
+	//          Sec-WebSocket-Accept: <key>\r\n
+	//          \r\n
+	FString Response = TEXT("HTTP/1.1 101 Switching Protocols\r\n");
+	Response += TEXT("Upgrade: websocket\r\n");
+	Response += TEXT("Connection: Upgrade\r\n");
+	Response += FString::Printf(TEXT("Sec-WebSocket-Accept: %s\r\n"), *AcceptKey);
+	Response += AuthSchemeLine;
+	Response += TEXT("\r\n");
+	
+	UE_MCP_LOG_WIRE(Log, TEXT("[UE-MCP] Accept key: %s"), *AcceptKey);
+	UE_MCP_LOG_WIRE(Log, TEXT("[UE-MCP] Response length: %d chars"), Response.Len());
+
+	return Response;
+}
+
+bool FMCPBridgeServer::FindHeaderValue(const FString& Request, const FString& HeaderName, FString& OutValue)
+{
+	// Scan line by line rather than searching the whole request for the header
+	// name: a value that happens to contain another header's name would
+	// otherwise be read as that header.
+	TArray<FString> Lines;
+	Request.ParseIntoArray(Lines, TEXT("\r\n"), /*InCullEmpty*/ false);
+	for (int32 Index = 1; Index < Lines.Num(); ++Index) // line 0 is the request line
+	{
+		const int32 Colon = Lines[Index].Find(TEXT(":"), ESearchCase::CaseSensitive);
+		if (Colon == INDEX_NONE)
+		{
+			continue;
+		}
+		if (Lines[Index].Left(Colon).TrimStartAndEnd().Equals(HeaderName, ESearchCase::IgnoreCase))
+		{
+			OutValue = Lines[Index].Mid(Colon + 1).TrimStartAndEnd();
+			return true;
+		}
+	}
+	return false;
+}
+
+void FMCPBridgeServer::SendHttpError(FMCPSocketHandle SocketFD, int32 StatusCode, const FString& StatusText, const FString& Detail, const FString& ExtraHeaders)
+{
+	// A rejected upgrade used to be a silent disconnect, which reads to the
+	// caller exactly like "no editor is running". Say what was wrong.
+	const FString Body = Detail + TEXT("\r\n");
+	const FTCHARToUTF8 Utf8Body(*Body);
+	const FString Response = FString::Printf(
+		TEXT("HTTP/1.1 %d %s\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: %d\r\nConnection: close\r\n%s\r\n%s"),
+		StatusCode, *StatusText, Utf8Body.Length(), *ExtraHeaders, *Body);
+
+	const FTCHARToUTF8 Utf8Response(*Response);
+	SendAll(SocketFD, (const uint8*)Utf8Response.Get(), Utf8Response.Length());
+}
+
+bool FMCPBridgeServer::ReadHttpRequest(FMCPSocketHandle SocketFD, FString& OutRequest, TArray<uint8>& OutPipelinedBytes)
+{
+	OutRequest.Reset();
+	OutPipelinedBytes.Reset();
+
+	TArray<uint8> Raw;
+	uint8 Chunk[4096];
+	int32 HeaderEnd = INDEX_NONE;
+
+	const double Deadline = FPlatformTime::Seconds() + MCPWebSocketLimits::kUpgradeReadTimeoutSeconds;
+
+	// Read until the blank line that ends the headers. A single recv is not a
+	// request: a header split across segments loses Sec-WebSocket-Key, and the
+	// connection then drops with nothing said about why.
+	while (HeaderEnd == INDEX_NONE)
+	{
+		const double Remaining = Deadline - FPlatformTime::Seconds();
+		if (Remaining <= 0.0)
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Timed out reading the WebSocket upgrade request (%d bytes read)"), Raw.Num());
+			return false;
+		}
+
+		fd_set ReadSet;
+		FD_ZERO(&ReadSet);
+		FD_SET(SocketFD, &ReadSet);
+
+		timeval Timeout;
+		Timeout.tv_sec = (long)Remaining;
+		Timeout.tv_usec = (long)((Remaining - (double)Timeout.tv_sec) * 1000000.0);
+
+		const int32 SelectResult = select(SocketFD + 1, &ReadSet, nullptr, nullptr, &Timeout);
+		if (SelectResult <= 0 || !FD_ISSET(SocketFD, &ReadSet))
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Timeout waiting for the WebSocket upgrade request"));
+			return false;
+		}
+
+		const int32 BytesReceived = recv(SocketFD, (char*)Chunk, (int32)sizeof(Chunk), 0);
+		if (BytesReceived <= 0)
+		{
+			// A close with NOTHING read is a liveness probe, not a fault. The
+			// server's own readiness check opens a TCP socket, sees it accept
+			// and destroys it without speaking HTTP, once a second while an
+			// editor is starting. Logging that at Warning wrote fifty warnings
+			// into the editor log per launch and taught the reader to ignore
+			// the category. A PARTIAL read is different: somebody began an
+			// upgrade and vanished, which is worth seeing.
+			if (Raw.Num() == 0)
+			{
+				UE_MCP_LOG_WIRE(Verbose, TEXT("[UE-MCP] Port probe connected and closed without an upgrade request"));
+			}
+			else
+			{
+				UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Connection closed part way through the upgrade request (%d bytes read)"), Raw.Num());
+			}
+			return false;
+		}
+
+		// The terminator can straddle two reads, so back up three bytes.
+		const int32 SearchFrom = FMath::Max(0, Raw.Num() - 3);
+		Raw.Append(Chunk, BytesReceived);
+
+		for (int32 Index = SearchFrom; Index + 3 < Raw.Num(); ++Index)
+		{
+			if (Raw[Index] == '\r' && Raw[Index + 1] == '\n' && Raw[Index + 2] == '\r' && Raw[Index + 3] == '\n')
+			{
+				HeaderEnd = Index + 4;
+				break;
+			}
+		}
+
+		if (HeaderEnd == INDEX_NONE && Raw.Num() > MCPWebSocketLimits::kMaxUpgradeHeaderBytes)
+		{
+			UE_MCP_LOG_WIRE(Warning, TEXT("[UE-MCP] Upgrade request headers exceed %d bytes with no terminator; refusing"), MCPWebSocketLimits::kMaxUpgradeHeaderBytes);
+			SendHttpError(SocketFD, 431, TEXT("Request Header Fields Too Large"), TEXT("The upgrade request headers are too large for the UE-MCP bridge."));
+			return false;
+		}
+	}
+
+	// Decode exactly the header bytes. ANSI_TO_TCHAR reads until a NUL, and a
+	// socket buffer does not contain one; passing the length is what keeps the
+	// conversion inside the buffer.
+	const FUTF8ToTCHAR Header((const char*)Raw.GetData(), HeaderEnd);
+	OutRequest = FString(Header.Length(), Header.Get());
+
+	// Whatever followed the blank line is the client's first frames, arriving
+	// in the same segment as the upgrade. They belong to the frame reader.
+	if (Raw.Num() > HeaderEnd)
+	{
+		OutPipelinedBytes.Append(Raw.GetData() + HeaderEnd, Raw.Num() - HeaderEnd);
+	}
+
+	UE_MCP_LOG_WIRE(Log, TEXT("[UE-MCP] Read HTTP upgrade request (%d header bytes, %d pipelined):\n%s"),
+		HeaderEnd, OutPipelinedBytes.Num(), *OutRequest.Left(200));
+
+	return true;
+}
+
+FString FMCPBridgeServer::CreateWebSocketAcceptKey(const FString& ClientKey)
+{
+	// WebSocket accept key = base64(sha1(client_key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
+	FString MagicString = TEXT("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+	FString Combined = ClientKey + MagicString;
+
+	// FSHA1 always produces the full 20-byte digest.
+	FTCHARToUTF8 UTF8String(*Combined);
+
+	uint8 HashBytes[20] = {};
+	FSHA1 Sha1;
+	Sha1.Update((const uint8*)UTF8String.Get(), UTF8String.Length());
+	Sha1.Final();
+	Sha1.GetHash(HashBytes);
+
+	// Base64 encode
+	FString AcceptKey = FBase64::Encode(HashBytes, 20);
+	return AcceptKey;
+}
+
+void FMCPBridgeServer::SendCloseFrame(FMCPSocketHandle SocketFD, uint16 StatusCode, const FString& Reason)
+{
+	TArray<uint8> Payload;
+	Payload.Add((uint8)((StatusCode >> 8) & 0xFF));
+	Payload.Add((uint8)(StatusCode & 0xFF));
+
+	FTCHARToUTF8 Utf8Reason(*Reason);
+	const int32 ReasonLen = FMath::Min(Utf8Reason.Length(), 123);
+	Payload.Append((const uint8*)Utf8Reason.Get(), ReasonLen);
+
+	const TArray<uint8> Frame = MCPFrameCodec::CreateControlFrame(EMCPWebSocketOpcode::Close, Payload);
+	SendAll(SocketFD, Frame.GetData(), Frame.Num());
+}
+
+bool FMCPBridgeServer::SendAll(FMCPSocketHandle SocketFD, const uint8* Data, int32 NumBytes)
+{
+	int32 Sent = 0;
+	while (Sent < NumBytes)
+	{
+		const int32 BytesSent = send(SocketFD, (const char*)Data + Sent, NumBytes - Sent, 0);
+		if (BytesSent <= 0)
+		{
+			return false;
+		}
+		Sent += BytesSent;
+	}
+	return true;
+}

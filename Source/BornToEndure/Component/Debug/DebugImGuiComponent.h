@@ -1,5 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+/**
+ * @file DebugImGuiComponent.h
+ * @brief 플레이어와 연관 시스템의 상태를 ImGui로 표시하는 디버그 컴포넌트입니다.
+ */
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -39,8 +44,7 @@ protected:
 
 private:
 
-	FImGuiDelegateHandle ImGuiDelegateHandle;
-	void LoadKoreanFontToImGui();
+	FDelegateHandle ImGuiDelegateHandle;
 
 	// Camera
 	USpringArmComponent* SpringArmComp;

@@ -1,5 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
+/**
+ * @file GameDebugActor.cpp
+ * @brief 게임 진행과 플레이어 상태를 확인하고 테스트하는 ImGui 디버그 액터입니다.
+ */
 
 #include "DebugCode/GameDebugActor.h"
 
@@ -28,12 +32,11 @@ void AGameDebugActor::BeginPlay()
 	LastActionMessage = TEXT("대기");
 	if (FImGuiModule::IsAvailable() && IsValid(GetWorld()))
 	{
-		const FImGuiDelegate Delegate = FImGuiDelegate::CreateUObject(this, &AGameDebugActor::DrawDebugWindow);
-		ImGuiDelegateHandle = FImGuiModule::Get().AddWorldImGuiDelegate(GetWorld(), Delegate);
+		ImGuiDelegateHandle = FImGuiDelegates::OnWorldDebug(GetWorld()).AddUObject(this, &AGameDebugActor::DrawDebugWindow);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[GameDebugActor] Cannot register ImGui: module or world unavailable."));
+		UE_LOG(LogTemp, Warning, TEXT("[AGameDebugActor] ImGui 모듈 또는 월드가 유효하지 않아 디버그 창을 등록할 수 없습니다."));
 	}
 #endif
 }
@@ -41,9 +44,9 @@ void AGameDebugActor::BeginPlay()
 void AGameDebugActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 #if !UE_BUILD_SHIPPING
-	if (FImGuiModule::IsAvailable() && ImGuiDelegateHandle.IsValid())
+	if (FImGuiModule::IsAvailable() && IsValid(GetWorld()) && ImGuiDelegateHandle.IsValid())
 	{
-		FImGuiModule::Get().RemoveImGuiDelegate(ImGuiDelegateHandle);
+		FImGuiDelegates::OnWorldDebug(GetWorld()).Remove(ImGuiDelegateHandle);
 	}
 	ImGuiDelegateHandle.Reset();
 	WindowTitle.Reset();

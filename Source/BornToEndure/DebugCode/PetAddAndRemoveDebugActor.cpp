@@ -1,4 +1,9 @@
-﻿#include "DebugCode/PetAddAndRemoveDebugActor.h"
+﻿/**
+ * @file PetAddAndRemoveDebugActor.cpp
+ * @brief 펫 목록을 조회하고 펫 추가를 테스트하는 ImGui 디버그 액터입니다.
+ */
+
+#include "DebugCode/PetAddAndRemoveDebugActor.h"
 
 #if !UE_BUILD_SHIPPING
 #include "Character/Pet/PetCompanionCharacter.h"
@@ -26,8 +31,7 @@ void APetAddAndRemoveDebugActor::BeginPlay()
 #if !UE_BUILD_SHIPPING
 	if (IsValid(GetWorld()) && FImGuiModule::IsAvailable())
 	{
-		ImGuiDelegateHandle = FImGuiModule::Get().AddWorldImGuiDelegate(
-			GetWorld(), FImGuiDelegate::CreateUObject(this, &APetAddAndRemoveDebugActor::RenderImGui));
+		ImGuiDelegateHandle = FImGuiDelegates::OnWorldDebug(GetWorld()).AddUObject(this, &APetAddAndRemoveDebugActor::RenderImGui);
 	}
 #endif
 }
@@ -35,9 +39,9 @@ void APetAddAndRemoveDebugActor::BeginPlay()
 void APetAddAndRemoveDebugActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 #if !UE_BUILD_SHIPPING
-	if (FImGuiModule::IsAvailable() && ImGuiDelegateHandle.IsValid())
+	if (FImGuiModule::IsAvailable() && IsValid(GetWorld()) && ImGuiDelegateHandle.IsValid())
 	{
-		FImGuiModule::Get().RemoveImGuiDelegate(ImGuiDelegateHandle);
+		FImGuiDelegates::OnWorldDebug(GetWorld()).Remove(ImGuiDelegateHandle);
 	}
 	ImGuiDelegateHandle.Reset();
 	LastResult.Reset();
